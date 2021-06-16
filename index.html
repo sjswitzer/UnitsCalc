@@ -234,12 +234,12 @@
 
       div#numpad {
         display: none;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 5px;
         padding: 10px;
         position: absolute;
         left: 30%;
-        bottom: 16px;
+        bottom: 5px;
         border: 2px solid black;
         border-radius: 8px;
         background-color: #aaaaaa;
@@ -263,6 +263,10 @@
       div#numpad > div.span2 {
         grid-column-end: span 2;
         width: 79px;
+      }
+      div#numpad > div.span3 {
+        grid-column-end: span 3;
+        width: 123px;
       }
 
       /* Looks like a link but is actually a "button" */
@@ -722,12 +726,11 @@
       </div>
     </div>
     <div id="numpad">
-      <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div>
-      <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div>
-      <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> * </div>
-      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div>
-      <div> ' </div> <div> " </div> <div> . </div> <div> : </div>
-      <div class="span2" data-stuff=" "> space </div>
+      <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div> <div> ' </div>
+      <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div> <div> " </div>
+      <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> * </div> <div> . </div>
+      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div> : </div>
+      <div class="span3" data-stuff=" "> space </div>
       <div class="span2" data-stuff="x"> &#9003; </div>
     </div>
     <script type="text/javascript">
