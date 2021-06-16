@@ -232,6 +232,39 @@
         border-radius: 8px;
       }
 
+      div#numpad {
+        display: none;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+        padding: 10px;
+        position: absolute;
+        left: 30%;
+        bottom: 16px;
+        border: 2px solid black;
+        border-radius: 8px;
+        background-color: #aaaaaa;
+      }
+      body[data-numpad="show"] div#numpad {
+        display: grid !important;
+      }
+      div#numpad > div {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        border: 2px solid black;
+        color: white;
+        font-weight: bold;
+        font-size: 120%;
+        background-color: #888888;
+      }
+      div#numpad > div.span2 {
+        grid-column-end: span 2;
+        width: 79px;
+      }
+
       /* Looks like a link but is actually a "button" */
       span.linklike {
         color: #0000dd;
@@ -321,6 +354,8 @@
             autocapitalize="none">
         </div>
         <div class="clear-text-button mobile-only" onclick="stuffExpr('');"><span></span></div>
+        <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
+          onclick="toggleNumpad()">#</span>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
           onclick="showHelp('help-expr')">?</span>
       </div>
@@ -686,6 +721,15 @@
         </table>
       </div>
     </div>
+    <div id="numpad">
+      <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div>
+      <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div>
+      <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> * </div>
+      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div>
+      <div> ' </div> <div> " </div> <div> . </div> <div> : </div>
+      <div class="span2" data-stuff=" "> space </div>
+      <div class="span2" data-stuff="x"> &#9003; </div>
+    </div>
     <script type="text/javascript">
       "use strict";
 
@@ -708,6 +752,7 @@
       const denomElement = document.getElementById('denom');
       const timesElement = document.getElementById('times');
       const divElement = document.getElementById('div');
+      const numpadElement = document.getElementById('numpad');
 
       class MessageError extends Error {
         constructor(msg) {
@@ -2857,7 +2902,7 @@
                 let sym = getSymbol(text);
                 if (sym?.origin)
                   text = "0 " + text;
-                stuffExpr(text);
+                stuffExpr(text.trim());
                 return;
               }
               element = element.parentElement;
@@ -2866,15 +2911,41 @@
         }
       }
 
+      function addNumpadStuffs() {
+        document.body.addEventListener("click", function(event) {
+          let element = event.target;
+          while (element) {
+            if (element === numpadElement)
+              return;
+            if (element.parentElement === numpadElement) {
+              let text = element.textContent.trim();
+              let stuff = element.getAttribute('data-stuff');
+              if (stuff === 'x') { // hack
+                text = exprElement.value;
+                text = text.substr(0, text.length-1);
+                stuffExpr(text);
+                return;
+              }
+              if (stuff)
+                text = stuff;
+              stuffExpr(exprElement.value + text);
+            }
+            element = element.parentElement;
+          }
+          // clicked somewhere outside the numpad
+          toggleNumpad(false);
+        });
+      }
+
       function stuffExpr(text) {
-        exprElement.value = text.trim();
+        exprElement.value = text;
         // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
         updateParse({ doAssigns: true, showErrors: true });
       }
 
       function toggleLegacyMode(legacy) {
         const attr = 'data-presentation-mode';
-        if (legacy || !document.body.getAttribute(attr))
+        if (legacy === undefined || !document.body.getAttribute(attr))
           document.body.setAttribute(attr, 'legacy');
         else
           document.body.removeAttribute(attr);
@@ -2892,6 +2963,22 @@
           document.body.setAttribute(attr, mode || 'mobile');
         else
           document.body.removeAttribute(attr);
+      }
+
+      let numpadJustShown = false;
+
+      function toggleNumpad(mode) {
+        const attr = 'data-numpad';
+        if (mode !== false && (mode !== undefined || !document.body.getAttribute(attr))) {
+          document.body.setAttribute(attr, mode || 'show');
+          numpadJustShown = true;
+        } else {
+          // This is for the stupid reason that the click that brings it up
+          // is otherwise a "click outside the box" and brings it down!
+          if (!numpadJustShown)
+            document.body.removeAttribute(attr);
+          numpadJustShown = false;
+        }
       }
 
       {
@@ -2960,7 +3047,8 @@
       });
       
       addExampleStuffs();
-      ftElement.value = "5";
+      addNumpadStuffs();
+      ftElement.value = "5";  // populate wuth example content
       updateResult();
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
    </script>
