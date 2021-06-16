@@ -1018,15 +1018,18 @@
         day: { type: 'num', dim: { T: 1 }, val: DAY, uscu: null, alt: ["days"] },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
+        // There are good arguments for the default year to be tropical, buy even astronomers
+        // use julian years to define light year. Most people would be surprised by anything else
+        // and numbers come out all weird if you use tropical years. So "yr" is julian.
         // Per Unified Code for Units of Measure:
-        yr: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY , 100000 ], uscu: null,
-            desc: "mean tropical year", alt: ["year", "years", "yrs", "at"] },
-        yrj: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], uscu: null,
-            desc: "mean Julian year", alt: ["aj"] },
-        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY , 10000 ], uscu: null,
+        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], uscu: null,
+            desc: "mean Julian year", alt: ["year", "years", "yrs", "yrt", "aj"] },
+        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], uscu: null,
+            desc: "mean tropical year", alt: ["at"] },
+        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], uscu: null,
             desc: "mean Gregorian year", alt: ["ag"] },
-        mo: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY , 1200000 ], uscu: null,
-            desc: "mean tropical month", alt: ["month", "months"] },
+        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], uscu: null,
+            desc: "mean julian month", alt: ["month", "months"] },
         ms: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000 ], uscu: null, alt: ["millisecond", "milliseconds"] },
         us: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**2 ], uscu: null, display: MICROSYM+"s", alt: ["microsecond", "microseconds"] },
         ns: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**3 ], uscu: null, alt: ["nanosecond", "nanoseconds"] },
