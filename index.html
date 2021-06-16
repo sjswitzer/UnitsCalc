@@ -529,16 +529,30 @@
             <li> Sea-level air pressure in PSI? <code>atm | PSI</code>
             <li> What's 20 degrees celsius in fahrenheit? <code>20 celsius | fahrenheit</code>
             <li> What about absolute zero? <code>0K | degf</code>
-            <li> What <i>is</i> 20000 leagues anyway? <code>20000 league | mi</code>
+            <li> What <i>is</i> 20000 leagues anyway? <code>20000 league | mi</code>.
+                 That's deep! <!-- SNL skit reference -->
             <li> How far away is the Sun in miles? <code>au | mi</code>
             <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
                  <code>5V / 2000 ohm</code>
             <li> What's <code>pi/4</code> radians in degrees? <code>pi/4 radians | degrees</code>
             <li> How much does it cost to run a 100 watt lightbulb for a year,
-                 assuming electricity costs $0.20 per kilowatt hour?
-                 <code>.20 'dollars' / kW hr * 100 watts * 365 days</code>, about $175
+                 assuming electricity costs $0.20 per kilowatt hour
+                 (<code>ecost = 0.20 'dollars' / kW hr</code>)?
+                 That would be, <code>ecost * 100 watts | year</code>, about $175
             <li> Alternatively, it's about $1.75 per watt per year
-                 <code>.20 'dollars' / kW hr * watt * 365 days</code>
+                 <code>ecost * watt | yr</code>
+                 <!-- Refrigerator wattage ratings are maximum draw, for rating the electrical service
+                      they require, but refrigerators cycle and use much less power on average.
+                      A modern Energy Star refrigerator averages about 50 watts, but it totally
+                      depends on usage and conditions. I'll pad it out to $65. -->
+            <li> How much does it cost to run a typical refrigerator per month?
+                <code>ecost * 65W | mo</code>
+            <li> How much does it cost to watch a large LED TV per hour?
+                 <code>ecost * 450 watt | hr</code>
+            <li> How about a year on standby?
+                 <code>ecost * .5 watt | yr</code>
+            <li> An electric kettle per minute?
+                 <code>ecost * 3000 watt | min</code>, about one cent.
             <li> What's 45 mpg as km/liter? <code>45 mi/gallon | km/liter</code>
             <li> How much does a gallon of water weigh in pounds? <code>kg/liter*gallon | lb</code>
             <li> How long does it take sunlight to reach the Earth? <code>au/c | min</code>
@@ -999,6 +1013,18 @@
         min: { type: 'num', dim: { T: 1 }, val: MIN, uscu: null, alt: ["minute", "minutes", "mins"] },
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true, uscu: null,
             alt: ["second", "seconds", "sec", "secs"] },
+        day: { type: 'num', dim: { T: 1 }, val: DAY, uscu: null, alt: ["days"] },
+        // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
+        // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
+        // Per Unified Code for Units of Measure:
+        yr: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY , 100000 ], uscu: null,
+            desc: "mean tropical year", alt: ["year", "years", "yrs", "at"] },
+        yrj: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], uscu: null,
+            desc: "mean Julian year", alt: ["aj"] },
+        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY , 10000 ], uscu: null,
+            desc: "mean Gregorian year", alt: ["ag"] },
+        mo: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY , 1200000 ], uscu: null,
+            desc: "mean tropical month", alt: ["month", "months"] },
         ms: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000 ], uscu: null, alt: ["millisecond", "milliseconds"] },
         us: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**2 ], uscu: null, display: MICROSYM+"s", alt: ["microsecond", "microseconds"] },
         ns: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**3 ], uscu: null, alt: ["nanosecond", "nanoseconds"] },
@@ -1165,7 +1191,6 @@
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
-        day: { type: 'num', dim: { T: 1 }, val: DAY, uscu: null, alt: ["days"] },
         week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", uscu: null, alt: ["weeks"] },
         fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", uscu: null, alt: ["fortnights"] },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
