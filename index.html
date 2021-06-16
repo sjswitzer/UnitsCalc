@@ -51,6 +51,9 @@
       body[data-device="mobile"] div.input-area {
         font-size: 150%;
       }
+      body:not([data-device="mobile"]) .mobile-only {
+        display: none;
+      }
  
       body:not([data-presentation-mode="legacy"]) .legacy {
         display: none;
@@ -211,6 +214,24 @@
         /* transform: scale(1.3); */
       }
 
+      /* greasy way to make a text-delete button in the input box */
+      .clear-text-button {
+        position: relative;
+        width: 0;
+      }
+      .clear-text-button > span:before {
+        position: absolute;
+        content: "\d7"; /* Unicode times character */
+        font-size: 90%;
+        bottom: 6px;
+        left: -32px;
+        color: white;
+        background-color: #bbbbbb;
+        cursor: pointer;
+        padding: 1px 8px;
+        border-radius: 8px;
+      }
+
       /* Looks like a link but is actually a "button" */
       span.linklike {
         color: #0000dd;
@@ -296,8 +317,10 @@
       <div class="layout-row input-area">
         <div class="expands">
           <input style="width: 100%;" type="text" id="expr" value=""
-            autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="none">
+            autocomplete="off" spellcheck="false" autocorrect="off"
+            autocapitalize="none">
         </div>
+        <div class="clear-text-button mobile-only" onclick="stuffExpr('');"><span></span></div>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
           onclick="showHelp('help-expr')">?</span>
       </div>
@@ -2834,15 +2857,19 @@
                 let sym = getSymbol(text);
                 if (sym?.origin)
                   text = "0 " + text;
-                exprElement.value = text.trim();
-                // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
-                updateParse({ doAssigns: true, showErrors: true });
+                stuffExpr(text);
                 return;
               }
               element = element.parentElement;
             }
           });
         }
+      }
+
+      function stuffExpr(text) {
+        exprElement.value = text.trim();
+        // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
+        updateParse({ doAssigns: true, showErrors: true });
       }
 
       function toggleLegacyMode(legacy) {
