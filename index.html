@@ -713,7 +713,7 @@
           return n;
         }
 
-        static equal(dim1 = {}, dim2 = {}) {
+        static equal(dim1, dim2) {
           for (const measure in dim1) {
             if ((dim1[measure] ?? 0) !== (dim2[measure] ?? 0))
               return false;
