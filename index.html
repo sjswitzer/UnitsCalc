@@ -26,16 +26,19 @@
         margin: 0px 0px;
         background-color: #f8f8f8;
       }
-
-      body, table th, table td {
+      body, table {
         font: 110% caption, sans-serif;
       }
 
+      /*
+       * A trick to let the app switch to mobile mode on the fly.
+       * Javascript flips the --device property into the
+       * body element's data-device attribute, but the app
+       * can change it later.
+       */
       @media (hover: none) {
         body { --device: mobile; }
       }
-
-      /* A trick to let the app switch mobile mode on the fly */
       body[data-device="mobile"],
       body[data-device="mobile"] table th,
       body[data-device="mobile"] table td {
