@@ -1330,7 +1330,6 @@
 
       const userSymbols = {};
       let environment = {};
-      let userSymbolsNeedSave = false;
 
       function getSymbol(symName, opts) {
         let val = environment[symName];
@@ -2506,13 +2505,14 @@
                 display: undefined, reserved: undefined, alt: undefined };
         delete userSymbols[sym];  // remove from list so new value now shows up first (in reverse listing)
         userSymbols[sym] = val;
-        userSymbolsNeedSave = true;
+        // Do it here because iOS doesn't reliably deliver any kind of event when the app ends.
+        saveUserSymbols();
       }
 
       function deleteDef(symName) {
         delete userSymbols[symName];
-        userSymbolsNeedSave = true;
         showUserSymbols()
+        saveUserSymbols();
       }
 
      function updateParse(opts) {
@@ -2763,8 +2763,6 @@
       }
 
       function saveUserSymbols() {
-        if (!userSymbolsNeedSave)
-          return;
         const localStorage = window.localStorage;
         if (!localStorage)
           return false;
@@ -2786,7 +2784,6 @@
         let json = JSON.stringify(wad);
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, json);
-          userSymbolsNeedSave = false;
           return true;
         }
         catch (e) {
@@ -2887,12 +2884,6 @@
         }
         builtinSymbolsElement.innerHTML = html;
       }
-
-      // iOS devices don't reliably deliver beforeunload or even visibilitychange, so register several
-      // just in case.
-      window.addEventListener("beforeunload", saveUserSymbols);
-      window.addEventListener("pagehide", saveUserSymbols);
-      document.addEventListener("visibilitychange", saveUserSymbols);
 
       document.addEventListener("keydown", function(evt) {
         if (evt.key === "Escape")
