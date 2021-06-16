@@ -716,7 +716,7 @@
           return n;
         }
 
-        static equal(dim1, dim2) {
+        static equal(dim1 = {}, dim2 = {}) {
           for (const measure in dim1) {
             if ((dim1[measure] ?? 0) !== (dim2[measure] ?? 0))
               return false;
@@ -1330,6 +1330,7 @@
 
       const userSymbols = {};
       let environment = {};
+      let userSymbolsNeedSave = false;
 
       function getSymbol(symName, opts) {
         let val = environment[symName];
@@ -2332,7 +2333,7 @@
             } else if (val.type === 'num' && val2.type === 'num') {
               if ((val.origin || val2.origin) && Dim.equal(val.dim, val2.dim)) {
                 // Ratios with affine units should just be a ratio of their magnitudes
-                // so that degf / degc == 5/9
+                // so that degf / degc = 5/9
                 val = { ...val, origin: undefined };
                 val2 = { ...val2, origin: undefined };
               }
@@ -2505,9 +2506,16 @@
                 display: undefined, reserved: undefined, alt: undefined };
         delete userSymbols[sym];  // remove from list so new value now shows up first (in reverse listing)
         userSymbols[sym] = val;
+        userSymbolsNeedSave = true;
       }
 
-      function updateParse(opts) {
+      function deleteDef(symName) {
+        delete userSymbols[symName];
+        userSymbolsNeedSave = true;
+        showUserSymbols()
+      }
+
+     function updateParse(opts) {
         clearFields();
         try {
           let exprStr = exprElement.value;
@@ -2592,11 +2600,6 @@
               <span class="delete-button" onclick="deleteDef('${sym}')"></span>${symStr}</p>`;
         }
         symdefsElement.innerHTML = str;
-      }
-
-      function deleteDef(symName) {
-        delete userSymbols[symName];
-        showUserSymbols()
       }
 
       function symString(val, opts) {
@@ -2760,6 +2763,8 @@
       }
 
       function saveUserSymbols() {
+        if (!userSymbolsNeedSave)
+          return;
         const localStorage = window.localStorage;
         if (!localStorage)
           return false;
@@ -2781,6 +2786,7 @@
         let json = JSON.stringify(wad);
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, json);
+          userSymbolsNeedSave = false;
           return true;
         }
         catch (e) {
@@ -2882,9 +2888,11 @@
         builtinSymbolsElement.innerHTML = html;
       }
 
-      window.addEventListener("beforeunload", function(evt) {
-        saveUserSymbols();
-      });
+      // iOS devices don't reliably deliver beforeunload or even visibilitychange, so register several
+      // just in case.
+      window.addEventListener("beforeunload", saveUserSymbols);
+      window.addEventListener("pagehide", saveUserSymbols);
+      document.addEventListener("visibilitychange", saveUserSymbols);
 
       document.addEventListener("keydown", function(evt) {
         if (evt.key === "Escape")
