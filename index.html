@@ -2853,8 +2853,10 @@
           document.body.removeAttribute(attr);
       }
 
-      if (window.location.href.match(/inch/i))
+      if (window.location.href.match(/inch/i)) {
+        document.title = "Feet & Inch Calculator";
         toggleLegacyMode(true);
+      }
       document.body.setAttribute('data-protocol', window.location.protocol);
 
       function toggleDeviceMode(mode) {
