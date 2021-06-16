@@ -1222,7 +1222,6 @@
           return { ...val, val: Rat.sign(val.val), dim:{} };
         },
 
-        // Square root
         sqrt: function SquareRoot(...params) {
           if (params.length !== 1) throw new MessageError(`${this.sym}(): Needs one parameter`);
           let val = params[0];
@@ -1232,7 +1231,6 @@
           return { type: 'num', dim, val: Rat.sqrt(numVal(val)), uscu: val.uscu };
         },
 
-        // Cube root
         cbrt: function CubeRoot(...params) {
           if (params.length !== 1) throw new MessageError(`${this.sym}(): Needs one parameter`);
           let val = params[0];
