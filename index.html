@@ -357,7 +357,7 @@
             autocomplete="off" spellcheck="false" autocorrect="off"
             autocapitalize="none">
         </div>
-        <div class="clear-text-button mobile-only" onclick="stuffExpr('');"><span></span></div>
+        <div class="clear-text-button mobile-only" onclick="clearExpr()"><span></span></div>
         <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
           onclick="toggleNumpad()">#</span>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
@@ -2905,7 +2905,7 @@
                 let sym = getSymbol(text);
                 if (sym?.origin)
                   text = "0 " + text;
-                stuffExpr(text.trim());
+                stuffExpr(text.trim(), { doAssigns: true, showErrors: true });
                 return;
               }
               element = element.parentElement;
@@ -2940,10 +2940,15 @@
         });
       }
 
-      function stuffExpr(text) {
+      function stuffExpr(text, opts) {
         exprElement.value = text;
         // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
-        updateParse({ doAssigns: true, showErrors: true });
+        updateParse(opts);
+      }
+
+      function clearExpr() {
+        stuffExpr('');
+        ignoreOneNumpadClose = true; // click shouldn't bring down the numpad
       }
 
       function toggleLegacyMode(legacy) {
@@ -2968,19 +2973,19 @@
           document.body.removeAttribute(attr);
       }
 
-      let numpadJustShown = false;
+      let ignoreOneNumpadClose = false;
 
       function toggleNumpad(mode) {
         const attr = 'data-numpad';
         if (mode !== false && (mode !== undefined || !document.body.getAttribute(attr))) {
           document.body.setAttribute(attr, mode || 'show');
-          numpadJustShown = true;
+          ignoreOneNumpadClose = true;
         } else {
           // This is for the stupid reason that the click that brings it up
           // is otherwise a "click outside the box" and brings it down!
-          if (!numpadJustShown)
+          if (!ignoreOneNumpadClose)
             document.body.removeAttribute(attr);
-          numpadJustShown = false;
+            ignoreOneNumpadClose = false;
         }
       }
 
