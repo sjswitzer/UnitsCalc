@@ -415,6 +415,8 @@
             The results box will be grayed out while that happens.
             It would be too noisy to alert each of these errors, but if you don't
             know why it's grayed out, you can hit &ldquo;enter&rdquo; to see an error message.
+        <p> If, however, you realized you should have begun a parenthasized expression and enter
+            <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically.
         <p> In these help boxes most sample expressions, like
             <code>11'4"/2</code>, can be clicked to evaluate the expression.
         </p>
@@ -2621,11 +2623,50 @@
      function updateParse(opts) {
         clearFields();
         try {
-          let exprStr = exprElement.value;
+          let exprStr = exprElement.value, val = null;
+          let hasCaret = exprStr.charAt(exprStr.length-1) === CARETSYM;
           exprStr = trimCaret(exprStr);
-          if (exprStr.trim() === "")
+          if (exprStr.trim() === "") {
             showAssignResult("&nbsp;");  // clear the input field
-          let val = parseInputStatement(exprStr);
+            return;
+          }
+          try {
+            val = parseInputStatement(exprStr);
+          } catch (e) {
+            if (!(e instanceof ChattyError)) {
+              throw e;
+            } else {
+              // try to supply missing left parin
+              let fixPos = 0, trackingFix = true;
+              if (exprStr.charAt(exprStr.length-1) === ')') {
+                let fixPos = 0, trackingFix = true, nl = 0, nr = 0;
+                for (let pos = 0; pos < exprStr.length; pos++) {
+                  let c = exprStr.charAt(pos);
+                  if (c === ' ' || c === '\t') {
+                    if (trackingFix)
+                    fixPos = pos+1;
+                  } else {
+                    trackingFix = false;
+                    if (c === ')') {
+                      nr++;
+                    } else if (c === '(' ) {
+                      nl++;
+                    } else if (c === '=') {
+                      trackingFix = true;
+                      fixPos = pos+1;
+                    }
+                  }
+                }
+                if (nl === nr-1) {
+                  exprStr = exprStr.substring(0, fixPos) + '(' + exprStr.substring(fixPos );
+                  if (hasCaret)
+                    exprStr += CARETSYM;
+                  exprElement.value = exprStr;
+                  val = parseInputStatement(exprStr);
+                }
+              }
+            }
+          }
           if (val !== null) {
             if (opts?.doAssigns && val.defined) {
               const sym = val.sym;
@@ -2918,7 +2959,6 @@
       }
 
       function trimCaret(str) {
-        str = str.trimEnd(str);
         if (str.charAt(str.length-1) === CARETSYM)
           str = str.substr(0, str.length-1);
         return str;
