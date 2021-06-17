@@ -235,11 +235,11 @@
         display: none;
         font-size: 120%;
         grid-template-columns: repeat(5, 1fr);
-        gap: .15em;
-        padding: .3em;
+        gap: .2em;
+        padding: .4em;
         position: absolute;
         right: 1em;
-        bottom: .5em;
+        bottom: .25em;
         border: .15em solid black;
         border-radius: .4em;
         background-color: #aaaaaa;
@@ -250,7 +250,7 @@
       div#numpad > div {
         width: 2em;
         height: 2em;
-        border: .1em solid black;
+        border: .15em solid black;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -260,12 +260,12 @@
         background-color: #888888;
       }
       div#numpad > div.span2 {
-        grid-column-end: span 2;  /*xxx call:2, border: .1, gap: .15 */
-        width: 4.35em;  /* 2 cells, 2 borders, 1 gap */
+        grid-column-end: span 2;
+        width: 4.5em;  /* 2 cells, 2 borders, 1 gap */
       }
       div#numpad > div.span3 {
         grid-column-end: span 3;
-        width: 6.7em;  /* 3 cells, 4 borders, 2 gaps = 6 * .4 + .3*/
+        width: 7em;  /* 3 cells, 4 borders, 2 gaps */
       }
 
       /* Looks like a link but is actually a "button" */
@@ -735,7 +735,7 @@
         <span style="font-size: 90%">abc</span> </div>
       <div class="span3" data-stuff=" "> space </div>
       <div class="span2" data-stuff="del">
-        <span style="font-size: 115%;">&#9003;</span> </div> <!-- back/erase symbol -->
+        <span style="font-size: 125%;">&#9003;</span> </div> <!-- back/erase symbol -->
     </div>
     <script type="text/javascript">
       "use strict";
