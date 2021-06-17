@@ -2636,7 +2636,8 @@
             if (!(e instanceof ChattyError)) {
               throw e;
             } else {
-              // try to supply missing left parin
+              // Try to supply missing left parin.
+              // Note: Yhis doesn't seem like a very general solution.
               let fixPos = 0, trackingFix = true;
               if (exprStr.charAt(exprStr.length-1) === ')') {
                 let fixPos = 0, trackingFix = true, nl = 0, nr = 0;
@@ -2659,10 +2660,19 @@
                 }
                 if (nl === nr-1) {
                   exprStr = exprStr.substring(0, fixPos) + '(' + exprStr.substring(fixPos );
-                  if (hasCaret)
-                    exprStr += CARETSYM;
-                  exprElement.value = exprStr;
-                  val = parseInputStatement(exprStr);
+                  let saveParseStr = parseStr, saveParesPos = parsePos, saveParseFurthest = parseFurthest;
+                  try {
+                    val = parseInputStatement(exprStr);
+                    if (val) {
+                      if (hasCaret)
+                        exprStr += CARETSYM;
+                      exprElement.value = exprStr;
+                    }
+                  } finally {
+                    // If it succeeds, there will be no error message.
+                    // If it fails, we want original context.
+                    parseStr = saveParseStr, parsePos = saveParesPos, parseFurthest = saveParseFurthest;
+                  }
                 }
               }
             }
