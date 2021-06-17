@@ -2969,7 +2969,7 @@
 
       function toggleLegacyMode(legacy) {
         const attr = 'data-presentation-mode';
-        if (legacy === undefined || !document.body.getAttribute(attr))
+        if (legacy || !document.body.getAttribute(attr))
           document.body.setAttribute(attr, 'legacy');
         else
           document.body.removeAttribute(attr);
