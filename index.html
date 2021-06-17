@@ -3039,7 +3039,8 @@
           return;
         }
         const attr = 'data-numpad';
-        if (mode !== false && (mode !== undefined || !document.body.getAttribute(attr))) {
+        const currValue = document.body.getAttribute(attr);
+        if (mode !== false && (mode !== undefined || !currValue)) {
           document.body.setAttribute(attr, 'show');
           exprElement.value = exprElement.value + CARETSYM;
           ignoreOneToggleNumpad = true;
@@ -3047,7 +3048,7 @@
           window.setTimeout(function() {  // fires at next event loop
             ignoreOneToggleNumpad = false;
           });
-        } else {
+        } else if (currValue) {
           document.body.removeAttribute(attr);
           exprElement.value = trimCaret(exprElement.value);
         }
