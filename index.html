@@ -729,9 +729,9 @@
       <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div> <div> ' </div>
       <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div> <div> " </div>
       <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> * </div> <div> . </div>
-      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div> : </div>
+      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div data-stuff="abc"> abc  </div>
       <div class="span3" data-stuff=" "> space </div>
-      <div class="span2" data-stuff="x"> &#9003; </div>
+      <div class="span2" data-stuff="del"> &#9003; </div>
     </div>
     <script type="text/javascript">
       "use strict";
@@ -1020,7 +1020,8 @@
       const CMPS = 299792458;
 
       const DIGITS = "0123456789";
-      const MICROSYM = "\u00B5", OHMSYM = "\u2126", PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F";
+      const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
+          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F";
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -2620,6 +2621,7 @@
         clearFields();
         try {
           let exprStr = exprElement.value;
+          exprStr = trimCaret(exprStr);
           if (exprStr.trim() === "")
             showAssignResult("&nbsp;");  // clear the input field
           let val = parseInputStatement(exprStr);
@@ -2914,6 +2916,13 @@
         }
       }
 
+      function trimCaret(str) {
+        str = str.trimEnd(str);
+        if (str.charAt(str.length-1) === CARETSYM)
+          str = str.substr(0, str.length-1);
+        return str;
+      }
+
       function addNumpadStuffs() {
         document.body.addEventListener("click", function(event) {
           let element = event.target;
@@ -2922,17 +2931,22 @@
               return;
             if (element.parentElement === numpadElement) {
               let text = element.textContent.trim();
+              let exprText = exprElement.value;
+              exprText = trimCaret(exprText);
               let stuff = element.getAttribute('data-stuff');
-              if (stuff === 'x') { // hack
-                text = exprElement.value;
-                text = text.substr(0, text.length-1);
-                stuffExpr(text);
+              if (stuff === 'del') { // hack
+                exprText = exprText.substr(0, exprText.length-1);
+                stuffExpr(exprText + CARETSYM);
+              } else if (stuff === 'abc') {
+                exprElement.focus();
+                toggleNumpad(false);
               } else {
                 if (stuff)
                   text = stuff;
-                stuffExpr(exprElement.value + text);
+                stuffExpr(exprText + text + CARETSYM);
               }
-              exprElement.focus();
+              // Again, it seeme like this is a good idea, but it brings up the keyboard on iOS
+              //   exprElement.focus();  /* no! */
               return;
             }
             element = element.parentElement;
@@ -2949,8 +2963,8 @@
       }
 
       function clearExpr() {
-        stuffExpr('');
-        ignoreOneNumpadClose = true; // click shouldn't bring down the numpad
+        stuffExpr("");
+        ignoreOneToggleNumpad = true;  // don't bring down the numpad!
       }
 
       function toggleLegacyMode(legacy) {
@@ -2975,19 +2989,26 @@
           document.body.removeAttribute(attr);
       }
 
-      let ignoreOneNumpadClose = false;
+      let ignoreOneToggleNumpad = false;
 
       function toggleNumpad(mode) {
+        // This is to deal with the click that opens the numpad being itself "out of the box"
+        if (ignoreOneToggleNumpad) {
+          ignoreOneToggleNumpad = false;
+          return;
+        }
         const attr = 'data-numpad';
         if (mode !== false && (mode !== undefined || !document.body.getAttribute(attr))) {
-          document.body.setAttribute(attr, mode || 'show');
-          ignoreOneNumpadClose = true;
+          document.body.setAttribute(attr, 'show');
+          exprElement.value = exprElement.value + CARETSYM;
+          ignoreOneToggleNumpad = true;
+          exprElement.blur();
+          window.setTimeout(function() {  // fires at next event loop
+            ignoreOneToggleNumpad = false;
+          });
         } else {
-          // This is for the stupid reason that the click that brings it up
-          // is otherwise a "click outside the box" and brings it down!
-          if (!ignoreOneNumpadClose)
-            document.body.removeAttribute(attr);
-            ignoreOneNumpadClose = false;
+          document.body.removeAttribute(attr);
+          exprElement.value = trimCaret(exprElement.value);
         }
       }
 
