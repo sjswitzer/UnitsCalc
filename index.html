@@ -233,7 +233,7 @@
 
       div#numpad {
         display: none;
-        font-size: 110%;
+        font-size: 125%;
         grid-template-columns: repeat(5, 1fr);
         gap: .2em;
         padding: .4em;
@@ -415,7 +415,7 @@
             The results box will be grayed out while that happens.
             It would be too noisy to alert each of these errors, but if you don't
             know why it's grayed out, you can hit &ldquo;enter&rdquo; to see an error message.
-        <p> If, however, you realized you should have begun a parenthasized expression and enter
+        <p> If, however, you realize you should have begun a parenthasized expression and enter
             <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically
             so that you don't have to go back and add it youself (which is tedious on mobile devices).
         <p> In these help boxes most sample expressions, like
@@ -1249,9 +1249,6 @@
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: Math.PI, display: PISYM, desc: PISYM },
         tau: { type: 'num', dim: {}, val: 2 * Math.PI, display: TAUSYM, desc: `2${PISYM}` },
-        unit: { type: 'num', dim: {}, val: 1, desc: "one", display: null, alt: ["u"] },  // to allow "1 1/2 u"
-        ratio: { type: 'num', dim: {}, val: 1, display: null, rat: 1, alt: ["rat"] }, // secret unit to force fraction display
-        mixratio: { type: 'num', dim: {}, val: 1, display: null, rat: 2, alt: ["mixrat"] }, // secret unit to force mixed fraction display
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         mol: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number", alt: ["mols"] },
         dalton: { type: 'num', dim: { M: 1 }, val: 1.6605390666e-27 * KG },
@@ -1298,6 +1295,16 @@
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, display: null }, // :)
 
+
+        // Special units
+        groupSpecial: { group: "Special Units" },
+        unit: { type: 'num', dim: {}, val: 1, desc: "one",
+            desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
+        ratio: { type: 'num', dim: {}, val: 1, ratio: 1, alt: ["rat"],
+            desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
+        mixratio: { type: 'num', dim: {}, val: 1, ratio: 2, alt: ["mixrat"],
+            desc: ' like "ratio" but will display mixed fractions if possible' },
+
         // General n-dimensional hypotenuse
         hyp: function Hypotenuse(...params) {
           if (params.length < 1)
@@ -1339,7 +1346,7 @@
           if (val.type !== 'num') throw new MessageError(`${this.sym}(x): Illegal parameter`);
           let dim = Dim.div(val.dim, 2);
           if (!dim) throw new MessageError(`${this.sym}(x): parameter must have even units`);
-          return { type: 'num', dim, val: Rat.sqrt(numVal(val)), uscu: val.uscu };
+          return { type: 'num', dim, val: Rat.sqrt(numVal(val)), uscu: val.uscu, ratio: val.ratio };
         },
 
         cbrt: function CubeRoot(...params) {
@@ -1348,7 +1355,7 @@
           if (val.type !== 'num') throw new MessageError(`${this.sym}(x): Illegal parameter`);
           let dim = Dim.div(val.dim, 3);
           if (! dim) throw new MessageError(`${this.sym}(x): parameter units must be power of three`);
-          return { type: 'num', dim, val: Rat.cbrt(numVal(val)), uscu: val.uscu };
+          return { type: 'num', dim, val: Rat.cbrt(numVal(val)), uscu: val.uscu, ratio: val.ratio };
         },
 
         // Some trig functions that are valid over their whole domain, are somewhat useful,
@@ -1420,7 +1427,7 @@
 
       function reduceParamVals(name, accum, params, fn) {  // fn => (accum, val) => val
         let dim;
-        let uscu = false;
+        let uscu = false, ratio = false;
         for (const val of params) {
           if (val.type !== 'num') throw new MessageError(`${name}(): Illegal parameter`);
           const value = numVal(val);
@@ -1430,11 +1437,12 @@
             dim = val.dim;
             accum = fn(accum, value);
             uscu = uscu || val.uscu;
+            ratio = ratio || val.ratio;
           }
         }
         if (!dim)
           dim = {}
-        return { type: 'num', dim, val: accum, uscu };
+        return { type: 'num', dim, val: accum, uscu, ratio };
       }
 
       const userSymbols = {};
@@ -1464,7 +1472,7 @@
                 let desc = val.sym && `${val.sym ?? symPrefix}^${String(exp)}`;
                 return { sym: symName, type: 'num',
                   dim: Dim.mul(val.dim, exp), val: Rat.pow(numVal(val), exp),
-                  desc, reserved: val.reserved, uscu: val.uscu,
+                  desc, reserved: val.reserved, uscu: val.uscu, ratio: val.ratio,
                   baseSym: val, withExp: exp };
               }
             }
@@ -1538,16 +1546,15 @@
       const candidateUnitsUSCU = filterUnits([ ...commonUnits, 'lbf', 'ft', 'in', 'lb' ]);
 
       function val2str(val, opts) {
-        let descStr = "", displayUnits = val.displayUnits, rat = displayUnits?.rat;
+        let descStr = "", displayUnits = val.displayUnits, ratio = displayUnits?.ratio;
         if (opts?.describe && val.desc && !displayUnits)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
         let noFrac = false;
         if (val.val !== undefined) {
-          let uscu = !!val.uscu;
-          if (displayUnits?.uscu)
-            uscu = true;
+          let uscu = val.uscu || displayUnits?.uscu;
           let dim = val.dim;
+          ratio = ratio || val.ratio;
           val = Rat.normalize(numVal(val));
           // Certain kinds of units should not be displayed as fractions
           noFrac = Dim.isScalar(dim) || Dim.hasNonce(dim)
@@ -1613,7 +1620,7 @@
           function applyDesc(unitDesc) {
             let unitList = unitDesc.unit.unitList ?? [ [ 1, unitDesc.unit ] ];
             for (let [exp, unit] of unitList) {
-              if (unit.rat) continue; // special unit to force fractional representation
+              if (unit.ratio) continue; // special unit to force fractional representation
               let str = " ";
               let displayExp = exp = unitDesc.exp * exp;
               if (displayExp < 0) {
@@ -1744,9 +1751,13 @@
         let asFrac = false;
         let num = val[0], denom = val[1], intpart = 0n;
         if (typeof num === 'bigint') {
-          if (rat !== 1) {  // rat = 1 means no _mixed_ fractions, rat = 2 allows them
+          if (ratio !== 1) {  // ratio = 1 means no _mixed_ fractions, ratio = 2 allows them
             intpart = num/denom;
             num -= intpart*denom;
+          }
+          if (denom === 1n) {  // don't display 2/1
+            intpart += num;
+            num = 0n;
           }
           if (!noFrac) {
             if (num === 1n || num <= 12n && denom <= 12n) {
@@ -1763,7 +1774,7 @@
             }
           }
         }
-        if (asFrac || rat) {
+        if (asFrac || ratio) {
           let neg = num < 0n;
           let str = "";
           if (neg) {
@@ -2075,7 +2086,7 @@
       //    [ '/'? word ]+
 
       function parseUnitString(val, opts) {
-        let implicitValue = false, type = 'num', rat = false;
+        let implicitValue = false, type = 'num', ratio = false;
         if (!val) {
           val = Rat.ONE;
           // In this case, there's doubt whether we've got a unit string or just a variable,
@@ -2109,8 +2120,6 @@
             unitList.push([ 1, sym ]);
             continue;
           }
-          if (sym.rat)
-            rat = sym.rat;
           // Affine units can't combine with other units at all
           if (origin || sym.origin && unitList.length > 0)
             throw new MessageError(`Implausible units`);
@@ -2136,8 +2145,8 @@
             dim = Dim.add(dim, sym.dim);
             val = Rat.mul(val, symVal);
           }
-          if (sym.uscu)
-            uscu = true;
+          uscu = uscu || sym.uscu;
+          ratio = ratio || sym.ratio;
           unitVal = Rat.mul(unitVal, symVal);
           let exp = sym.withExp ?? 1;
           if (hasSlash)
@@ -2153,7 +2162,7 @@
         let desc;
         if (unitList.length === 1 && unitList[0][0] === 1)
           desc = unitList[0][1].desc;
-        return { type, val, dim, uscu, origin, desc, unitVal, unitList, rat };
+        return { type, val, dim, origin, desc, unitVal, unitList, uscu, ratio };
       }
 
       // Parse a value, which is either a plain number (n) or a sequesnce of
@@ -2165,7 +2174,7 @@
         const backtrack = parsePos;
         let val = Rat.ZERO, dim, origin, type = 'num';
         let lastUnitVal = Number.POSITIVE_INFINITY;
-        let uscu = false;   // consider it metric unless we encounter any non-metric unit
+        let ratio = false, uscu = false;   // consider it metric unless we encounter any non-metric unit
 
         // The idea of lastUnitVal is that units should get progressively smaller.
         // Otherwise, someone could enter 2'3' when they meant 2'3"
@@ -2202,6 +2211,7 @@
               parsePos = backtrackChunk;
               break;
             }
+            ratio = ratio || res.ratio;
             if (res.type === 'num') {
               // can't combine affine units with anything else
               if (origin || dim && res.origin) throw new MessageError("Implausible units");
@@ -2229,7 +2239,7 @@
           }
         }
         if (dim)
-          return { type, dim, val, origin, uscu };
+          return { type, dim, val, origin, uscu, ratio };
         parsePos = backtrack;
         let num = parseNum(opts);
         if (num !== null)
@@ -2288,7 +2298,7 @@
             let resVal = Rat.neg(val.val);
             if (val.origin)   // special negation of affine values: don't negate the origin value
               resVal = Rat.add(resVal, val.origin);
-            return { type: val.type, dim: val.dim, val: resVal, uscu: val.uscu };
+            return { type: val.type, dim: val.dim, val: resVal, uscu: val.uscu, ratio: val.ratio };
           }
           parsePos = backtrack;
           return null;
@@ -2300,7 +2310,7 @@
             if (val.type === 'parse')
               return { type: 'parse', op: 'recip', expr: val };
             let q = Rat.recip(numVal(val));
-            return { type: val.type, dim: Dim.mul(val.dim, -1), val: q, uscu: val.uscu };
+            return { type: val.type, dim: Dim.mul(val.dim, -1), val: q, uscu: val.uscu, ratio: val.ratio };
           }
           parsePos = backtrack;
           return null;
@@ -2400,7 +2410,7 @@
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
-            val: Rat.pow(numVal(val), numVal(exp)), uscu: val.uscu };
+            val: Rat.pow(numVal(val), numVal(exp)), uscu: val.uscu , ratio: val.ratio};
         }
         return val;
       }
@@ -2427,7 +2437,8 @@
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num')
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
-                  val: Rat.mul(numVal(val), numVal(val2)), uscu: val.uscu || val2.uscu };
+                  val: Rat.mul(numVal(val), numVal(val2)),
+                  uscu: val.uscu || val2.uscu, ratio: val.ratio || val2.ratio };
             else
               throw new MessageError("Unknown value type");
           } else if (take('/') || take(DIVSYM)) { // '/' or divide sign
@@ -2448,7 +2459,8 @@
                 val2 = { ...val2, origin: undefined };
               }
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
-                  val: Rat.div(numVal(val), numVal(val2)), uscu: val.uscu || val2.uscu };
+                  val: Rat.div(numVal(val), numVal(val2)),
+                  uscu: val.uscu || val2.uscu, ratio: val.ratio || val2.ratio };
             } else {
               throw new MessageError("Unknown value type");
             }
@@ -2486,7 +2498,8 @@
             } else if (val.type === 'num' && val2.type === 'num') {
               if (Dim.equal(val.dim, val2.dim))
                 val = { type: 'num', dim: val.dim,
-                  val: Rat.add(numVal(val), numVal(val2)), uscu: val.uscu || val2.uscu };
+                  val: Rat.add(numVal(val), numVal(val2)),
+                  uscu: val.uscu || val2.uscu , ratio: val.ratio || val2.ratio};
               else
                 throw new ChattyError("Cannot add different unit types")
             } else {
@@ -2510,7 +2523,8 @@
                 // It this usage, degf is a relative degree not an absolute degree.
                 // Henve, we don't call numVal for it
                 val = { type: 'num', dim: val.dim,
-                    val: Rat.sub(numVal(val), val2.val), uscu: val.uscu && val2.uscu };
+                    val: Rat.sub(numVal(val), val2.val),
+                    uscu: val.uscu && val2.uscu, ratio: val.ratio || val2.ratio };
               } else {
                 throw new ChattyError("Cannot subtract different unit types");
               }
