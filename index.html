@@ -2927,11 +2927,13 @@
                 text = exprElement.value;
                 text = text.substr(0, text.length-1);
                 stuffExpr(text);
-                return;
+              } else {
+                if (stuff)
+                  text = stuff;
+                stuffExpr(exprElement.value + text);
               }
-              if (stuff)
-                text = stuff;
-              stuffExpr(exprElement.value + text);
+              exprElement.focus();
+              return;
             }
             element = element.parentElement;
           }
