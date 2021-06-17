@@ -624,9 +624,10 @@
             <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
             <li> What's a kilobyte per meter in kilometers? <code>KB/m : km</code>.
                  It seems rather silly, but it might be a length of magnetic tape
-            <li> Suppose an Icelandic Kr&oacute;na is about <code>ISK = .008 'dollar'</code>
+            <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
                  and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
-                 <code>220 ISK/liter : 'dollar'/gallon</code>
+                 <code>220 ISK/liter : $/gallon</code>
+            <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
           </ul>
         <p> As an exercise (click the code that follows), suppose an elephant weighs
             <code>elephantWeight = 8000lbf</code>
@@ -1031,7 +1032,7 @@
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        MICROSYM + OHMSYM + TAUSYM + PISYM;
+        MICROSYM + OHMSYM + TAUSYM + PISYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
       let unitsSystem = 'mks';  // can also be 'cgs'
@@ -1295,11 +1296,14 @@
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, display: null }, // :)
 
-
         // Special units
         groupSpecial: { group: "Special Units" },
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
+        '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars"], reserved: true,
+            desc: 'a dollar, no particular kind'},
+        cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
+            desc: 'a cent, no particular kind'},
         ratio: { type: 'num', dim: {}, val: 1, ratio: 1, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
         mixratio: { type: 'num', dim: {}, val: 1, ratio: 2, alt: ["mixrat"],
@@ -1528,7 +1532,7 @@
         'KB',  'MB',  'GB',  'TB',  'PB',  'EB',
         // seconds come after electrical and information units so that a coulomb
         // is an "A s", not an "s A"
-        's', 'K', 'person',
+        's', 'K', 'person', '$',
         'sr', 'radian', 'cd', 'lx', 'lm' ];
       const commonMetricUnits = [
         'joule', 'N', 'Pa', 'kPa', 'W', 'kW', 'mW' ];
@@ -1558,7 +1562,8 @@
           val = Rat.normalize(numVal(val));
           // Certain kinds of units should not be displayed as fractions
           noFrac = Dim.isScalar(dim) || Dim.hasNonce(dim)
-              || dim.A || dim.Q || dim.RAD || dim.BIT || dim.CD || dim.PERSON
+              || dim.A || dim.Q || dim.RAD || dim.BIT || dim.CD
+              || dim.PERSON || dim.CURRENCY
               || !uscu && (dim.L || dim.M);
           function describeUnit(unit, opts) {
             try {
