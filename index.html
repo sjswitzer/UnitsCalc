@@ -30,7 +30,7 @@
         margin: 0px 0px;
         background-color: #f8f8f8;
       }
-      body, table th, table td {
+      body, table  {
         font: 110% caption, sans-serif;
       }
 
@@ -44,8 +44,7 @@
         body { --device: mobile; }
       }
       body[data-device="mobile"],
-      body[data-device="mobile"] table th,
-      body[data-device="mobile"] table td {
+      body[data-device="mobile"] table {
           font: 90% caption, sans-serif !important;
       }
       body[data-device="mobile"] div.input-area {
@@ -164,9 +163,9 @@
         margin: .5em;
       }
       div.help code,
-      div.help table.example tr td:first-child,
-      div.help table.example2 tr td:nth-child(1),
-      div.help table.example2 tr td:nth-child(2) {
+      div.help table.example td:first-child,
+      div.help table.example2 td:nth-child(1),
+      div.help table.example2 td:nth-child(2) {
         font-weight: bold;
         font-family: caption, sans-serif;
         color: #444444;  /* subtle graying to offset the boldness */
@@ -174,19 +173,19 @@
       div.help code.abstract {
         font-style: italic;
       }
-      div.help table.example tr td:first-child {
+      div.help table.example td:first-child {
         width: 7em;
      }
-      div.help table.example2 tr td:nth-child(1),
-      div.help table.example2 tr td:nth-child(2) {
-        width: 3em;
+      div.help table.example2 td:nth-child(1),
+      div.help table.example2 td:nth-child(2) {
+        width: 2.5em !important;
       }
       div.help table.example, div.help table.example2 {
         margin-left: 1em;
       }
       /* Testing affordance; example text can be stuffed into the expr box */
       div.help code:hover, div.help .stuff-text:hover,
-      div.help table.stuff.example tr td:first-child:hover {
+      div.help table.stuff.example td:first-child:hover {
         cursor: pointer;
         color: #0000dd;
         text-decoration: underline;
@@ -728,8 +727,8 @@
     <div id="numpad">
       <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div> <div> ' </div>
       <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div> <div> " </div>
-      <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> * </div> <div> . </div>
-      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div data-stuff="abc"> abc  </div>
+      <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> &times; </div> <div> . </div>
+      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div data-stuff="abc"> abc </div>
       <div class="span3" data-stuff=" "> space </div>
       <div class="span2" data-stuff="del"> &#9003; </div>
     </div>
@@ -1021,7 +1020,9 @@
 
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
-          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F";
+          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F",
+          MULSYM = "\u00D7", DIVSYM = "\u00F7";
+  ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -1174,7 +1175,7 @@
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"] },
         kW: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ 1000 * KG * M**2, SEC**3 ], alt: ["kilowatt", "killowatts"] },
         mW: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, 1000 * SEC**3 ], alt: ["milliwatt", "milliwatts"] },
-        horsepower: { type: 'num', dim: { L: 2, M: 1, T:-3 },
+        hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"],
             val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", uscu: true },
 
         // Pressure (L^-1 M T^-2)
@@ -1279,7 +1280,7 @@
         are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
         grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], uscu: true },
         stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], uscu: true, desc: "UK stone" }, // no alt "stones"
-        hundredweight: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], uscu: true,
+        cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], uscu: true, alt: ["hundredweight"],
             desc: "UK hundredweight, about 51 kg" },  // in the US it's 100lb, but nobody uses it so...
         longton: { type: 'num', dim: { M: 1 }, val: [ 2240 * LBM100M, N100M ], uscu: true, alt: ["longtons"], desc: "UK long ton" },
         ton: { type: 'num', dim: { M: 1 }, val: [ 2000 * LBM100M, N100M ], uscu: true, alt: ["tons"], desc: "US ton" },
@@ -2406,7 +2407,7 @@
         if (val === null)
           return null;
         while (true) {
-          if (take('*') || take('\u00D7')) {  // '*' or times sign
+          if (take('*') || take(MULSYM)) {  // '*' or times sign
             let val2 = parseExponentiation(opts);
             if (val2 === null) {
               parsePos = backtrack;
@@ -2421,7 +2422,7 @@
                   val: Rat.mul(numVal(val), numVal(val2)), uscu: val.uscu || val2.uscu };
             else
               throw new MessageError("Unknown value type");
-          } else if (take('/') || take('\u00F7')) { // '/' or divide sign
+          } else if (take('/') || take(DIVSYM)) { // '/' or divide sign
             let val2 = parseExponentiation(opts);
             if (val2 === null) {
               parsePos = backtrack;
