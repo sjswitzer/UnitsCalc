@@ -416,7 +416,8 @@
             It would be too noisy to alert each of these errors, but if you don't
             know why it's grayed out, you can hit &ldquo;enter&rdquo; to see an error message.
         <p> If, however, you realized you should have begun a parenthasized expression and enter
-            <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically.
+            <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically
+            so that you don't have to go back and add it youself (which is tedious on mobile devices).
         <p> In these help boxes most sample expressions, like
             <code>11'4"/2</code>, can be clicked to evaluate the expression.
         </p>
@@ -1247,7 +1248,8 @@
         pi: { type: 'num', dim: {}, val: Math.PI, display: PISYM, desc: PISYM },
         tau: { type: 'num', dim: {}, val: 2 * Math.PI, display: TAUSYM, desc: `2${PISYM}` },
         unit: { type: 'num', dim: {}, val: 1, desc: "one", display: null, alt: ["u"] },  // to allow "1 1/2 u"
-        ratio: { type: 'num', dim: {}, val: 1, display: null, rat: true, alt: ["rat"] }, // secret unit to force fraction display
+        ratio: { type: 'num', dim: {}, val: 1, display: null, rat: 1, alt: ["rat"] }, // secret unit to force fraction display
+        mixratio: { type: 'num', dim: {}, val: 1, display: null, rat: 2, alt: ["mixrat"] }, // secret unit to force mixed fraction display
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         mol: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number", alt: ["mols"] },
         dalton: { type: 'num', dim: { M: 1 }, val: 1.6605390666e-27 * KG },
@@ -1740,8 +1742,10 @@
         let asFrac = false;
         let num = val[0], denom = val[1], intpart = 0n;
         if (typeof num === 'bigint') {
-          intpart = num/denom;
-          num -= intpart*denom;
+          if (rat !== 1) {  // rat = 1 means no _mixed_ fractions, rat = 2 allows them
+            intpart = num/denom;
+            num -= intpart*denom;
+          }
           if (!noFrac) {     // xxx this logic looks suss
             if (num === 1n || num <= 12n && denom <= 12n) {
               asFrac = true;
@@ -2024,7 +2028,7 @@
           let val = getNonceUnit(symPrefix);
           let exp = Number(symSuffix);
           if (exp < 2)
-            throw new MessageError("Bad units exponent");
+            throw new ChattyError("Bad units exponent");
           return { ...val, dim: Dim.mul(val.dim, exp), val: Rat.pow(numVal(val), exp) };
         }
         let sym = nonceUnits[name];
@@ -2055,7 +2059,7 @@
             if (exp !== null) {
               exp = Rat.number(exp);
               if (exp < 2)
-                throw new MessageError("Bad units exponent");
+                throw new Chat("Bad units exponent");
               return { ...sym, dim: Dim.mul(sym.dim, exp), val: Rat.pow(numVal(sym), exp) };
             }
             return sym;
@@ -2104,7 +2108,7 @@
             continue;
           }
           if (sym.rat)
-            rat = true;
+            rat = sym.rat;
           // Affine units can't combine with other units at all
           if (origin || sym.origin && unitList.length > 0)
             throw new MessageError(`Implausible units`);
@@ -2633,9 +2637,7 @@
           try {
             val = parseInputStatement(exprStr);
           } catch (e) {
-            if (!(e instanceof ChattyError)) {
-              throw e;
-            } else {
+            if (e instanceof ChattyError) {
               // Try to supply missing left parin.
               // Note: Yhis doesn't seem like a very general solution.
               let fixPos = 0, trackingFix = true;
@@ -2667,7 +2669,10 @@
                       if (hasCaret)
                         exprStr += CARETSYM;
                       exprElement.value = exprStr;
+                      e = undefined;  // ignore the error
                     }
+                  } catch(e2) { 
+                      e = e2; // keep original error
                   } finally {
                     // If it succeeds, there will be no error message.
                     // If it fails, we want original context.
@@ -2676,6 +2681,8 @@
                 }
               }
             }
+            if (e)
+              throw e;
           }
           if (val !== null) {
             if (opts?.doAssigns && val.defined) {
