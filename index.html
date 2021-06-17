@@ -45,10 +45,10 @@
       }
       body[data-device="mobile"],
       body[data-device="mobile"] table {
-          xxxfont: 100% caption, sans-serif !important;
+          font: 100% caption, sans-serif !important;
       }
       body[data-device="mobile"] div.input-area {
-        xxxfont-size: 150%;
+        font-size: 130%;
       }
       body:not([data-device="mobile"]) .mobile-only {
         display: none;
@@ -118,7 +118,7 @@
         left: 40%;
         right: 1em;
         bottom: .5em;
-        border: .2em solid black;
+        border: .15em solid black;
         border-radius: .4em;
       }
       div.help > span.close-button {
@@ -222,7 +222,6 @@
       .clear-text-button > span:before {
         position: absolute;
         content: "\d7"; /* Unicode times character */
-        font-size: 90%;
         bottom: .4em;
         left: -1.7em;
         color: white;
@@ -234,10 +233,10 @@
 
       div#numpad {
         display: none;
-        font-size: 140%;
+        font-size: 120%;
         grid-template-columns: repeat(5, 1fr);
-        gap: .1em;
-        padding: .2em;
+        gap: .15em;
+        padding: .3em;
         position: absolute;
         right: 1em;
         bottom: .5em;
@@ -261,12 +260,12 @@
         background-color: #888888;
       }
       div#numpad > div.span2 {
-        grid-column-end: span 2;
-        width: 4.3em;  /* 2 cells, 2 borders, 1 gap */
+        grid-column-end: span 2;  /*xxx call:2, border: .1, gap: .15 */
+        width: 4.35em;  /* 2 cells, 2 borders, 1 gap */
       }
       div#numpad > div.span3 {
         grid-column-end: span 3;
-        width: 6.6em;  /* 3 cells, 4 borders, 2 gaps */
+        width: 6.7em;  /* 3 cells, 4 borders, 2 gaps = 6 * .4 + .3*/
       }
 
       /* Looks like a link but is actually a "button" */
@@ -732,10 +731,11 @@
       <div> 1 </div> <div> 2 </div> <div> 3 </div> <div> + </div> <div> ' </div>
       <div> 4 </div> <div> 5 </div> <div> 6 </div> <div> - </div> <div> " </div>
       <div> 7 </div> <div> 8 </div> <div> 9 </div> <div> &times; </div> <div> . </div>
-      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div data-stuff="abc"> abc </div>
+      <div> ( </div> <div> 0 </div> <div> ) </div> <div> / </div> <div data-stuff="abc">
+        <span style="font-size: 90%">abc</span> </div>
       <div class="span3" data-stuff=" "> space </div>
       <div class="span2" data-stuff="del">
-        <span style="font-size: 120%;">&#9003;</span> </div> <!-- back/erase symbol -->
+        <span style="font-size: 115%;">&#9003;</span> </div> <!-- back/erase symbol -->
     </div>
     <script type="text/javascript">
       "use strict";
@@ -1748,7 +1748,7 @@
             intpart = num/denom;
             num -= intpart*denom;
           }
-          if (!noFrac) {     // xxx this logic looks suss
+          if (!noFrac) {
             if (num === 1n || num <= 12n && denom <= 12n) {
               asFrac = true;
               // But favor decimal for things like 0.001
