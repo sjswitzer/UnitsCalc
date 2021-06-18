@@ -65,6 +65,9 @@
       body:not([data-protocol="file:"]) .local-only {
         display: none;
       }
+      body[data-protocol="file:"] .remote-only {
+        display: none;
+      }
 
       /* Spiff up input fields */
       input[type="text"] {
@@ -688,9 +691,12 @@
         <p> This program is unapologetically biased towards US conventional units since
             it was originally conceived as a tool to help with their absurdity. Nobody else
             has problems dealing with unit conversions.
+        <p class="remote-only"> You can download this app locally as
+            <a href="index.html" download="UnitsCalc.html">UnitsCalc</a> or
+            <a href="index.html" download="FeetInchCalc.html">FeetInchCalc</a>
         <p class="local-only"> You can also
             <a href="https://sjswitzer.github.io/UnitsCalc">
-              run this from the web</a>.
+              run this app from the web</a>.
         <p> A-B-C. A-Always. B-Be. C-Coding.
         <p> Copyright &copy; 2021, Stan Switzer
         <p> Icon made by <a href="https://www.freepik.com" title="Freepik">Freepik</a>
