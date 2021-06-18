@@ -765,24 +765,16 @@
       const divElement = document.getElementById('div');
       const numpadElement = document.getElementById('numpad');
 
+      const InternalError = Error;
       class MessageError extends Error {
-        constructor(msg) {
-          super(msg);
-        }
         toString() { return this.message; }
       }
-
       class OverflowError extends MessageError {};
 
       // Errors that are too chatty to show while typing.
       //   (Error will be shown if the user hits "enter.")
-      class ChattyError extends MessageError {
-        constructor(msg) {
-          super(msg);
-        }
-      }
+      class ChattyError extends MessageError {}
 
-      const InternalError = Error;
 
       let logLevel = 0;
       function Log(level, msg, ...rest) {
@@ -803,7 +795,7 @@
         }
 
         static normSquared(dim) {
-          // How far this dimension is from being scalar.
+          // How far this dimension is from being scalar (squared).
           let n = 0
           for (const measure in dim) {
             const m = dim[measure];
@@ -822,16 +814,6 @@
             if ((dim1[measure] ?? 0) !== (dim2[measure] ?? 0))
               return false;
           return true;
-        }
-
-        static noncePrefix = 'NONCE-';
-
-        static hasNonce(dim) {
-          for (const measure in dim)
-            if (measure.startsWith(Dim.noncePrefix)
-                && nonceUnits[measure.substr(Dim.noncePrefix.length)])
-              return true;
-          return false;
         }
 
         static mul(dim, n) {
@@ -872,11 +854,11 @@
       function BigGCD(...params) { // requires BigInt params
         let a = params[0];
         if (a < 0n) a = -a;
-        if (a === 0n) return 1n
+        if (a <= 1n) return 1n;
         for (let i = params.length-1; i > 0; --i) {
           let b = params[i];
           if (b < 0n) b = -b;
-          if (b === 0n) return 1n;
+          if (b <= 1n) return 1n;
           while (b !== 0n) {
             let t = b;
             b = a % b;
@@ -889,7 +871,7 @@
       // Rational numbers [ num, denom ]
       //  denom must be BigInt, numerator can be a number for things like pi
       class Rat {
-        static number(a) {
+        static number(a) {  // returns Number
           let res = Number(a[0])/Number(a[1]);
           if (!isFinite(res))
             throw new MessageError("Divide by zero");
@@ -907,14 +889,15 @@
             if (denom === Math.trunc(denom))
               denom = BigInt(denom);
             else
-              num = Number(num)/denom, denom = 1n;
+              num = Rat.number(a), denom = 1n;
           }
+          // denom is now a BigInt
           if (denom === 0n)
             throw new MessageError("Divide by zero");
           if (denom < 0n) // keep denom positive
              num = -num, denom = -denom;
           if (num === 0n || num === 0)
-            return [ 0n, 1n ];
+            return Rat.ZERO;
           if (typeof num === 'number') {
             if (num !== Math.trunc(num))
               return [ num, denom ];
@@ -963,7 +946,7 @@
 
         static add(a, b, factor = 1) {
           if (typeof a[0] === 'number' || typeof b[0] === 'number')
-            return Rat.normalize([ Number(a[0])/Number(a[1]) + Number(b[0])/Number(b[1]), 1n ]);
+            return Rat.normalize([ Number(a[0])/Number(a[1]) + factor * Number(b[0])/Number(b[1]), 1n ]);
           // an/ad + f * bn/bd === (an * bd + f * bn*ad)/(ad/bd)
           let res = [ a[0]*b[1] + BigInt(factor)*b[0]*a[1], a[1]*b[1] ];
           return Rat.normalize(res);
@@ -1559,7 +1542,7 @@
           let dim = val.dim;
           val = Rat.normalize(numVal(val));
           // Certain kinds of units should not be displayed as fractions
-          noFrac = Dim.isScalar(dim) || Dim.hasNonce(dim)
+          noFrac = Dim.isScalar(dim) || hints.nonce
               || dim.A || dim.Q || dim.RAD || dim.BIT || dim.CD
               || dim.PERSON || dim.CURRENCY
               || !hints?.uscu && (dim.L || dim.M);
@@ -1588,6 +1571,12 @@
               // The dot product measures how aligned the units vectors are; the projection
               // each vector on the other. Orthagonal units ha a product of zero; negative
               // dot products mean anti-aligned, but we flipped the exponent's sign in that case.
+              // The dot product tells us which unit is most aligned with the number and tells us
+              // the sign of the exponent, but it may not be the best unit to apply, for instance
+              // it may not divide the dimensions evenly and we can't have fractional dimensions.
+              // Also, other factors may figure in chosing the unit such as which one reduces the
+              // total number of dimensions present. That's a bit heuristic and it's literally
+              // sorted out later based on the qualities summarized in the returned "description."
               dotProduct = dotProduct * exp;
               const reducedDim = Dim.add(dim, unit.dim, -exp);
               const reducedNormSquared = Dim.normSquared(reducedDim);
@@ -1703,7 +1692,7 @@
                 //  diff = a.reducedNormSquared - b.reducedNormSquared;
                 //  if (diff !== 0) return diff;
 
-                // Least exponents, ragardless of exponent
+                // Least number of exponents
                 diff = a.nDims - b.nDims;
                 if (diff !== 0) return diff;
 
@@ -1711,19 +1700,19 @@
                 diff = a.expSum - b.expSum;
                 if (diff !== 0) return diff;
 
-                // Favor units in the denominator (typically time)
+                // Favor units in the denominator (often T, time)
                 diff = Math.sign(a.exp) - Math.sign(b.exp);
                 if (diff !== 0) return diff;
 
                 // Values greater than 1 get a special bonus in the calculation below.
                 // The idea is that anything over a meter should be expressed in meters
                 // and less in lower units. But the inverse of cord (/cord) comes out
-                // to some ridiculous number of cubic miles and it really should be cubic feet.
-                // so being over 1 should give a bonus over the "distance from 1", but should
-                // not be absolute.
+                // to some ridiculous number of invers cubic miles and it really should
+                // be 1/128 /ft3. So being over 1 should give a bonus over the "distance
+                // from 1", but should not be absolute.
                 const aa = Math.abs(a.newNum), ab = Math.abs(b.newNum);
 
-                // Values closer to 1 win. log10 is number of digits basically
+                // Values closer to 1 win, generally.
                 let va = a.digits - (aa >= 1 ? 5 : 0);
                 let vb = b.digits - (ab >= 1 ? 5 : 0);
                 if (!isFinite(va) || !isFinite(vb)) {
@@ -2052,8 +2041,8 @@
         if (sym)
           return sym;
         const display = `'${name}'`;
-        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, favored: 1, hints: { uscu: null }, nonce: true };
-        sym.dim[Dim.noncePrefix+name] = 1;
+        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, favored: 1, hints: { nonce: true, uscu: null } };
+        sym.dim['NONCE-'+name] = 1;
         nonceUnits[name] = sym;
         return sym;
       }
