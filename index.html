@@ -1,5 +1,5 @@
 <!--
-  A calculator originaly designed to do inconvenient math with expressions in
+  A calculator originally designed to do inconvenient math with expressions in
   feet and inches such as dividing 5' 6 3/8" by 3. Hence, its grammar supports
   these conventional notations and favors the display of feet and inches
   results when applicable. But it now supports fairly general dimensional calculations
@@ -813,7 +813,7 @@
           return n;
         }
 
-        static equal(dim1 = {}, dim2 = {}) {
+        static equal(dim1, dim2) {
           for (const measure in dim1) {
             if ((dim1[measure] ?? 0) !== (dim2[measure] ?? 0))
               return false;
@@ -834,7 +834,7 @@
           return false;
         }
 
-        static mul(dim = {}, n) {
+        static mul(dim, n) {
           let ret = {};
           for (const measure in dim)
             ret[measure] = dim[measure]*n;
@@ -843,7 +843,7 @@
 
         // If a dimension can be evenly divided, the new dimension, else null
         // We don't allow fractal dimensions in this town.
-        static div(dim = {}, n) {
+        static div(dim, n) {
         let ret = {};
           for (const measure in dim) {
             const expDiv = dim[measure]/n;
@@ -869,7 +869,7 @@
         }
       }
 
-      function gcd(...params) { // requires BigInt params
+      function BigGCD(...params) { // requires BigInt params
         let a = params[0];
         if (a < 0n) a = -a;
         if (a === 0n) return 1n
@@ -921,8 +921,8 @@
             num = BigInt(num);
           }
           if (denom === 1n) return [ num, denom ];
-          let g = gcd(num, denom);
-          return [ num/g, denom/g ];
+          let gcd = BigGCD(num, denom);
+          return [ num/gcd, denom/gcd ];
         }
 
         static cmp(a, b) {
@@ -2782,7 +2782,7 @@
       }
 
       function symString(val, opts) {
-        if (Dim.equal(val.dim, { L: 1 }) && val.hints?.uscu && !opts?.saveMode) {
+        if (val.dim && Dim.equal(val.dim, { L: 1 }) && val.hints?.uscu && !opts?.saveMode) {
           let [ftStr, inStr, delta] = unitsToUSStringReps(Rat.number(numVal(val)));
           let str = `${val.sym} = ${ftStr}${delta}`;
           if (opts?.html)
