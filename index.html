@@ -1277,12 +1277,13 @@
 
         // Special units
         groupSpecial: { group: "Special Units" },
-        unit: { type: 'num', dim: {}, val: 1, desc: "one",
-            desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars"], reserved: true,
             desc: 'a dollar, no particular kind'},
         cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
             desc: 'a cent, no particular kind'},
+        // These are mostly for my amusement, but also useful debugging aids
+        unit: { type: 'num', dim: {}, val: 1, desc: "one",
+            desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 1 }, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
         mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 2 }, alt: ["mixrat", "ratmix"],
