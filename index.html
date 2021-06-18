@@ -131,6 +131,8 @@
       }
       div.help > span.close-button:before {
         content: "\d7"; /* Unicode times character */
+        position: relative;
+        top: -0.06em;
       }
       div.help > span.close-button:hover {
         transform: scale(1.25);
@@ -1300,8 +1302,8 @@
             desc: 'a cent, no particular kind'},
         ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 1 }, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
-        mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 2 }, alt: ["mixrat"],
-            desc: ' like "ratio" but will display mixed fractions if possible' },
+        mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 2 }, alt: ["mixrat", "ratmix"],
+            desc: 'like "ratio" but will display mixed fractions if possible' },
 
         // General n-dimensional hypotenuse
         hyp: function Hypotenuse(...params) {
