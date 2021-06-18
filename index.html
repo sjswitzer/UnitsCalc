@@ -2544,7 +2544,7 @@
       //    expr
       //    word '=' expr
       //    word '(' [ word [ ',' word ]* ]? ')' '=' expr
-      //    expr ':' unitsstr
+      //    expr ( ':' | '|' ) unitsstr
 
       function parseStatement(opts) {
         const backtrack = parsePos;
@@ -2591,7 +2591,7 @@
           parsePos = backtrack;
         }
         let val = parseExpr();
-        if (val && take(':')) {
+        if (val && (take(':') || take('|'))) {  // I prefer '|' but ':' is easier on mobile
           let displayUnits = parseUnitString(opts);
           if (!displayUnits) {
             parsePos = backtrack;
