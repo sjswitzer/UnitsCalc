@@ -1085,32 +1085,32 @@
 
         // Time (T)
         groupTime: { group: "Time Units" },
-        hr: { type: 'num', dim: { T: 1 }, val: HR, hints: { uscu: null }, alt: ["hour", "hours", "hrs"] },
-        min: { type: 'num', dim: { T: 1 }, val: MIN, hints: { uscu: null }, alt: ["minute", "minutes", "mins"] },
-        s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true, hints: { uscu: null },
+        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"] },
+        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"] },
+        s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
             alt: ["second", "seconds", "sec", "secs"] },
-        day: { type: 'num', dim: { T: 1 }, val: DAY, hints: { uscu: null }, alt: ["days"] },
+        day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"] },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
         // There are good arguments for the default year to be tropical, buy even astronomers
         // use julian years to define light year. Most people would be surprised by anything else
         // and numbers come out all weird if you use tropical years. So "yr" is julian.
         // Per Unified Code for Units of Measure:
-        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], hints: { uscu: null },
+        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ],
             desc: "mean Julian year", alt: ["year", "years", "yrs", "yrt", "aj"] },
-        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], hints: { uscu: null },
+        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ],
             desc: "mean tropical year", alt: ["at"] },
-        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], hints: { uscu: null },
+        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ],
             desc: "mean Gregorian year", alt: ["ag"] },
-        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], hints: { uscu: null },
+        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ],
             desc: "mean julian month", alt: ["month", "months"] },
-        ms: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000 ], hints: { uscu: null }, alt: ["millisecond", "milliseconds"] },
-        us: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**2 ], hints: { uscu: null }, display: MICROSYM+"s", alt: ["microsecond", "microseconds"] },
-        ns: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**3 ], hints: { uscu: null }, alt: ["nanosecond", "nanoseconds"] },
-        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", hints: { uscu: null }, alt: ["hertz"] },
-        kHz: { type: 'num', dim: { T: -1 }, val: [ 1000, SEC ], desc: "kilohertz", hints: { uscu: null } },
-        MHz: { type: 'num', dim: { T: -1 }, val: [ 1000**2, SEC ], desc: "megahertz", hints: { uscu: null } },
-        GHz: { type: 'num', dim: { T: -1 }, val: [ 1000**3, SEC ], desc: "gigahertz", hints: { uscu: null } },
+        ms: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000 ], alt: ["millisecond", "milliseconds"] },
+        us: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**2 ], display: MICROSYM+"s", alt: ["microsecond", "microseconds"] },
+        ns: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**3 ], alt: ["nanosecond", "nanoseconds"] },
+        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"] },
+        kHz: { type: 'num', dim: { T: -1 }, val: [ 1000, SEC ], desc: "kilohertz" },
+        MHz: { type: 'num', dim: { T: -1 }, val: [ 1000**2, SEC ], desc: "megahertz" },
+        GHz: { type: 'num', dim: { T: -1 }, val: [ 1000**3, SEC ], desc: "gigahertz" },
 
         // Temperature (Q)
         groupTemperature: { group: "Temperature Units" },
@@ -1156,9 +1156,9 @@
 
         // Population (PERSON)
         groupPop: { group: "Population Units" },
-        person: { type: 'num', dim: { PERSON: 1 }, val: PERSON, reserved: true, hints: { uscu: null }, favored: 1,
+        person: { type: 'num', dim: { PERSON: 1 }, val: PERSON, reserved: true, favored: 1,
             desc: "person", alt: [ "persons", "people", "capita" ] },
-        percapita: { type: 'num', dim: { PERSON: -1 }, val: [ 1, PERSON ], hints: { uscu: null } },
+        percapita: { type: 'num', dim: { PERSON: -1 }, val: [ 1, PERSON ] },
 
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
@@ -1265,8 +1265,8 @@
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
-        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", hints: { uscu: null }, alt: ["weeks"] },
-        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", hints: { uscu: null }, alt: ["fortnights"] },
+        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"] },
+        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"] },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
             desc: "surveyor's link", hints: { uscu: true }, alt: ["links"] },
         rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", hints: { uscu: true }, alt: ["rods"] },
@@ -1683,10 +1683,8 @@
             }
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
               function cmp(a,b) {
-                // Units system should match
-                //   (unit.hints?.uscu === null is a hack for units like time that are universal)
-                if (a.unit.hints?.uscu !== null && b.unit.hints?.uscu !== null
-                    && !a.unit.hints?.uscu !== !b.unit.hints?.uscu) {
+                // Units system should match, if possible
+                if (!a.unit.hints?.uscu !== !b.unit.hints?.uscu) {
                   if (!hints?.uscu === !a.unit.hints?.uscu)
                     return -1;
                   return 1;
@@ -2055,7 +2053,7 @@
         if (sym)
           return sym;
         const display = `'${name}'`;
-        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, favored: 1, hints: { nonce: true, uscu: null } };
+        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, favored: 1, hints: { nonce: true } };
         sym.dim['NONCE-'+name] = 1;
         nonceUnits[name] = sym;
         return sym;
