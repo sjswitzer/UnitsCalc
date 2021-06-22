@@ -1033,19 +1033,19 @@
       const systemSymbols = {
         // Length (L)
         groupLength: { group: "Length Units" },
-        in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, hints: { system: 'uscu' }, alt: ["inch", "inches"] },
-        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, hints: { system: 'uscu' }, alt: ["foot", "feet"] },
-        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], hints: { system: 'uscu' }, alt: ["yard", "yards"] },
+        in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { system: 'uscu' }, alt: ["inch", "inches"] },
+        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { system: 'uscu' }, alt: ["foot", "feet"] },
+        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { system: 'uscu' }, alt: ["yard", "yards"] },
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
-            reserved: true, hints: { system: 'uscu' } },
+            reserved: true, smells: { system: 'uscu' } },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
             prefixSym: 'm',  prefixNames: ["meter", "meters"] },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
-        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, hints: { system: 'uscu' }, alt: ["acres"],
+        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, smells: { system: 'uscu' }, alt: ["acres"],
             desc: "66' \u00D7 660'" },
-        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"], hints: { system: 'mks' /* sorta */ },
+        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"], smells: { system: 'mks' /* sorta */ },
             desc: "100 meters \u00D7 100 meters" },
 
         // Volume (L^3)
@@ -1053,49 +1053,49 @@
         //    and, further, differences between the US and Imperial systems.
         //    When in conflict, I've chosen liquid volumes and US units.
         groupVolume: { group: "Volume Units" },
-        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], hints: { system: 'uscu' }, alt: ["gallons"] },
-        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], hints: { system: 'uscu' }, alt: ["quarts"] },
-        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], hints: { system: 'uscu' }, alt:["pints"] },
-        cup: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 16 * N5K**3 ], hints: { system: 'uscu' }, alt: ["cups"] },
-        tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], hints: { system: 'uscu' }, alt: ["tablespoon", "tablespoons", "tbsps"] },
-        tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], hints: { system: 'uscu' }, alt: ["teaspoon", "teaspoons", "tsps"] },
-        floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", hints: { system: 'uscu' } },
-        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"], hints: { system: 'mks' } },
+        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], smells: { system: 'uscu' }, alt: ["gallons"] },
+        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], smells: { system: 'uscu' }, alt: ["quarts"] },
+        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], smells: { system: 'uscu' }, alt:["pints"] },
+        cup: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 16 * N5K**3 ], smells: { system: 'uscu' }, alt: ["cups"] },
+        tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], smells: { system: 'uscu' }, alt: ["tablespoon", "tablespoons", "tbsps"] },
+        tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], smells: { system: 'uscu' }, alt: ["teaspoon", "teaspoons", "tsps"] },
+        floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", smells: { system: 'uscu' } },
+        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"], smells: { system: 'mks' } },
         ml: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], alt: ["milliliter", "millilitre", "milliliters", "millilitres"] },
-        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter", hints: { system: 'cgs' } },
-        gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], hints: { system: 'uscu' }, desc: "gill", alt:["gill", "gills"] },
-        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], hints: { system: 'uscu' }, alt: ["drams"] },
-        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], hints: { system: 'uscu' }, alt: ["minims"] },
-        cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", hints: { system: 'uscu' }, alt: ["cords"] },
+        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter", smells: { system: 'cgs' } },
+        gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], smells: { system: 'uscu' }, desc: "gill", alt:["gill", "gills"] },
+        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], smells: { system: 'uscu' }, alt: ["drams"] },
+        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], smells: { system: 'uscu' }, alt: ["minims"] },
+        cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", smells: { system: 'uscu' }, alt: ["cords"] },
 
         // Mass (M)
         groupMass: { group: "Mass Units" },
-        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { system: 'uscu' }, alt: ["lbs", "pound", "pounds", "lbm"] },
-        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { system: 'uscu' }, alt: ["ounce", "ounces"]},
+        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", smells: { system: 'uscu' }, alt: ["lbs", "pound", "pounds", "lbm"] },
+        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", smells: { system: 'uscu' }, alt: ["ounce", "ounces"]},
         gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
             prefixSym: 'g',  prefixNames: ["gram", "grams"], },
 
         // Time (T)
         groupTime: { group: "Time Units" },
-        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], hints: { unscientific: true } },
-        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], hints: { unscientific: true } },
+        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], smells: { unscientific: true } },
+        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], smells: { unscientific: true } },
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
             alt: ["second", "seconds", "sec", "secs"],
             prefixSym: 's',  prefixNames: ["second", "seconds"] },
-        day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"], hints: { unscientific: true } },
+        day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"], smells: { unscientific: true } },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
         // There are good arguments for the default year to be tropical, buy even astronomers
         // use julian years to define light year. Most people would be surprised by anything else
         // and numbers come out all weird if you use tropical years. So "yr" is julian.
         // Per Unified Code for Units of Measure:
-        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], hints: { unscientific: true },
+        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], smells: { unscientific: true },
             desc: "mean Julian year", alt: ["year", "years", "yrs", "aj"] },
-        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], hints: { unscientific: true },
+        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], smells: { unscientific: true },
             desc: "mean tropical year", alt: ["at"] },
-        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], hints: { unscientific: true },
+        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], smells: { unscientific: true },
             desc: "mean Gregorian year", alt: ["ag"] },
-        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], hints: { unscientific: true },
+        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], smells: { unscientific: true },
             desc: "mean julian month", alt: ["month", "months"] },
         Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
@@ -1103,10 +1103,10 @@
         // Temperature (THETA)
         groupTemperature: { group: "Temperature & Thermodynamic Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
-            desc: "Celsius", alt: ["degc"], hints: { affineUnit: "celsius"} },
+            desc: "Celsius", alt: ["degc"], smells: { affineUnit: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
-            desc: "Fahrenheit", alt: ["degf"], hints: { affineUnit: "fahrenheit" } },
+            desc: "Fahrenheit", alt: ["degf"], smells: { affineUnit: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             prefixSym: 'K',  prefixNames: ["kelvin"] },
         boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
@@ -1157,40 +1157,40 @@
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
         N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
-           prefixSym: "N", prefixNames: ["newton", "newtons"], hints: { system: 'mks' } },
+           prefixSym: "N", prefixNames: ["newton", "newtons"], smells: { system: 'mks' } },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
-            prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], hints: { system: 'cgs' } },
-        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", hints: { system: 'uscu' } },
+            prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], smells: { system: 'cgs' } },
+        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", smells: { system: 'uscu' } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
         J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joule", "joules"],
-            prefixSym: "J", prefixNames: ["joule", "joules"], hints: { system: 'mks' } },
+            prefixSym: "J", prefixNames: ["joule", "joules"], smells: { system: 'mks' } },
         erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M * M, SEC**2 ], alt: ["ergs"],
-            prefixNames: ["erg", "ergs"], hints: { system: 'cgs' } },
+            prefixNames: ["erg", "ergs"], smells: { system: 'cgs' } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M * M, 1000 * SEC**2 ], alt: ["calorie"],
             prefixSym: "cal", prefixNames: ["calorie", "calories"] },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"],
-            prefixSym: "W", prefixNames: ["watt", "watts"], hints: { system: 'mks' } },
+            prefixSym: "W", prefixNames: ["watt", "watts"], smells: { system: 'mks' } },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"],
-            val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", hints: { system: 'uscu' } },
+            val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", smells: { system: 'uscu' } },
 
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
         Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
-            prefixSym: "Pa", prefixNames: ["pascal", "pascals"], hints: { system: 'mks' } },
+            prefixSym: "Pa", prefixNames: ["pascal", "pascals"], smells: { system: 'mks' } },
         Ba: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, 10 * M * SEC**2 ], alt: ["barye", "byryes"],
-            prefixSym: "Ba", prefixNames: ["barye", "baryes"], hints: { system: 'cgs' } },
+            prefixSym: "Ba", prefixNames: ["barye", "baryes"], smells: { system: 'cgs' } },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
-            desc: "pounds per square inch", hints: { system: 'uscu' } },
+            desc: "pounds per square inch", smells: { system: 'uscu' } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
         bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"],
-            hints: { system: 'mks' } },
+            smells: { system: 'mks' } },
         millibar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100 * KG, M * SEC**2 ], alt: ["millibars"],
-            hints: { system: 'mks' } }, // maybe not _really_ mks, but otherwisw it resolves to baryes
+            smells: { system: 'mks' } }, // maybe not _really_ mks, but otherwisw it resolves to baryes
         mmHg: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 133.322387415 * KG, M * SEC**2 ],
             desc: "millimeter of mercury" },
         torr: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, 760 * M * SEC**2 ] },
@@ -1220,7 +1220,7 @@
             desc: "magnetic flux density", alt: ["tesla"],
             prefixSym: "T", prefixNames: ["tesla", "teslas"] },
         gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "magnetic flux density", alt: ["gauss"], hints: { system: 'cgs' },
+            desc: "magnetic flux density", alt: ["gauss"], smells: { system: 'cgs' },
             prefixNames: ["gauss"] },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
             desc: "mutual inductance", alt: ["henry"],
@@ -1263,26 +1263,26 @@
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
-        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"], hints: { unscientific: true } },
-        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"], hints: { unscientific: true } },
+        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"], smells: { unscientific: true } },
+        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"], smells: { unscientific: true } },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
-            desc: "surveyor's link", hints: { system: 'uscu' }, alt: ["links"] },
-        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", hints: { system: 'uscu' }, alt: ["rods"] },
-        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", hints: { system: 'uscu' }, alt: ["chains"] },
-        furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], hints: { system: 'uscu' }, alt: ["furlongs"] },
-        township: { type: 'num', dim: { L: 2 }, val: [ (6 * MI5K)**2, N5K**2 ], hints: { system: 'uscu' }, alt: ["townships"] },
+            desc: "surveyor's link", smells: { system: 'uscu' }, alt: ["links"] },
+        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { system: 'uscu' }, alt: ["rods"] },
+        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { system: 'uscu' }, alt: ["chains"] },
+        furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], smells: { system: 'uscu' }, alt: ["furlongs"] },
+        township: { type: 'num', dim: { L: 2 }, val: [ (6 * MI5K)**2, N5K**2 ], smells: { system: 'uscu' }, alt: ["townships"] },
         are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
-        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], hints: { system: 'uscu' } },
-        stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], hints: { system: 'uscu' }, desc: "UK stone" }, // no alt "stones"
-        cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["hundredweight"],
+        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], smells: { system: 'uscu' } },
+        stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], smells: { system: 'uscu' }, desc: "UK stone" }, // no alt "stones"
+        cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], smells: { system: 'uscu' }, alt: ["hundredweight"],
             desc: "UK hundredweight, about 51 kg" },  // in the US it's 100lb, but nobody uses it so...
-        longton: { type: 'num', dim: { M: 1 }, val: [ 2240 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["longtons"], desc: "UK long ton" },
-        ton: { type: 'num', dim: { M: 1 }, val: [ 2000 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["tons"], desc: "US ton" },
+        longton: { type: 'num', dim: { M: 1 }, val: [ 2240 * LBM100M, N100M ], smells: { system: 'uscu' }, alt: ["longtons"], desc: "UK long ton" },
+        ton: { type: 'num', dim: { M: 1 }, val: [ 2000 * LBM100M, N100M ], smells: { system: 'uscu' }, alt: ["tons"], desc: "US ton" },
         tonne: { type: 'num', dim: { M: 1 }, val: 1000 * KG, alt: ["tonnes"], desc: "metric ton" },
         carat: { type: 'num', dim: { M: 1 }, val: [ 200 * KG, 1000**2 ], alt: ["carats"] },
-        league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, hints: { system: 'uscu' }, alt: ["leagues"], desc: "3 nautical miles" },
-        nmi: { type: 'num', dim: { L: 1 }, val: NMI, hints: { system: 'uscu' }, desc: "nautical mile" },
-        knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], hints: { system: 'uscu' }, alt: ["knots"], desc: "nautical mile per hour" },
+        league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, smells: { system: 'uscu' }, alt: ["leagues"], desc: "3 nautical miles" },
+        nmi: { type: 'num', dim: { L: 1 }, val: NMI, smells: { system: 'uscu' }, desc: "nautical mile" },
+        knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], smells: { system: 'uscu' }, alt: ["knots"], desc: "nautical mile per hour" },
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, display: null }, // :)
 
@@ -1294,16 +1294,16 @@
             desc: 'a cent, no particular kind'},
         // These are mostly for my amusement, but also useful as debugging aids
         mks: { type: 'num', dim: {}, val: 1, desc: "display result in MKS system",
-            hints: { system: "mks" } },
+            smells: { system: "mks" } },
         cgs: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
-            hints: { system: "cgs" } },
+            smells: { system: "cgs" } },
         uscu: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
-            hints: { system: "uscu" } },
+            smells: { system: "uscu" } },
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
-        ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'rat' }, alt: ["rat"],
+        ratio: { type: 'num', dim: {}, val: 1, smells: { ratio: 'rat' }, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but <code>1.5 m ratio</code> is' },
-        mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'mix' }, alt: ["mixrat", "ratmix"],
+        mixratio: { type: 'num', dim: {}, val: 1, smells: { ratio: 'mix' }, alt: ["mixrat", "ratmix"],
             desc: 'like "ratio" but will display mixed fractions if possible' },
 
         // General n-dimensional hypotenuse
@@ -1347,7 +1347,7 @@
           if (val.type !== 'num') throw new MessageError(`${this.sym}(x): Illegal parameter`);
           let dim = Dim.div(val.dim, 2);
           if (!dim) throw new MessageError(`${this.sym}(x): parameter must have even units`);
-          return { type: 'num', dim, val: Rat.sqrt(numVal(val)), hints: val.hints };
+          return { type: 'num', dim, val: Rat.sqrt(numVal(val)), smells: val.smells };
         },
 
         cbrt: function CubeRoot(...params) {
@@ -1356,7 +1356,7 @@
           if (val.type !== 'num') throw new MessageError(`${this.sym}(x): Illegal parameter`);
           let dim = Dim.div(val.dim, 3);
           if (! dim) throw new MessageError(`${this.sym}(x): parameter units must be power of three`);
-          return { type: 'num', dim, val: Rat.cbrt(numVal(val)), hints: val.hints };
+          return { type: 'num', dim, val: Rat.cbrt(numVal(val)), smells: val.smells };
         },
 
         // Some trig functions that are valid over their whole domain, are somewhat useful,
@@ -1368,7 +1368,7 @@
           if (Dim.isScalar(val.dim))
             return { type: 'num', val: [ Math.sin(Rat.number(numVal(val))), 1n ], dim: {} };
           if (!Dim.equal(val.dim, { RAD: 1 })) throw new MessageError(`${this.sym}(x): Parameter must be an angle`);
-          // Doesn't propagate hints since result is altogether different in kind
+          // Doesn't propagate smells since result is altogether different in kind
           return { type: 'num', val: [ Math.sin(Rat.number(numVal(val))/RADIAN), 1n ], dim: {} };
         },
 
@@ -1379,7 +1379,7 @@
           if (Dim.isScalar(val.dim))
             return { type: 'num', val: [ Math.cos(Rat.number(numVal(val))), 1n ], dim: {} };
           if (!Dim.equal(val.dim, { RAD: 1 })) throw new MessageError(`${this.sym}(x): Parameter must be an angle`);
-          // Doesn't propagate hints since result is altogether different in kind
+          // Doesn't propagate smells since result is altogether different in kind
           return { type: 'num', val: [ Math.cos(Rat.number(numVal(val))/RADIAN), 1], dim: {} };
         },
 
@@ -1387,7 +1387,7 @@
           if (params.length !== 2) throw new MessageError(`${this.sym}(): Needs two parameters`);
           let val1 = params[0], val2 = params[1];
           if (!Dim.equal(val1.dim, val2.dim)) throw new MessageError(`${this.sym}(): Parameter types incompatible`);
-          // Doesn't propagate hints since result is altogether different in kind
+          // Doesn't propagate smells since result is altogether different in kind
           return { type: 'num', dim: { RAD: 1 },
               val: [ Math.atan2(Rat.number(numVal(val1)), Rat.number(numVal(val2)))*RADIAN, 1n ] };
         },
@@ -1537,16 +1537,16 @@
         }
         builtinSymbolsElement.innerHTML = html;
         // Patch cm to the cgs system
-        systemSymbols.cm.hints = { ...systemSymbols.cm.hints, system: 'cgs' };
-        systemSymbols.gm.hints = { ...systemSymbols.gm.hints, system: 'cgs' };
-        systemSymbols.m.hints = { ...systemSymbols.m.hints, system: 'mks' };
-        systemSymbols.kg.hints = { ...systemSymbols.kg.hints, system: 'mks' };
+        systemSymbols.cm.smells = { ...systemSymbols.cm.smells, system: 'cgs' };
+        systemSymbols.gm.smells = { ...systemSymbols.gm.smells, system: 'cgs' };
+        systemSymbols.m.smells = { ...systemSymbols.m.smells, system: 'mks' };
+        systemSymbols.kg.smells = { ...systemSymbols.kg.smells, system: 'mks' };
       }
 
       groomSystemSymbols();
 
       function reduceParamVals(name, accum, params, fn) {  // fn => (accum, val) => val
-        let dim, hints;
+        let dim, smells;
         for (const val of params) {
           if (val.type !== 'num') throw new MessageError(`${name}(): Illegal parameter`);
           const value = numVal(val);
@@ -1555,12 +1555,11 @@
               throw new ChattyError(`${name}(): Parameter types incompatible`);
             dim = val.dim;
             accum = fn(accum, value);
-            hints = { ...val.hints, ...hints };  // first hint wins
+            smells = { ...val.smells, ...smells };  // first smell wins
           }
         }
-        if (!dim)
-          dim = {}
-        return { type: 'num', dim, val: accum, hints };
+        if (!dim) dim = {};
+        return { type: 'num', dim, val: accum, smells };
       }
 
       const userSymbols = {};
@@ -1587,7 +1586,7 @@
                 let desc = val.sym && `${val.sym ?? symPrefix}^${String(exp)}`;
                 return { sym: symName, type: 'num',
                   dim: Dim.mul(val.dim, exp), val: Rat.pow(numVal(val), exp),
-                  desc, reserved: val.reserved, hints: val.hints,
+                  desc, reserved: val.reserved, smells: val.smells,
                   baseSym: val, withExp: exp };
               }
             }
@@ -1665,9 +1664,9 @@
 
       function val2str(val, opts) {
         let descStr = "";
-        let hints = val.hints ?? {}, displayUnits = val.displayUnits ?? [];
+        let smells = val.smells ?? {}, displayUnits = val.displayUnits ?? [];
         for (const dispUnit of displayUnits)
-          hints = { ...hints, ...dispUnit?.hints };
+          smells = { ...smells, ...dispUnit?.smells };
         if (opts?.describe && val.desc && displayUnits.length === 0)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
@@ -1676,11 +1675,11 @@
           val = Rat.normalize(numVal(val));
           // If both L and M are present or any of the scientific or technical
           // units, we don't want to use unscientific units like hr and min
-          let excludeUnscientific = hints.system === 'mks' || hints.system === 'cgs'
+          let excludeUnscientific = smells.system === 'mks' || smells.system === 'cgs'
             || dim.L && dim.M || dim.I || dim.J || dim.THETA || dim.BIT || dim.N;
           function describeUnit(unit, opts) {
             try {
-              if (excludeUnscientific && unit.hints?.unscientific && !opts?.forceUnit)
+              if (excludeUnscientific && unit.smells?.unscientific && !opts?.forceUnit)
                 return null;
               let normSquared = Dim.normSquared(dim);
               let measures = {...dim, ...unit.dim }, smallest = Number.POSITIVE_INFINITY, dotProduct = 0;
@@ -1729,10 +1728,10 @@
               // It's a measure of "how far from one" the valus is.
               let digits = Math.abs(Math.log10(Math.abs(newNum)));
               let favored = unit.favored ?? 0;
-              let hints = unit.hints ?? {};
+              let smells = unit.smells ?? {};
               // A bunch of stuff that can be used in the sort function.
-              return { sym: unit.sym, hints, favored, nDims, exp, expSum, digits, newNum,
-                  reducedDim, unit, newVal, reducedNormSquared, dotProduct, hints };
+              return { sym: unit.sym, smells, favored, nDims, exp, expSum, digits, newNum,
+                  reducedDim, unit, newVal, reducedNormSquared, dotProduct, smells };
             }
             catch (e) {
               if (e instanceof OverflowError) // exponentiation failed somewhere along the line
@@ -1745,8 +1744,8 @@
             for (let [exp, unit] of unitList) {
               // Ignore special flag units
               if (Dim.isScalar(unit.dim) && unit.val[0] === 1n && unit.val[1] === 1n) {
-                if (unit.hints?.ratio) continue;
-                if (unit.hints?.system) continue;                
+                if (unit.smells?.ratio) continue;
+                if (unit.smells?.system) continue;                
               }
               let str = " ";
               let displayExp = exp = unitDesc.exp * exp;
@@ -1778,9 +1777,9 @@
             applyDesc(desc);
           }
           let allowedCandidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
-          if (hints.affineUnit) {
-            let affineUnit = getSymbol(hints.affineUnit);
-            if (!affineUnit) throw InternalError(`Unknown unit ${hints.affineUnit})`);
+          if (smells.affineUnit) {
+            let affineUnit = getSymbol(smells.affineUnit);
+            if (!affineUnit) throw InternalError(`Unknown unit ${smells.affineUnit})`);
             affineUnit = { ...affineUnit, favored: 1 };
             allowedCandidateUnits = [ affineUnit, ...allowedCandidateUnits ];
           }
@@ -1798,11 +1797,11 @@
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
               function cmp(a,b) {
                 // Units system should match, if possible
-                if (hints.system) {
-                  if (a.hints.system !== b.hints.system) {
-                    if (hints.system === a.hints.system)
+                if (smells.system) {
+                  if (a.smells.system !== b.smells.system) {
+                    if (smells.system === a.smells.system)
                       return -1;
-                    if (hints.system === b.hints.system)
+                    if (smells.system === b.smells.system)
                       return 1;
                   }
                 }
@@ -1862,7 +1861,7 @@
             });
             Log(2, (level) =>  // use a function here to defer evaluation unless we're logging
                 "======== " + parseStr + " unit candidates for " + val + " " +
-                JSON.stringify(dim) + " " + val.hints + " ========\n" +
+                JSON.stringify(dim) + " " + val.smells + " ========\n" +
                 JSON.stringify(unitDescs, (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
             if (unitDescs.length < 1)
               throw new InternalError("Insufficient basis units");
@@ -1871,10 +1870,10 @@
         }
 
         // Now, should it be represented as a (mixed) fraction?
-        let displayRatio = hints.ratio;
+        let displayRatio = smells.ratio;
         if (displayRatio === undefined) {
           displayRatio = 'none';
-          if (hints.system === 'uscu')
+          if (smells.system === 'uscu')
           displayRatio = 'mix?';
         }
         if (displayRatio !== 'none' && typeof val[0] === 'bigint') {
@@ -2174,7 +2173,7 @@
         if (sym)
           return sym;
         const display = `'${name}'`;
-        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, hints: { nonce: true } };
+        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, smells: { nonce: true } };
         sym.dim['NONCE-'+name] = 1;
         nonceUnits[name] = sym;
         return sym;
@@ -2220,7 +2219,7 @@
           implicitValue = true;
         }
         let backtrack1 = parsePos;
-        let unitVal = Rat.ONE, unitList = [], dim = {}, origin, hints;
+        let unitVal = Rat.ONE, unitList = [], dim = {}, origin, smells;
         while (true) {
           const backtrack2 = parsePos;
           let hasSlash = take('/');
@@ -2251,12 +2250,12 @@
             throw new MessageError(`Implausible units`);
           if (sym.origin) {
             if (hasSlash) {
-              // Affine units in the denominator lose their origin and affine hints
-              let hints = sym.hints;
-              if (hints)
-                hints = { ...hints, affineUnit: undefined };
-              if (hints || sym.origin)
-                sym = { ...sym, hints, origin: undefined };
+              // Affine units in the denominator lose their origin and affine smells
+              let smells = sym.smells;
+              if (smells)
+                smells = { ...smells, affineUnit: undefined };
+              if (smells || sym.origin)
+                sym = { ...sym, smells, origin: undefined };
             } else {
               // Affine units must appear alone with no exponents or in the denominator.
               // Affine units can only have a +1 exponent or a negative exponent.
@@ -2280,7 +2279,7 @@
             dim = Dim.add(dim, sym.dim);
             val = Rat.mul(val, symVal);
           }
-          hints = { ...hints, ...sym.hints };
+          smells = { ...smells, ...sym.smells };
           unitVal = Rat.mul(unitVal, symVal);
           let exp = sym.withExp ?? 1;
           if (hasSlash)
@@ -2296,7 +2295,7 @@
         let desc;
         if (unitList.length === 1 && unitList[0][0] === 1)
           desc = unitList[0][1].desc;
-        return { type, val, dim, origin, desc, unitVal, unitList, hints };
+        return { type, val, dim, origin, desc, unitVal, unitList, smells };
       }
 
       // Parse a value, which is either a plain number (n) or a sequesnce of
@@ -2308,7 +2307,7 @@
         const backtrack = parsePos;
         let val = Rat.ZERO, dim, origin, type = 'num';
         let lastUnitVal = Number.POSITIVE_INFINITY;
-        let hints = {};
+        let smells = {};
 
         // The idea of lastUnitVal is that units should get progressively smaller.
         // Otherwise, someone could enter 2'3' when they meant 2'3"
@@ -2332,12 +2331,12 @@
             chunkDim = { L: 1 };
             unitVal = Number(FT5K)/Number(N5K);
             chunkVal = Rat.mul(chunkVal, [ BigInt(FT5K), BigInt(N5K) ]);
-            hints.system = 'uscu';
+            smells.system = 'uscu';
           } else if (take('"') && !ALPHA.includes(peekc())) {
             chunkDim = { L:1 };
             unitVal = Number(IN5K)/Number(N5K);
             chunkVal = Rat.mul(chunkVal, [ BigInt(IN5K), BigInt(N5K) ]);
-            hints.system = 'uscu';
+            smells.system = 'uscu';
           } else {
             parsePos = backtrackQuote; // un-eat the quote in case this is a nonce unit
             const res = parseUnitString(chunkVal, opts);
@@ -2345,7 +2344,7 @@
               parsePos = backtrackChunk;
               break;
             }
-            hints = { ...res.hints, ...hints };  // first hint wins
+            smells = { ...res.smells, ...smells };  // first smell wins
             if (res.type === 'num') {
               // Can't combine affine units with anything
               if (origin || dim && res.origin) throw new MessageError("Implausible units");
@@ -2371,7 +2370,7 @@
           }
         }
         if (dim)
-          return { type, dim, val, origin, hints };
+          return { type, dim, val, origin, smells };
         parsePos = backtrack;
         let num = parseNum(opts);
         if (num !== null)
@@ -2430,7 +2429,7 @@
             let resVal = Rat.neg(val.val);
             if (val.origin)   // special negation of affine values: don't negate the origin value
               resVal = Rat.add(resVal, val.origin);
-            return { type: val.type, dim: val.dim, val: resVal, hints: val.hints };
+            return { type: val.type, dim: val.dim, val: resVal, smells: val.smells };
           }
           parsePos = backtrack;
           return null;
@@ -2445,8 +2444,8 @@
             // but we might as well match units behavior, where
             // 1 /degc means the same as 1 /K, the logic being that we're talking
             // about a degree of _change_. So we ignore the origin by NOT calling numval().
-            let hints = { ...val.hints, affineUnit: undefined };
-            return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), hints };
+            let smells = { ...val.smells, affineUnit: undefined };
+            return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), smells };
           }
           parsePos = backtrack;
           return null;
@@ -2545,12 +2544,11 @@
           let expVal = Rat.number(numVal(exp));
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
-          let hints = val.hints;
-          if (hints.affineUnit) {
-            hints = { ...hints, affineUnit: undefined };
-          }
+          let smells = val.smells;
+          if (smells.affineUnit)
+            smells = { ...smells, affineUnit: undefined };
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
-            val: Rat.pow(numVal(val), numVal(exp)), hints: val.hints };
+            val: Rat.pow(numVal(val), numVal(exp)), smells: val.smells };
         }
         return val;
       }
@@ -2576,9 +2574,9 @@
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num') {
-              let hints = { ...val2.hints, ...val.hints, affineUnit: undefined };
+              let smells = { ...val2.smells, ...val.smells, affineUnit: undefined };
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
-                  val: Rat.mul(numVal(val), numVal(val2)), hints };
+                  val: Rat.mul(numVal(val), numVal(val2)), smells };
             }
             else
               throw new MessageError("Unknown value type");
@@ -2593,7 +2591,7 @@
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '/', expr1: val, expr2: val2 };
             } else if (val.type === 'num' && val2.type === 'num') {
-              let hints = { ...val2.hints, ...val.hints, affineUnit: undefined };
+              let smells = { ...val2.smells, ...val.smells, affineUnit: undefined };
               // Ratios with an affine unit should just be a ratio of its rate of change.
               // Ratios between affine units should be the ratios of their rates of change
               // so that degf / degc = 5/9. But an afine unit divided by anything else
@@ -2602,7 +2600,7 @@
               if (val.origin && val2.origin)
                  val = { ...val, origin: undefined }; // val2 is handled by not calling numval()
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
-                  val: Rat.div(numVal(val), val2.val), hints };
+                  val: Rat.div(numVal(val), val2.val), smells };
             } else {
               throw new MessageError("Unknown value type");
             }
@@ -2641,7 +2639,7 @@
               if (Dim.equal(val.dim, val2.dim))
                 val = { type: 'num', dim: val.dim,
                   val: Rat.add(numVal(val), val2.val), // ignore offset in 2nd arg; see discussion at '-'
-                  hints: { ...val2.hints, ...val.hints }};
+                  smells: { ...val2.smells, ...val.smells }};
               else
                 throw new ChattyError("Cannot add different unit types")
             } else {
@@ -2666,7 +2664,7 @@
                 // Henve, we don't call numVal for it
                 val = { type: 'num', dim: val.dim,
                     val: Rat.sub(numVal(val), val2.val),
-                    hints: { ...val2.hints, ...val.hints } };
+                    smells: { ...val2.smells, ...val.smells } };
               } else {
                 throw new ChattyError("Cannot subtract different unit types");
               }
@@ -2861,7 +2859,7 @@
               showUserSymbols();
               if (opts?.userHitEnter)
                 exprElement.value = "";
-            } else if (val.type === 'num' && val.hints?.system === 'uscu' && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
+            } else if (val.type === 'num' && val.smells?.system === 'uscu' && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
               showFeetInchesResult(numVal(val));
             } else if (val.type === 'num') {
               showResult(val);
@@ -2927,7 +2925,7 @@
       }
 
       function symString(val, opts) {
-        if (val.dim && Dim.equal(val.dim, { L: 1 }) && val.hints?.system === 'uscu' && !opts?.saveMode) {
+        if (val.dim && Dim.equal(val.dim, { L: 1 }) && val.smells?.system === 'uscu' && !opts?.saveMode) {
           let [ftStr, inStr, delta] = unitsToUSStringReps(Rat.number(numVal(val)));
           let str = `${val.sym} = ${ftStr}${delta}`;
           if (opts?.html)
