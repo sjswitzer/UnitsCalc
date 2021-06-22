@@ -1653,9 +1653,11 @@
       const candidateUnitsUSCU = filterUnits([ ...commonUnits, 'lbf', 'ft', 'in', 'lb' ]);
 
       function val2str(val, opts) {
-        let descStr = "", displayUnits = val.displayUnits;
-        let hints = { ...val.hints, ...displayUnits?.hints }; // displayUnits hints win
-        if (opts?.describe && val.desc && !displayUnits)
+        let descStr = "", displayUnits = val.displayUnits ?? [];
+        let hints = val.hints ?? {};
+        for (const dispUnit of displayUnits)
+          hints = { ...hints, ...dispUnit?.hints };
+        if (opts?.describe && val.desc && displayUnitslength === 0)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
         if (val.val !== undefined) {
@@ -1748,10 +1750,10 @@
             val = unitDesc.newVal;
             dim = unitDesc.reducedDim;
           }
-          if (displayUnits) {
-            const desc = describeUnit(displayUnits, { forceUnit: true } );
+          while (displayUnits.length > 0) {
+            let displayUnit = displayUnits.shift();
+            const desc = describeUnit(displayUnit, { forceUnit: true } );
             applyDesc(desc);
-            displayUnits = null;
           }
           let allowedCandidateUnits = candidateUnits;
           if (dim.L && dim.M || dim.A || dim.DC) {
@@ -2649,7 +2651,7 @@
       //    expr
       //    word '=' expr
       //    word '(' [ word [ ',' word ]* ]? ')' '=' expr
-      //    expr ( ':' | '|' ) unitsstr
+      //    expr ( ( ':' | '|' ) unitsstr ) )+
 
       function parseStatement(opts) {
         const backtrack = parsePos;
@@ -2696,15 +2698,17 @@
           parsePos = backtrack;
         }
         let val = parseExpr();
-        if (val && (take(':') || take('|'))) {  // I prefer '|' but ':' is easier on mobile
-          let displayUnits = parseUnitString(opts);
-          if (!displayUnits) {
-            parsePos = backtrack;
-            return null;
-          }
-          return { ...val, displayUnits };
+        let displayUnits;
+        while (val && (take(':') || take('|'))) {  // I prefer '|' but ':' is easier on mobile
+          let unitString = parseUnitString(opts);
+          if (!unitString)
+            break;
+          if (!displayUnits)
+            displayUnits = [unitString];
+          else
+            displayUnits.push(unitString);
         }
-        return val;
+        return { ...val, displayUnits };
       }
 
       //
