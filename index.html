@@ -547,10 +547,10 @@
             then hitting &ldquo;enter.&rdquo; For instance, you can define a function to average to numbers
             or lengths: <code>average(x,y) = (x+y)/2</code> (but the predefined function
             <code>mean(&hellip;)</code> already does that, so&hellip;).
-        <p> Functions can use any of their parameters and variables
-            that have already been defined. As a special case, a function with no parameters
-            can be used as a &ldquo;dynamic variable.&rdquo; That is, assuming variables <code>a</code>
-            and <code>b</code> are already defined
+        <p> Functions can refer to their parameters and to variables.
+            As a special case, a function with no parameters can be used as a
+            &ldquo;dynamic variable.&rdquo; That is, assuming variables <code>a</code>
+            and <code>b</code> are defined
             (say, <code>a = 2</code> and <code>b = 3</code>), the function
             <code>ab() = a + b</code> can be invoked as <code>ab()</code> or <code>ab</code>,
             and in either case gives you the current value of <code>a + b</code>.
@@ -628,7 +628,7 @@
             <li> How about a year on standby?
                  <code>ecost * .5 watt : yr</code>
             <li> An electric kettle per minute?
-                 <code>ecost * 3000 watt : min</code>, about one cent.
+                 <code>ecost * 3000 watt : min</code>, just one cent.
             <li> What's 45 mpg as km/liter? <code>45 mi/gallon : km/liter</code>
             <li> How much does a gallon of water weigh in pounds? <code>kg/liter*gallon : lb</code>
             <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
@@ -1030,8 +1030,6 @@
         MICROSYM + OHMSYM + TAUSYM + PISYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
-      let unitsSystem = 'mks';  // can also be 'cgs'
-
       const systemSymbols = {
         // Length (L)
         groupLength: { group: "Length Units" },
@@ -1041,13 +1039,13 @@
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
             reserved: true, hints: { system: 'uscu' } },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
-            prefixSym: 'm',  prefixNames: ["meter", "meters"], hints: { system: 'mks' } },
+            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
         acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, hints: { system: 'uscu' }, alt: ["acres"],
             desc: "66' \u00D7 660'" },
-        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"],
+        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"], hints: { system: 'mks' /* sorta */ },
             desc: "100 meters \u00D7 100 meters" },
 
         // Volume (L^3)
@@ -1075,29 +1073,29 @@
         lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { system: 'uscu' }, alt: ["lbs", "pound", "pounds", "lbm"] },
         oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { system: 'uscu' }, alt: ["ounce", "ounces"]},
         gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
-          prefixSym: 'g',  prefixNames: ["gram", "grams"], hints: { system: 'mks' } }, // gm gets patched to cgs later
+            prefixSym: 'g',  prefixNames: ["gram", "grams"], },
 
         // Time (T)
         groupTime: { group: "Time Units" },
-        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"] },
-        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"] },
+        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], hints: { unscientific: true } },
+        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], hints: { unscientific: true } },
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
             alt: ["second", "seconds", "sec", "secs"],
             prefixSym: 's',  prefixNames: ["second", "seconds"] },
-        day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"] },
+        day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"], hints: { unscientific: true } },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
         // There are good arguments for the default year to be tropical, buy even astronomers
         // use julian years to define light year. Most people would be surprised by anything else
         // and numbers come out all weird if you use tropical years. So "yr" is julian.
         // Per Unified Code for Units of Measure:
-        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ],
+        yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], hints: { unscientific: true },
             desc: "mean Julian year", alt: ["year", "years", "yrs", "aj"] },
-        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ],
+        yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], hints: { unscientific: true },
             desc: "mean tropical year", alt: ["at"] },
-        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ],
+        yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], hints: { unscientific: true },
             desc: "mean Gregorian year", alt: ["ag"] },
-        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ],
+        mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], hints: { unscientific: true },
             desc: "mean julian month", alt: ["month", "months"] },
         Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
@@ -1136,6 +1134,9 @@
             prefixNames: ["bit", "bits"], noFractionalPrefix: true },
         byte: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BYTE, alt: ["bytes"],
             prefixSym: "B", prefixNames: ["byte", "bytes"], noFractionalPrefix: true },
+        // Because people expect it but it falls outside the prefix system (which uses lowercase 'k')
+        KB: { type: 'num', dim: { BIT: 1 }, reserved: true, val: 1000 * BYTE,
+            desc: "kilobyte", display: null },
         symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
         baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
             prefixNames: ["baud"] },
@@ -1182,12 +1183,14 @@
         Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
             prefixSym: "Pa", prefixNames: ["pascal", "pascals"], hints: { system: 'mks' } },
         Ba: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, 10 * M * SEC**2 ], alt: ["barye", "byryes"],
-            prefixSym: "Ba", prefixNames: ["barye", "byryes"], hints: { system: 'cgs' } },
+            prefixSym: "Ba", prefixNames: ["barye", "baryes"], hints: { system: 'cgs' } },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
             desc: "pounds per square inch", hints: { system: 'uscu' } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
-        bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"] },
-        millibar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100 * KG, M * SEC**2 ], alt: ["millibars"] },
+        bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"],
+            hints: { system: 'mks' } },
+        millibar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100 * KG, M * SEC**2 ], alt: ["millibars"],
+            hints: { system: 'mks' } }, // maybe not _really_ mks, but otherwisw it resolves to baryes
         mmHg: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 133.322387415 * KG, M * SEC**2 ],
             desc: "millimeter of mercury" },
         torr: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, 760 * M * SEC**2 ] },
@@ -1201,24 +1204,26 @@
             alt: ["volt", "volts"],
             prefixSym: "V", prefixNames: ["volt", "volts"] },
         ohm: { type: 'num', dim: { M: 1, L: 2, T: -3, I: -2 }, val: [ KG * M**2, SEC**3 * AMP**2 ],
-            display: OHMSYM, desc: "ohm", alt: ["ohms"],
+            display: OHMSYM, desc: "resistance", alt: ["ohms"],
             prefixSym: OHMSYM, prefixNames: ["ohm", "ohms"] },
-        S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ], desc: "siemens" },
-        C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "coulomb, electric charge" },
-        F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ],
+        S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ],
+            desc: "conductance", alt: ["siemens", "mho"] },
+        C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "electric charge", alt: ["coulomb", "coulombs"],
+            prefixSym: "C", prefixNames: ["coulomb", "coulombs"]},
+        F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ], desc: "capacitance",
             alt: ["farad", "farads"],
             prefixSym: "F", prefixNames: ["farad", "farads"] },
         Wb: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -1 }, val: [ KG * M**2, SEC**2 * AMP ],
-            desc: "weber, magnetic flux", alt: ["weber"],
+            desc: "magnetic flux", alt: ["weber"],
             prefixSym: "Wb", prefixNames: ["weber", "webers"] },
         T: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, SEC**2 * AMP ],
-            desc: "tesla, magnetic flux density", alt: ["tesla"],
+            desc: "magnetic flux density", alt: ["tesla"],
             prefixSym: "T", prefixNames: ["tesla", "teslas"] },
         gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "gauss, magnetic flux density", alt: ["gauss"],
+            desc: "magnetic flux density", alt: ["gauss"], hints: { system: 'cgs' },
             prefixNames: ["gauss"] },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
-            desc: "henry, mutual inductance ", alt: ["henry"],
+            desc: "mutual inductance", alt: ["henry"],
            prefixSym: "H", prefixNames: ["henry"] },
 
         // Photometry (J...)
@@ -1258,8 +1263,8 @@
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
-        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"] },
-        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"] },
+        week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"], hints: { unscientific: true } },
+        fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"], hints: { unscientific: true } },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
             desc: "surveyor's link", hints: { system: 'uscu' }, alt: ["links"] },
         rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", hints: { system: 'uscu' }, alt: ["rods"] },
@@ -1289,11 +1294,11 @@
             desc: 'a cent, no particular kind'},
         // These are mostly for my amusement, but also useful as debugging aids
         mks: { type: 'num', dim: {}, val: 1, desc: "display result in MKS system",
-            command: () => unitsSystem = 'mks', hints: { system: "mks" } },
+            hints: { system: "mks" } },
         cgs: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
-            command: () => unitsSystem = 'cgs', hints: { system: "cgs" } },
+            hints: { system: "cgs" } },
         uscu: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
-            command: () => unitsSystem = 'uscu', hints: { system: "uscu" } },
+            hints: { system: "uscu" } },
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'rat' }, alt: ["rat"],
@@ -1378,7 +1383,7 @@
           return { type: 'num', val: [ Math.cos(Rat.number(numVal(val))/RADIAN), 1], dim: {} };
         },
 
-        atan2: function ArctangentOfRatio(...params) {
+        atan2: function ArctangentOfCoordinite(...params) {
           if (params.length !== 2) throw new MessageError(`${this.sym}(): Needs two parameters`);
           let val1 = params[0], val2 = params[1];
           if (!Dim.equal(val1.dim, val2.dim)) throw new MessageError(`${this.sym}(): Parameter types incompatible`);
@@ -1455,7 +1460,7 @@
           if (sym.display)
             alts.unshift(sym.display);
           for (const alt of alts)
-            systemSymbols[alt] = { ...sym, name: alt, display, altOf: name, alt: undefined, reserved: false };
+            systemSymbols[alt] = { ...sym, sym: alt, display, altOf: name, alt: undefined, reserved: false };
           let helpDesc = sym.desc || name;
           if (helpDesc === alts[0]) {
             alts.shift();
@@ -1464,14 +1469,14 @@
           if (sym.reserved)
             helpDesc += " <i>(reserved)</i>";
           if (alts.length > 0) {
-            helpDesc += ", also: ";
+            helpDesc += "; also: ";
             let sep = "";
             for (const alt of alts) {
               helpDesc += sep + `<span class="stuff-text">${alt}</span>`;
               sep = ", ";
             }
           }
-          let sep = ", plus: ", helpName = true, helpSym = true;
+          let sep = "; plus: ", helpName = true, helpSym = true;
           for (const pref of metricPrefixes) {
             if (sym.prefixNames) {
               for (const nm of sym.prefixNames) {
@@ -1494,7 +1499,7 @@
                   desc = s;
                 }
                 if (!systemSymbols[s])
-                  systemSymbols[s] = { ...sym, name: s, display, desc, alt: undefined, reserved: false,
+                  systemSymbols[s] = { ...sym, sym: s, display, desc, alt: undefined, reserved: false,
                       val: Rat.mul(sym.val, pref.val) };
               }
             }
@@ -1517,7 +1522,7 @@
                 if (sym.prefixNames)
                   desc = `${pref.name}${sym.prefixNames[0]}`;
                 if (!systemSymbols[s]) {
-                  systemSymbols[s] = { ...sym, name: s, display: s, alt: undefined, reserved: false, desc,
+                  systemSymbols[s] = { ...sym, sym: s, display: s, alt: undefined, reserved: false, desc,
                       val: Rat.mul(sym.val, pref.val) };
                   if (pref.symbol === MICROSYM)
                     systemSymbols[`u${sym.prefixSym}`] = systemSymbols[s];
@@ -1533,6 +1538,9 @@
         builtinSymbolsElement.innerHTML = html;
         // Patch cm to the cgs system
         systemSymbols.cm.hints = { ...systemSymbols.cm.hints, system: 'cgs' };
+        systemSymbols.gm.hints = { ...systemSymbols.gm.hints, system: 'cgs' };
+        systemSymbols.m.hints = { ...systemSymbols.m.hints, system: 'mks' };
+        systemSymbols.kg.hints = { ...systemSymbols.kg.hints, system: 'mks' };
       }
 
       groomSystemSymbols();
@@ -1634,36 +1642,30 @@
         return ret;
       }
 
-      // The first unit listed is prefered over later units with the same
-      // favorability. So it's important to have 'sr' before 'radian', for example.
-      const commonUnits = [ // Ensure a covering basis of units in all cases
+      // This lists the units considered for use in a result.
+      // It must contain at basis unit in every dimension.
+      // (This is the reason some uncommon symbols are reserved anyway.)
+      const candidateUnits = filterUnits([
         'A', 'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb',
         'ohm', 'kiloohm', 'F', 'mF', 'uF', 'nF', 'pF',
-        'bit', 'byte',
-        'kB',  'MB',  'GB',  'TB',  'PB',  'EB',
-        "W", "kW",
+        'W', 'kW', 'MW', 'mW',
+        'bit', 'byte', 'kB',  'MB',  'GB',  'TB',
         // seconds come after electrical and information units so that a coulomb
         // is an "A s", not an "s A"
         's', 'K', 'person', '$', 'symbol', 'mol',
-        'sr', 'radian', 'cd', 'lx', 'lm' ];
-      const commonMetricUnits = [
-        'joule', 'erg', 'N', 'dyne', 'Pa', 'Da', 'kPa', 'kBa', 'W', 'kW', 'mW' ];
-      const candidateUnits = filterUnits([
-        ...commonUnits, ... commonMetricUnits,
+        'sr', 'radian', 'cd', 'lx', 'lm',
+        'joule', 'erg', 'N', 'dyne', 'Pa', 'kPa', 'Ba', 'kBa',
+        'um', 'mm', 'cm', 'm', 'km', 'ml', 'liter',
         'in', 'ft', 'mi', 'acre',
         'tsp', 'tbsp', 'floz', 'cup', 'pint', 'quart', 'gallon',
-        'lbf', 'oz', 'lb',
-        'um', 'mm', 'cm', 'm', 'km', 'ml', 'liter',
         'kg', 'gm', 'mg', 'ug',
-        'min', 'hr', // 'us', 'ms' -- don't include or you get m/s as um/us!
+        'lbf', 'oz', 'lb',
+        'min', 'hr', // 'us', 'ms' -- don't include or you get um/us instead of m/s!
       ]);
-      const candidateUnitsMKS = filterUnits([ ...commonUnits, ...commonMetricUnits, 'kg', 'm' ]);
-      const candidateUnitsCGS = filterUnits([ ...commonUnits, ...commonMetricUnits, 'gm', 'cm' ]);
-      const candidateUnitsUSCU = filterUnits([ ...commonUnits, 'lbf', 'ft', 'in', 'lb' ]);
 
       function val2str(val, opts) {
-        let descStr = "", displayUnits = val.displayUnits ?? [];
-        let hints = val.hints ?? {};
+        let descStr = "";
+        let hints = val.hints ?? {}, displayUnits = val.displayUnits ?? [];
         for (const dispUnit of displayUnits)
           hints = { ...hints, ...dispUnit?.hints };
         if (opts?.describe && val.desc && displayUnits.length === 0)
@@ -1672,8 +1674,14 @@
         if (val.val !== undefined) {
           let dim = val.dim;
           val = Rat.normalize(numVal(val));
+          // If both L and M are present or any of the scientific or technical
+          // units, we don't want to use unscientific units like hr and min
+          let excludeUnscientific = hints.system === 'mks' || hints.system === 'cgs'
+            || dim.L && dim.M || dim.I || dim.J || dim.THETA || dim.BIT || dim.N;
           function describeUnit(unit, opts) {
             try {
+              if (excludeUnscientific && unit.hints?.unscientific && !opts?.forceUnit)
+                return null;
               let normSquared = Dim.normSquared(dim);
               let measures = {...dim, ...unit.dim }, smallest = Number.POSITIVE_INFINITY, dotProduct = 0;
               for (const measure in measures) {
@@ -1723,8 +1731,8 @@
               let favored = unit.favored ?? 0;
               let hints = unit.hints ?? {};
               // A bunch of stuff that can be used in the sort function.
-              return { unit, exp, newVal, newNum, reducedDim, reducedNormSquared,
-                favored, dotProduct, digits, expSum, nDims, hints };
+              return { sym: unit.sym, hints, favored, nDims, exp, expSum, digits, newNum,
+                  reducedDim, unit, newVal, reducedNormSquared, dotProduct, hints };
             }
             catch (e) {
               if (e instanceof OverflowError) // exponentiation failed somewhere along the line
@@ -1769,24 +1777,10 @@
             const desc = describeUnit(displayUnit, { forceUnit: true } );
             applyDesc(desc);
           }
-          let allowedCandidateUnits = candidateUnits;
-          /*
-          if (dim.L && dim.M || dim.I || dim.J) {
-            // Things get weird when both mass and length are in a value. It's best
-            // to revert to barebones CGS, MKS, or basic USCS units. Otherwise you get
-            // things like "km cg" instead of "m gm"
-            if (hints?.system === 'uscu')
-              allowedCandidateUnits = candidateUnitsUSCU;
-            else if (unitsSystem === 'mks' || opts?.saveMode)
-              allowedCandidateUnits = candidateUnitsMKS;
-            else if (unitsSystem === 'cgs')
-              allowedCandidateUnits = candidateUnitsCGS;
-          }
-          */
-          allowedCandidateUnits = [ ...Object.values(nonceUnits), ...allowedCandidateUnits ];
+          let allowedCandidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
           if (hints.affineUnit) {
             let affineUnit = getSymbol(hints.affineUnit);
-            if (!affineUnit) throw Error(`Unknown unit: ${hints.affineUnit})`);
+            if (!affineUnit) throw InternalError(`Unknown unit ${hints.affineUnit})`);
             affineUnit = { ...affineUnit, favored: 1 };
             allowedCandidateUnits = [ affineUnit, ...allowedCandidateUnits ];
           }
@@ -1794,7 +1788,7 @@
           let iterations = 0;
           while (!Dim.isScalar(dim)) {
             if (++iterations > 100)
-              throw new InternalError("Failed to reduce units");  // a system error, hence Error
+              throw new InternalError("Failed to reduce units");
             let unitDescs = [];
             for (const unit of allowedCandidateUnits) {
               const unitDesc = describeUnit(unit);
@@ -1868,7 +1862,7 @@
             });
             Log(2, (level) =>  // use a function here to defer evaluation unless we're logging
                 "======== " + parseStr + " unit candidates for " + val + " " +
-                JSON.stringify(dim) + " ========\n" +
+                JSON.stringify(dim) + " " + val.hints + " ========\n" +
                 JSON.stringify(unitDescs, (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
             if (unitDescs.length < 1)
               throw new InternalError("Insufficient basis units");
@@ -2218,7 +2212,7 @@
       //    [ '/'? word ]+
 
       function parseUnitString(val, opts) {
-        let implicitValue = false, type = 'num', ratio = false;
+        let implicitValue = false, type = 'num';
         if (!val) {
           val = Rat.ONE;
           // In this case, there's doubt whether we've got a unit string or just a variable,
@@ -2286,7 +2280,7 @@
             dim = Dim.add(dim, sym.dim);
             val = Rat.mul(val, symVal);
           }
-          hints = { ...sym.hints, ...hints }; // first hint wins
+          hints = { ...hints, ...sym.hints };
           unitVal = Rat.mul(unitVal, symVal);
           let exp = sym.withExp ?? 1;
           if (hasSlash)
