@@ -1122,7 +1122,8 @@
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
-        bit: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BIT, alt: ["bits"] },
+        bit: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BIT, alt: ["bits"],
+            prefixNames: ["bit", "bits"], noFractionalPrefix: true },
         byte: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BYTE, alt: ["bytes"],
             prefixSym: "B", prefixNames: ["byte", "bytes"], noFractionalPrefix: true },
         symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
@@ -1463,11 +1464,14 @@
             if (sym.prefixNames) {
               for (const nm of sym.prefixNames) {
                 if (helpName) {
-                  helpDesc += sep + `<span class="stuff-text">kilo${nm}</span>`;
+                  helpDesc += sep + `<span class="stuff-text">kilo${nm}</span>, `+ 
+                      `<span class="stuff-text">mega${nm}</span>`;
                   sep = ", ";
                   helpName = false;
-                  helpDesc += sep + `<span class="stuff-text">centi${nm}</span>`;
-                  helpDesc += sep + `<span class="stuff-text">milli${nm}</span>`;
+                  if (!sym.noFractionalPrefix)
+                    helpDesc += sep +
+                      `<span class="stuff-text">centi${nm}</span>, ` +
+                      `<span class="stuff-text">milli${nm}</span>`;
                 }
                 if (sym.noFractionalPrefix && pref.val[0] === 1n)
                   continue;
@@ -1487,7 +1491,9 @@
                 helpSym = false;
                 helpDesc += sep + 
                     `<span class="stuff-text">k${sym.prefixSym}</span>, ` +
-                    `<span class="stuff-text">M${sym.prefixSym}</span>, ` +
+                    `<span class="stuff-text">M${sym.prefixSym}</span>`;
+                if (!sym.noFractionalPrefix)
+                  helpDesc += sep +
                     `<span class="stuff-text">c${sym.prefixSym}</span>, ` +
                     `<span class="stuff-text">m${sym.prefixSym}</span>, ` +
                     `<span class="stuff-text">${MICROSYM}${sym.prefixSym}</span>`;
