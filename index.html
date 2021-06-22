@@ -1103,10 +1103,10 @@
         // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
-            desc: "Celsius", alt: ["degc"], hints: { deg: "celsius"} },
+            desc: "Celsius", alt: ["degc"], hints: { affineUnit: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
-            desc: "Fahrenheit", alt: ["degf"], hints: { deg: "fahrenheit" } },
+            desc: "Fahrenheit", alt: ["degf"], hints: { affineUnit: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             prefixSym: 'K',  prefixNames: ["kelvin"] },
 
@@ -1425,8 +1425,8 @@
             systemSymbols[name] = { type: 'fn', name,  params:["..."], native: sym, body: `#BuiltinFunction-${name}#` };
             continue;
           }
-          if (!sym.name)
-            sym.name = name;
+          if (!sym.sym)
+            sym.sym = name;
           if (typeof sym.val !== 'object') // array, really
             sym.val = [ sym.val, 1n ];
           if (sym.val)
@@ -1769,11 +1769,11 @@
               allowedCandidateUnits = candidateUnitsCGS;
           }
           allowedCandidateUnits = [ ...Object.values(nonceUnits), ...allowedCandidateUnits ];
-          if (dim.THETA && hints.deg) {
-            let degUnit = getSymbol(hints.deg);
-            if (!degUnit) throw Error(`Unknown unit: ${hints.deg})`);
-            degUnit = { ...degUnit, favored: 1 };
-            allowedCandidateUnits = [ degUnit, ...allowedCandidateUnits ];
+          if (hints.affineUnit) {
+            let affineUnit = getSymbol(hints.affineUnit);
+            if (!affineUnit) throw Error(`Unknown unit: ${hints.affineUnit})`);
+            affineUnit = { ...affineUnit, favored: 1 };
+            allowedCandidateUnits = [ affineUnit, ...allowedCandidateUnits ];
           }
           // Find best units to express the value in
           let iterations = 0;
@@ -2236,13 +2236,21 @@
           // Affine units can't combine with other units at all
           if (origin || sym.origin && unitList.length > 0)
             throw new MessageError(`Implausible units`);
-          if (sym.origin && !hasSlash) {
-            // Affine units must appear alone with no exponents or in the denominator.
-            // Affine units can only have a +1 exponent or a negative exponent.
-            // We ignore the offset for negative exponents because a unit in the denominator
-            // is like differentiation and constants dissapear.
-            if (sym.withExp) throw new MessageError(`Bad unit: ${sym.sym}`);
-            origin = sym.origin;
+          if (sym.origin) {
+            if (hasSlash) {
+              // Affine units in the denominator lose their origin and affine hints
+              let hints = sym.hints;
+              if (hints)  
+                delete hints.affineUnit;
+              sym = { ...sym, hints };
+            } else {
+              // Affine units must appear alone with no exponents or in the denominator.
+              // Affine units can only have a +1 exponent or a negative exponent.
+              // We ignore the offset for negative exponents because a unit in the denominator
+              // is like differentiation and constants dissapear.
+              if (sym.withExp) throw new MessageError(`Bad unit: ${sym.sym}`);
+              origin = sym.origin;
+            }
           }
           if (!sym.val) {
             if (!implicitValue)
@@ -2419,8 +2427,11 @@
             if (val.type === 'fn') throw new ChattyError("can't divide functions");
             if (val.type === 'parse')
               return { type: 'parse', op: 'recip', expr: val };
-            let q = Rat.recip(numVal(val));
-            return { type: val.type, dim: Dim.mul(val.dim, -1), val: q, hints: val.hints };
+            // No clear meaning to the reciprocal of an affine value, so remove hints about
+            // that. Not a principled stance, but it defers the issue.
+            let hints = { ...val.hints };
+            delete hints.affineUnit;
+            return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(numVal(val)), hints };
           }
           parsePos = backtrack;
           return null;
@@ -2545,10 +2556,12 @@
               throw new MessageError("Can't multiply functions");
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
-            else if (val.type === 'num' && val2.type === 'num')
+            else if (val.type === 'num' && val2.type === 'num') {
+              let hints = { ...val2.hints, ...val.hints };
+              delete hints.affineUnit;
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
-                  val: Rat.mul(numVal(val), numVal(val2)),
-                  hints: { ...val2.hints, ...val.hints } }; // first hint wins
+                  val: Rat.mul(numVal(val), numVal(val2)), hints };
+            }
             else
               throw new MessageError("Unknown value type");
           } else if (take('/') || take(DIVSYM)) { // '/' or divide sign
@@ -2568,9 +2581,10 @@
                 val = { ...val, origin: undefined };
                 val2 = { ...val2, origin: undefined };
               }
+              let hints = { ...val2.hints, ...val.hints };
+              delete hints.affineUnit;
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
-                  val: Rat.div(numVal(val), numVal(val2)),
-                  hints: { ...val2.hints, ...val.hints } };
+                  val: Rat.div(numVal(val), numVal(val2)), hints };
             } else {
               throw new MessageError("Unknown value type");
             }
