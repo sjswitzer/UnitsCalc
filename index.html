@@ -483,7 +483,8 @@
             <td> 1/4 mi2 / acres
             <td> The number of acres in a quarter of a square mile
         </table>
-        <p> Just for fun, try <code>furlongs/fortnight</code>, <code>9600 baud</code>, or <code>gallons/cup</code>.
+        <p> Just for fun, try <code>furlongs/fortnight</code>, <code>9600 baud * 1 bit/symbol</code>,
+            or <code>gallons/cup</code>.
         <h2> Terms </h2>
         <p> Expressions are built up out of <i>terms</i> which are either
           <ul>
@@ -1037,12 +1038,8 @@
         yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], hints: { uscu: true }, alt: ["yard", "yards"] },
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
             reserved: true, hints: { uscu: true } },
-        km: { type: 'num', dim: { L: 1 }, val: KM, alt: ["kilometer", "kilometers"] },
-        m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"] },
-        cm: { type: 'num', dim: { L: 1 }, val: [ M, 100 ], reserved: true, alt: ["centimeter", "centimeters"] },
-        mm: { type: 'num', dim: { L: 1 }, val: [ M, 1000 ], alt: ["millimeter", "millimeters"] },
-        um: { type: 'num', dim: { L: 1 }, val: [ M, 1000**2 ], display: MICROSYM+"m", alt: ["micrometer", "micrometers"] },
-        nm: { type: 'num', dim: { L: 1 }, val: [ M, 1000**3 ], alt: ["nanometer", "nanometers"] },
+        m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
+            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
@@ -1075,17 +1072,16 @@
         groupMass: { group: "Mass Units" },
         lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
         oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { uscu: true }, alt: ["ounce", "ounces"]},
-        kg: { type: 'num', dim: { M: 1 }, val: KG, reserved: true, alt: ["kilogram", "kilograms"] },
-        gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"] },
-        mg: { type: 'num', dim: { M: 1 }, val: [ KG, 1000**2 ], alt: ["milligram", "milligrams"]  },
-        ug: { type: 'num', dim: { M: 1 }, val: [ KG, 1000**3 ], display: MICROSYM+"g", alt: ["microgram", "micrograms"] },
+        gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
+          prefixSym: 'g',  prefixNames: ["gram", "grams"] },
 
         // Time (T)
         groupTime: { group: "Time Units" },
         hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"] },
         min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"] },
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
-            alt: ["second", "seconds", "sec", "secs"] },
+            alt: ["second", "seconds", "sec", "secs"],
+            prefixSym: 's',  prefixNames: ["second", "seconds"] },
         day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"] },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
@@ -1101,13 +1097,8 @@
             desc: "mean Gregorian year", alt: ["ag"] },
         mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ],
             desc: "mean julian month", alt: ["month", "months"] },
-        ms: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000 ], alt: ["millisecond", "milliseconds"] },
-        us: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**2 ], display: MICROSYM+"s", alt: ["microsecond", "microseconds"] },
-        ns: { type: 'num', dim: { T: 1 }, val: [ SEC, 1000**3 ], alt: ["nanosecond", "nanoseconds"] },
-        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"] },
-        kHz: { type: 'num', dim: { T: -1 }, val: [ 1000, SEC ], desc: "kilohertz" },
-        MHz: { type: 'num', dim: { T: -1 }, val: [ 1000**2, SEC ], desc: "megahertz" },
-        GHz: { type: 'num', dim: { T: -1 }, val: [ 1000**3, SEC ], desc: "gigahertz" },
+        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
+            prefixSym: 'Hz',  prefixNames: ["hertz"] },
 
         // Temperature (Q)
         groupTemperature: { group: "Temperature Units" },
@@ -1116,7 +1107,8 @@
         fahrenheit: { type: 'num', dim: { Q: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
             desc: "Fahrenheit", alt: ["degf"], hints: { deg: "fahrenheit" } },
-        K: { type: 'num', dim: { Q: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"] },
+        K: { type: 'num', dim: { Q: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
+            prefixSym: 'K',  prefixNames: ["kelvin"] },
 
         // Angles (RAD)
         //   A steradian can be thought of as a square radian because 2pi radians covers
@@ -1132,18 +1124,12 @@
         // Data (BIT)
         groupInformation: { group: "Data Units" },
         bit: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BIT, alt: ["bits"] },
-        byte: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BYTE, alt: ["bytes"] },
-        baud: { type: 'num', dim: { BIT: 1, T: -1 }, val: [ BIT, SEC ] },
-        kilobaud: { type: 'num', dim: { BIT: 1, T: -1 }, val: [ 1000 * BIT, SEC ], alt: ["kbaud"] },
-        // I personally find this offensive, but the modern consensus is that the well-named
-        // units here are powers of 10 and the stupidly-named ones are powers of 2.
+        byte: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BYTE, alt: ["bytes"],
+            prefixSym: "B", prefixNames: ["byte", "bytes"], noFractionalPrefix: true },
+        symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
+        baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
+            prefixNames: ["baud"] },
         //   https://www.ibm.com/docs/en/storage-insights?topic=overview-units-measurement-storage-data
-        KB: { type: 'num', dim: { BIT: 1 }, val: 10**3 * BYTE, alt: ["kilobyte", "kilobytes"] },
-        MB: { type: 'num', dim: { BIT: 1 }, val: 10**6 * BYTE, alt: ["megabyte", "megabytes"] },
-        GB: { type: 'num', dim: { BIT: 1 }, val: 10**9 * BYTE, alt: ["gigabyte", "gigabytes"] },
-        TB: { type: 'num', dim: { BIT: 1 }, val: 10**12 * BYTE, alt: ["terabyte", "terabytes"] },
-        PB: { type: 'num', dim: { BIT: 1 }, val: 10**15 * BYTE, alt: ["petabyte", "petabytes"] },
-        EB: { type: 'num', dim: { BIT: 1 }, val: 10**18 * BYTE, alt: ["exabyte", "exabytes"] },
         KiB: { type: 'num', dim: { BIT: 1 }, val: 2**10 * BYTE, alt: ["kibibyte", "kibibytes"] },
         MiB: { type: 'num', dim: { BIT: 1 }, val: 2**20 * BYTE, alt: ["mebibyte", "mebibytes"] },
         GiB: { type: 'num', dim: { BIT: 1 }, val: 2**30 * BYTE, alt: ["gibibyte", "gibibytes"] },
@@ -1159,27 +1145,28 @@
 
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
-        N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"] },
+        N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
+           prefixSym: "N", prefixNames: ["newton", "newtons"] },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 100000 * SEC**2 ], alt: ["dynes"] },
         lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", hints: { uscu: true } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
-        joule: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joules"] },
+        joule: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joules"],
+            prefixNames: ["joule", "joules"] },
         erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 * 10000000 ], alt: ["ergs"] },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
-        W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"] },
-        kW: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ 1000 * KG * M**2, SEC**3 ], alt: ["kilowatt", "killowatts"] },
-        mW: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, 1000 * SEC**3 ], alt: ["milliwatt", "milliwatts"] },
+        W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"],
+            prefixSym: "W", prefixNames: ["watt", "watts"] },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"],
             val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", hints: { uscu: true } },
 
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
-        Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"] },
-        kPa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 1000 * KG, M * SEC**2 ], alt: ["kilopascal", "kilopascals"] },
+        Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
+            prefixSym: "Pa", prefixNames: ["pascal", "pascals"] },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
             desc: "pounds per square inch", hints: { uscu: true } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
@@ -1192,21 +1179,14 @@
         // Electrical (A ...)
         //   http://www.ebyte.it/library/educards/sidimensions/SiDimensionsAlfaList.html
         groupElectrical: { group: "Electrical Units" },
-        A: { type: 'num', dim: { A: 1 }, val: AMP, reserved: true, alt: ["ampere", "amperes", "amp", "amps"]  },
-        mA: { type: 'num', dim: { A: 1 }, val: [ AMP, 1000 ], alt: ["milliampere", "milliamperes"] },
-        uA: { type: 'num', dim: { A: 1 }, val: [ AMP, 1000**2 ], display: MICROSYM+"A", alt: ["microampere", "microamperes"] },
+        A: { type: 'num', dim: { A: 1 }, val: AMP, reserved: true, alt: ["ampere", "amperes", "amp", "amps"],
+            prefixSym: "A", prefixNames: ["ampere", "amperes"] },
         V: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -1 }, val: [KG * M**2, SEC**3 * AMP ],
-            alt: ["volt", "volts"] },
-        kV: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -1 }, val: [ 1000 * KG * M**2, SEC**3 * AMP ],
-            alt: ["kilovolt", "kilovolts"] },
-        mV: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -1 }, val: [ KG*M**2, 1000 * SEC**3 * AMP ],
-            alt: ["millivolt", "millivolts"] },
-        uV: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -1 }, val: [ KG*M**2, 1000**2 * SEC**3 * AMP ],
-            display: MICROSYM+"V", alt: ["microvolt", "microvolts"] },
+            alt: ["volt", "volts"],
+            prefixSym: "V", prefixNames: ["volt", "volts"] },
         ohm: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -2 }, val: [ KG * M**2, SEC**3 * AMP**2 ],
-            display: OHMSYM, alt: ["ohms"] },
-        kohm: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -2 }, val: [ 1000 * KG * M**2, SEC**3 * AMP**2 ],
-            display: "k" + OHMSYM, alt: ["kiloohm", "kiloohms", "kilohm", "kilohms"] },
+            display: OHMSYM, desc: "ohm", alt: ["ohms"],
+            prefixSym: OHMSYM, prefixNames: ["ohm", "ohms"] },
         S: { type: 'num', dim: { M: -1, L: -2, T: 3, A: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ], desc: "siemens" },
         C: { type: 'num', dim: { T: 1, A: 1 }, val: SEC * AMP, desc: "coulomb" },
         // farads tend to be very small
@@ -1294,9 +1274,9 @@
         // These are mostly for my amusement, but also useful debugging aids
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
-        ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 1 }, alt: ["rat"],
+        ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'rat' }, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
-        mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 2 }, alt: ["mixrat", "ratmix"],
+        mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'mix' }, alt: ["mixrat", "ratmix"],
             desc: 'like "ratio" but will display mixed fractions if possible' },
 
         // General n-dimensional hypotenuse
@@ -1412,15 +1392,140 @@
         },
       };
 
-      groomSystemSymbols();
+      const metricPrefixes = [
+        { name: "deca", symbol: "da", val: [ 10n, 1n ] },
+        { name: "hecto", symbol: "h", val: [ 100n, 1n ] },
+        { name: "kilo", symbol: "k", val: [ 1000n, 1n ] },
+        { name: "mega", symbol: "M", val: [ 1000n**2n, 1n ] },
+        { name: "giga", symbol: "G", val: [ 1000n**3n, 1n ] },
+        { name: "tera", symbol: "T", val: [ 1000n**4n, 1n ] },
+        { name: "peta", symbol: "P", val: [ 1000n**5n, 1n ] },
+        { name: "exa", symbol: "E", val: [ 1000n**6n, 1n ] },
+        { name: "zetta", symbol: "Z", val: [ 1000n**7n, 1n ] },
+        { name: "yotta", symbol: "Y", val: [ 1000n**8n, 1n ] },
+        { name: "deci", symbol: "d", val: [ 1n, 10n ] },
+        { name: "centi", symbol: "c", val: [ 1n, 100n ] },
+        { name: "milli", symbol: "m", val: [ 1n, 1000n ] },
+        { name: "micro", symbol: MICROSYM, val: [ 1n, 1000n**2n ] },
+        { name: "nano", symbol: "n", val: [ 1n, 1000n**3n ] },
+        { name: "pico", symbol: "p", val: [ 1n, 1000n**4n ] },
+        { name: "femto", symbol: "f", val: [ 1n, 1000n**5n ] },
+        { name: "atto", symbol: "a", val: [ 1n, 1000n**6n ] },
+        { name: "zepto", symbol: "z", val: [ 1n, 1000n**7n ] },
+        { name: "yacto", symbol: "y", val: [ 1n, 1000n**8n ] },
+      ];
 
-      for (const [name, sym] of Object.entries(systemSymbols)) {
-        if (sym.alt)
-          for (const alt of sym.alt)
-            systemSymbols[alt] = { ...sym, altOf: name, alt: undefined, reserved: false };
-        if (sym.display)
-          systemSymbols[sym.display] = { ...sym, altOf: name, display: undefined, reserved: false };
+      // Groom the system symbols and inject help text
+      function groomSystemSymbols() {
+        let html = "";
+        for (const [name, sym] of Object.entries(systemSymbols)) {
+          if (sym.group) {
+            html += `<tr><td colspan="3" class="group">${sym.group}`;
+            delete systemSymbols[name];
+            continue;
+          }
+          if (sym instanceof Function) {
+            systemSymbols[name] = { type: 'fn', name,  params:["..."], native: sym, body: `#BuiltinFunction-${name}#` };
+            continue;
+          }
+          if (!sym.name)
+            sym.name = name;
+          if (typeof sym.val !== 'object') // array, really
+            sym.val = [ sym.val, 1n ];
+          if (sym.val)
+            sym.val = Rat.normalize(sym.val);
+          if (sym.origin)
+            sym.origin = Rat.normalize(sym.origin);
+          if (sym.type !== 'num' || sym.altOf || sym.display === null)
+            continue;
+          // if there's only one alt, it's usualy a plural
+          let alts = sym.alt ?? [];
+          let altName = alts.length > 1 && alts[0] || name;
+          if (!sym.desc)
+            sym.desc = altName;
+          let display = sym.display || altName;
+          if (sym.display)
+            alts.unshift(sym.display);
+          for (const alt of alts)
+            systemSymbols[alt] = { ...sym, name: alt, display, altOf: name, alt: undefined, reserved: false };
+          let helpDesc = sym.desc || name;
+          if (helpDesc === alts[0]) {
+            alts.shift();
+            helpDesc = `<span class="stuff-text">${altName}</span>`;
+          }
+          if (sym.reserved)
+            helpDesc += " <i>(reserved)</i>";
+          if (alts.length > 0) {
+            helpDesc += ", also: ";
+            let sep = "";
+            for (const alt of alts) {
+              helpDesc += sep + `<span class="stuff-text">${alt}</span>`;
+              sep = ", ";
+            }
+          }
+          let sep = ", plus: ", helpName = true, helpSym = true;
+          for (const pref of metricPrefixes) {
+            if (sym.prefixNames) {
+              for (const nm of sym.prefixNames) {
+                if (helpName) {
+                  helpDesc += sep + `<span class="stuff-text">kilo${nm}</span>`;
+                  sep = ", ";
+                  helpName = false;
+                  helpDesc += sep + `<span class="stuff-text">centi${nm}</span>`;
+                  helpDesc += sep + `<span class="stuff-text">milli${nm}</span>`;
+                }
+                if (sym.noFractionalPrefix && pref.val[0] === 1n)
+                  continue;
+                let s = `${pref.name}${nm}`;
+                let display, desc;
+                if (sym.prefixSym) {
+                  display = `${pref.symbol}${sym.prefixSym}`;
+                  desc = s;
+                }
+                if (!systemSymbols[s])
+                  systemSymbols[s] = { ...sym, name: s, display, desc, alt: undefined, reserved: false,
+                      val: Rat.mul(sym.val, pref.val) };
+              }
+            }
+            if (sym.prefixSym) {
+              if (helpSym) {
+                helpSym = false;
+                helpDesc += sep + 
+                    `<span class="stuff-text">k${sym.prefixSym}</span>, ` +
+                    `<span class="stuff-text">M${sym.prefixSym}</span>, ` +
+                    `<span class="stuff-text">c${sym.prefixSym}</span>, ` +
+                    `<span class="stuff-text">m${sym.prefixSym}</span>, ` +
+                    `<span class="stuff-text">${MICROSYM}${sym.prefixSym}</span>`;
+                sep = ", ";
+              }
+              if (!(sym.noFractionalPrefix && pref.val[0] === 1n)) {
+                let s = `${pref.symbol}${sym.prefixSym}`;
+                let desc;
+                if (sym.prefixNames)
+                  desc = `${pref.name}${sym.prefixNames[0]}`;
+                if (!systemSymbols[s]) {
+                  systemSymbols[s] = { ...sym, name: s, display: s, alt: undefined, reserved: false, desc,
+                      val: Rat.mul(sym.val, pref.val) };
+                  if (pref.symbol === MICROSYM)
+                    systemSymbols[`u${sym.prefixSym}`] = systemSymbols[s];
+                }
+              }
+            }
+          }
+          if (sep === ", ")
+          helpDesc += ", etc.";
+          html += `<tr><td><span class="stuff-text">${name}<span>
+                       <td><span class="stuff-text">/${name}</span><td>${helpDesc}`;
+        }
+        builtinSymbolsElement.innerHTML = html;
+        /*
+        for (const s in systemSymbols)
+          console.log(s, JSON.stringify(systemSymbols[s],
+            (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
+        */
       }
+
+      groomSystemSymbols();
 
       function reduceParamVals(name, accum, params, fn) {  // fn => (accum, val) => val
         let dim, hints;
@@ -1449,9 +1554,6 @@
           val = userSymbols[symName];
         if (val === undefined)
           val = systemSymbols[symName];
-        if (val instanceof Function)
-          val = { type: 'fn',  params:["..."], native: val,
-            body: `#BuiltinFunction-${val.name}#` };
         if (!val) {
           // special case to create pseudo-variables for exponentiated units.
           let pos = symName.length;
@@ -1510,21 +1612,29 @@
 
       // fetch unit values and filter out any non-units (user may have redefined some)
       function filterUnits(unitSyms) {
-        return unitSyms.map(sym => getSymbol(sym))
-          .filter(val => val.type === 'num' && val.val?.[0] && !Dim.isScalar(val.dim));
+        let ret = [];
+        for (const sym of unitSyms) {
+          const val = getSymbol(sym);
+          if (!val) throw InternalError("Bad unitsym");
+          // User may have redefined a symbol and that's OK.
+          // At least the fundamental basis symbol should be reserved.
+          if (val === systemSymbols[sym])
+            ret.push(val);
+        }
+        return ret;
       }
 
       // The first unit listed is prefered over later units with the same
       // favorability. So it's important to have 'sr' before 'radian', for example.
       const commonUnits = [ // Ensure a covering basis of units in all cases
         'A', 'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb',
-        'ohm', 'kohm', 'F', 'mF', 'uF', 'nF', 'pF',
+        'ohm', 'kiloohm', 'F', 'mF', 'uF', 'nF', 'pF',
         'bit', 'byte',
-        'KB',  'MB',  'GB',  'TB',  'PB',  'EB',
+        'kB',  'MB',  'GB',  'TB',  'PB',  'EB',
         "W", "kW",
         // seconds come after electrical and information units so that a coulomb
         // is an "A s", not an "s A"
-        's', 'K', 'person', '$',
+        's', 'K', 'person', '$', 'symbol',
         'sr', 'radian', 'cd', 'lx', 'lm' ];
       const commonMetricUnits = [
         'joule', 'N', 'Pa', 'kPa', 'W', 'kW', 'mW' ];
@@ -1544,19 +1654,12 @@
       function val2str(val, opts) {
         let descStr = "", displayUnits = val.displayUnits;
         let hints = { ...val.hints, ...displayUnits?.hints }; // displayUnits hints win
-        let ratio = hints?.ratio;
         if (opts?.describe && val.desc && !displayUnits)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
-        let noFrac = false;
         if (val.val !== undefined) {
           let dim = val.dim;
           val = Rat.normalize(numVal(val));
-          // Certain kinds of units should not be displayed as fractions
-          noFrac = Dim.isScalar(dim) || hints.nonce
-              || dim.A || dim.Q || dim.RAD || dim.BIT || dim.CD
-              || dim.PERSON || dim.CURRENCY
-              || !hints?.uscu && (dim.L || dim.M);
           function describeUnit(unit, opts) {
             try {
               let normSquared = Dim.normSquared(dim);
@@ -1750,10 +1853,16 @@
         }
 
         // Now, should it be represented as a (mixed) fraction?
-        let asFrac = false;
+        let displayRatio = hints.ratio;
+        if (displayRatio === undefined) {
+          displayRatio = 'none';
+          if (hints.uscu)
+          displayRatio = 'mix?';
+        }
         let num = val[0], denom = val[1], intpart = 0n;
-        if (typeof num === 'bigint') {
-          if (ratio !== 1) {  // ratio = 1 means no _mixed_ fractions, ratio = 2 allows them
+        if (displayRatio !== 'none' && typeof num === 'bigint') {
+          let asFrac = true;
+          if (displayRatio === 'mix' || displayRatio === 'mix?') {
             intpart = num/denom;
             num -= intpart*denom;
           }
@@ -1761,36 +1870,33 @@
             intpart += num;
             num = 0n;
           }
-          if (!noFrac) {
-            if (num === 1n || num <= 12n && denom <= 12n) {
-              asFrac = true;
-              // But favor decimal for things like 0.001
-              let l10 = Math.log10(Number(denom));
-              if (l10 === Math.trunc(l10))
-                asFrac = false;
-            } else {
+          if (displayRatio === 'mix?') { // Is it worth displaying as a mixed fraction
+            // If the denom is a power of 10, it's not
+            let l10 = Math.log10(Number(denom));
+            if (l10 === Math.trunc(l10)) {
+              asFrac = false;
+            } else if (num > 12n || denom > 12n) { // num and/or denom too big
+              // unless we have a power of two in the denominator
               let lg2 = Math.log2(Number(denom));
-              if (lg2 === Math.trunc(lg2) && lg2 <= 10) {
-                asFrac = true;
-              }
+              asFrac = (lg2 === Math.trunc(lg2) && lg2 <= 10);
             }
           }
-        }
-        if (asFrac || ratio) {
-          let neg = num < 0n;
-          let str = "";
-          if (neg) {
-            num = -num;
-            str += "-";
-          }
-          if (intpart !== 0n || num === 0n) {
-            str += String(intpart);
+          if (asFrac) {
+            let neg = num < 0n;
+            let str = "";
+            if (neg) {
+              num = -num;
+              str += "-";
+            }
+            if (intpart !== 0n || num === 0n) {
+              str += String(intpart);
+              if (num !== 0n)
+                str += " ";
+            }
             if (num !== 0n)
-              str += " ";
+              str += String(num) + "/" + String(denom);
+            return str + unitsStr + invUnitsStr + descStr;
           }
-          if (num !== 0n)
-            str += String(num) + "/" + String(denom);
-          return str + unitsStr + invUnitsStr + descStr;
         }
 
         val = Rat.number(val);   // Finally, smash it into a JS number
@@ -3091,49 +3197,6 @@
         let val = styles.getPropertyValue("--device").trim();
         if (val !== '')
           toggleDeviceMode(val);
-      }
-
-      function groomSystemSymbols() { // grooms the system symbols and injects help text
-        let html = "";
-        for (const [name, sym] of Object.entries(systemSymbols)) {
-          if (sym.group) {
-            html += `<tr><td colspan="3" class="group">${sym.group}`;
-            delete systemSymbols[name];
-            continue;
-          }
-          if (sym instanceof Function) continue;
-          if (typeof sym.val !== 'object') // array, really
-            sym.val = [ sym.val, 1n ];
-          if (sym.val)
-            sym.val = Rat.normalize(sym.val);
-          if (sym.origin)
-            sym.origin = Rat.normalize(sym.origin);
-          if (sym.type !== 'num' || sym.altOf || sym.display === null)
-            continue;
-          let alts = sym.alt ?? [];
-          if (!sym.desc && alts.length > 1)  // If there's only one, it's usually the plural; skip it.
-            sym.desc = alts[0];
-          let desc = sym.desc || name;
-          if (sym.display)
-            alts.unshift(sym.display);
-          let unfilteredAlts = alts;
-          alts = alts.filter(name => name !== desc);
-          if (desc === name || unfilteredAlts.includes(desc))
-            desc = `<span class="stuff-text">${desc}</span>`;
-          if (sym.reserved)
-            desc += " <i>(reserved)</i>";
-          if (alts.length > 0) {
-            desc += ", also: ";
-            let comma = "";
-            for (const alt of alts) {
-              desc += comma + `<span class="stuff-text">${alt}</span>`;
-              comma = ", ";
-            }
-          }
-          html += `<tr><td><span class="stuff-text">${name}<span>
-                       <td><span class="stuff-text">/${name}</span><td>${desc}`;
-        }
-        builtinSymbolsElement.innerHTML = html;
       }
 
       document.addEventListener("keydown", function(evt) {
