@@ -1230,7 +1230,7 @@
         // Chemical units (N)
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         groupChemical: { group: "Chemical Units" },
-        mol: { type: 'num', dim: { N: 1 }, val: Rat.ONE, desc: "Mol, number of particles", alt: ["mols"] },
+        mol: { type: 'num', dim: { N: 1 }, val: 6.02214076e23, desc: "Mol, number of particles", alt: ["mols"], reserved: true },
         NA: { type: 'num', dim: { N: -1 }, val: 6.02214076e23, desc: "Avogadro's constant" },
         N0: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
@@ -1288,7 +1288,7 @@
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'rat' }, alt: ["rat"],
-            desc: 'normally units like meters are not displayed as ratios but "1.5 m ratio" is' },
+            desc: 'normally units like meters are not displayed as ratios but <code>1.5 m ratio</code> is' },
         mixratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'mix' }, alt: ["mixrat", "ratmix"],
             desc: 'like "ratio" but will display mixed fractions if possible' },
 
@@ -1842,12 +1842,13 @@
                 // and less in lower units. But the inverse of cord (/cord) comes out
                 // to some ridiculous number of invers cubic miles and it really should
                 // be 1/128 /ft3. So being over 1 should give a bonus over the "distance
-                // from 1", but should not be absolute.
+                // from 1", but should not be absolute. The factor should be tuned so that
+                // /cord is in expressed terms of /ft3 and a dalton is expressed in gm/mol.
                 const aa = Math.abs(a.newNum), ab = Math.abs(b.newNum);
 
                 // Values closer to 1 win, generally.
-                let va = a.digits - (aa >= 1 ? 5 : 0);
-                let vb = b.digits - (ab >= 1 ? 5 : 0);
+                let va = a.digits - 2*(aa >= 1);
+                let vb = b.digits - 2*(ab >= 1);
                 if (!isFinite(va) || !isFinite(vb)) {
                   if (isFinite(va))
                     return -1;
