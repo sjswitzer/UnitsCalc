@@ -1100,14 +1100,14 @@
         Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
 
-        // Temperature (Q)
+        // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
-        celsius: { type: 'num', dim: { Q: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
+        celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
             desc: "Celsius", alt: ["degc"], hints: { deg: "celsius"} },
-        fahrenheit: { type: 'num', dim: { Q: 1 }, val: [ 5 * KELVIN, 9 ],
+        fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
             desc: "Fahrenheit", alt: ["degf"], hints: { deg: "fahrenheit" } },
-        K: { type: 'num', dim: { Q: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
+        K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             prefixSym: 'K',  prefixNames: ["kelvin"] },
 
         // Angles (RAD)
@@ -1140,7 +1140,7 @@
 
         // Population (PERSON)
         groupPop: { group: "Population Units" },
-        person: { type: 'num', dim: { PERSON: 1 }, val: PERSON, reserved: true, favored: 1,
+        person: { type: 'num', dim: { PERSON: 1 }, val: PERSON, reserved: true,
             desc: "person", alt: [ "persons", "people", "capita" ] },
         percapita: { type: 'num', dim: { PERSON: -1 }, val: [ 1, PERSON ] },
 
@@ -1222,7 +1222,7 @@
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         mol: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number", alt: ["mols"] },
         dalton: { type: 'num', dim: { M: 1 }, val: 1.6605390666e-27 * KG },
-        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, Q: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
             desc: "Boltzmann constant" },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
         parsec:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M * 648000 / Math.PI,
@@ -1769,9 +1769,10 @@
               allowedCandidateUnits = candidateUnitsCGS;
           }
           allowedCandidateUnits = [ ...Object.values(nonceUnits), ...allowedCandidateUnits ];
-          if (dim.Q && hints.deg) {
+          if (dim.THETA && hints.deg) {
             let degUnit = getSymbol(hints.deg);
             if (!degUnit) throw Error(`Unknown unit: ${hints.deg})`);
+            degUnit = { ...degUnit, favored: 1 };
             allowedCandidateUnits = [ degUnit, ...allowedCandidateUnits ];
           }
           // Find best units to express the value in
@@ -2160,7 +2161,7 @@
         if (sym)
           return sym;
         const display = `'${name}'`;
-        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, favored: 1, hints: { nonce: true } };
+        sym = { sym: display, type: 'num', val: [ NONCE, 1n ], dim: {}, display, hints: { nonce: true } };
         sym.dim['NONCE-'+name] = 1;
         nonceUnits[name] = sym;
         return sym;
@@ -3091,8 +3092,6 @@
                 let text = event.target.textContent.trim();
                 // special handling for units that have offsets
                 let sym = getSymbol(text);
-                if (sym?.origin)
-                  text = "0 " + text;
                 stuffExpr(text.trim(), { doAssigns: true, showErrors: true });
                 return;
               }
