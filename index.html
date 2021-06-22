@@ -2242,7 +2242,7 @@
               let hints = sym.hints;
               if (hints)  
                 delete hints.affineUnit;
-              sym = { ...sym, hints };
+              sym = { ...sym, hints, origin: undefined };
             } else {
               // Affine units must appear alone with no exponents or in the denominator.
               // Affine units can only have a +1 exponent or a negative exponent.
