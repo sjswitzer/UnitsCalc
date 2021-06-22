@@ -1874,7 +1874,7 @@
             intpart += num;
             num = 0n;
           }
-          if (displayRatio === 'mix?') { // Is it worth displaying as a mixed fraction
+          if (displayRatio === 'mix?') { // Is it worth displaying as a mixed fraction?
             // If the denom is a power of 10, it's not worth it
             let l10 = Math.log10(Number(denom));
             if (l10 === Math.trunc(l10)) {
