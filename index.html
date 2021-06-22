@@ -793,7 +793,7 @@
         if (level <= logLevel) {
           if (msg instanceof Function) msg = msg(logLevel);
           if (msg instanceof Array) msg = [ ...res, ...rest ];
-          else msg = msg = [ msg, ...rest];
+          else msg = [ msg, ...rest];
           console.log(...msg);
         }
       }
@@ -1035,17 +1035,17 @@
       const systemSymbols = {
         // Length (L)
         groupLength: { group: "Length Units" },
-        in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, hints: { uscu: true }, alt: ["inch", "inches"] },
-        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, hints: { uscu: true }, alt: ["foot", "feet"] },
-        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], hints: { uscu: true }, alt: ["yard", "yards"] },
+        in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, hints: { system: 'uscu' }, alt: ["inch", "inches"] },
+        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, hints: { system: 'uscu' }, alt: ["foot", "feet"] },
+        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], hints: { system: 'uscu' }, alt: ["yard", "yards"] },
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
-            reserved: true, hints: { uscu: true } },
+            reserved: true, hints: { system: 'uscu' } },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
             prefixSym: 'm',  prefixNames: ["meter", "meters"] },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
-        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, hints: { uscu: true }, alt: ["acres"],
+        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, hints: { system: 'uscu' }, alt: ["acres"],
             desc: "66' \u00D7 660'" },
         hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"],
             desc: "100 meters \u00D7 100 meters" },
@@ -1055,25 +1055,25 @@
         //    and, further, differences between the US and Imperial systems.
         //    When in conflict, I've chosen liquid volumes and US units.
         groupVolume: { group: "Volume Units" },
-        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], hints: { uscu: true }, alt: ["gallons"] },
-        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], hints: { uscu: true }, alt: ["quarts"] },
-        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], hints: { uscu: true }, alt:["pints"] },
-        cup: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 16 * N5K**3 ], hints: { uscu: true }, alt: ["cups"] },
-        tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], hints: { uscu: true }, alt: ["tablespoon", "tablespoons", "tbsps"] },
-        tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], hints: { uscu: true }, alt: ["teaspoon", "teaspoons", "tsps"] },
-        floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", hints: { uscu: true } },
+        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], hints: { system: 'uscu' }, alt: ["gallons"] },
+        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], hints: { system: 'uscu' }, alt: ["quarts"] },
+        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], hints: { system: 'uscu' }, alt:["pints"] },
+        cup: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 16 * N5K**3 ], hints: { system: 'uscu' }, alt: ["cups"] },
+        tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], hints: { system: 'uscu' }, alt: ["tablespoon", "tablespoons", "tbsps"] },
+        tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], hints: { system: 'uscu' }, alt: ["teaspoon", "teaspoons", "tsps"] },
+        floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", hints: { system: 'uscu' } },
         liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"] },
         ml: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], alt: ["milliliter", "millilitre", "milliliters", "millilitres"] },
         cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
-        gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], hints: { uscu: true }, desc: "gill", alt:["gill", "gills"] },
-        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], hints: { uscu: true }, alt: ["drams"] },
-        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], hints: { uscu: true }, alt: ["minims"] },
-        cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", hints: { uscu: true }, alt: ["cords"] },
+        gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], hints: { system: 'uscu' }, desc: "gill", alt:["gill", "gills"] },
+        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], hints: { system: 'uscu' }, alt: ["drams"] },
+        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], hints: { system: 'uscu' }, alt: ["minims"] },
+        cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", hints: { system: 'uscu' }, alt: ["cords"] },
 
         // Mass (M)
         groupMass: { group: "Mass Units" },
-        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
-        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { uscu: true }, alt: ["ounce", "ounces"]},
+        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { system: 'uscu' }, alt: ["lbs", "pound", "pounds", "lbm"] },
+        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { system: 'uscu' }, alt: ["ounce", "ounces"]},
         gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
           prefixSym: 'g',  prefixNames: ["gram", "grams"] },
 
@@ -1158,7 +1158,7 @@
         N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
            prefixSym: "N", prefixNames: ["newton", "newtons"] },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 100000 * SEC**2 ], alt: ["dynes"] },
-        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", hints: { uscu: true } },
+        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", hints: { system: 'uscu' } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
@@ -1174,14 +1174,14 @@
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"],
             prefixSym: "W", prefixNames: ["watt", "watts"] },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"],
-            val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", hints: { uscu: true } },
+            val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", hints: { system: 'uscu' } },
 
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
         Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
             prefixSym: "Pa", prefixNames: ["pascal", "pascals"] },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
-            desc: "pounds per square inch", hints: { uscu: true } },
+            desc: "pounds per square inch", hints: { system: 'uscu' } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
         bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"] },
         millibar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100 * KG, M * SEC**2 ], alt: ["millibars"] },
@@ -1258,23 +1258,23 @@
         week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"] },
         fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"] },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
-            desc: "surveyor's link", hints: { uscu: true }, alt: ["links"] },
-        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", hints: { uscu: true }, alt: ["rods"] },
-        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", hints: { uscu: true }, alt: ["chains"] },
-        furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], hints: { uscu: true }, alt: ["furlongs"] },
-        township: { type: 'num', dim: { L: 2 }, val: [ (6 * MI5K)**2, N5K**2 ], hints: { uscu: true }, alt: ["townships"] },
+            desc: "surveyor's link", hints: { system: 'uscu' }, alt: ["links"] },
+        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", hints: { system: 'uscu' }, alt: ["rods"] },
+        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", hints: { system: 'uscu' }, alt: ["chains"] },
+        furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], hints: { system: 'uscu' }, alt: ["furlongs"] },
+        township: { type: 'num', dim: { L: 2 }, val: [ (6 * MI5K)**2, N5K**2 ], hints: { system: 'uscu' }, alt: ["townships"] },
         are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
-        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], hints: { uscu: true } },
-        stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], hints: { uscu: true }, desc: "UK stone" }, // no alt "stones"
-        cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], hints: { uscu: true }, alt: ["hundredweight"],
+        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], hints: { system: 'uscu' } },
+        stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], hints: { system: 'uscu' }, desc: "UK stone" }, // no alt "stones"
+        cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["hundredweight"],
             desc: "UK hundredweight, about 51 kg" },  // in the US it's 100lb, but nobody uses it so...
-        longton: { type: 'num', dim: { M: 1 }, val: [ 2240 * LBM100M, N100M ], hints: { uscu: true }, alt: ["longtons"], desc: "UK long ton" },
-        ton: { type: 'num', dim: { M: 1 }, val: [ 2000 * LBM100M, N100M ], hints: { uscu: true }, alt: ["tons"], desc: "US ton" },
+        longton: { type: 'num', dim: { M: 1 }, val: [ 2240 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["longtons"], desc: "UK long ton" },
+        ton: { type: 'num', dim: { M: 1 }, val: [ 2000 * LBM100M, N100M ], hints: { system: 'uscu' }, alt: ["tons"], desc: "US ton" },
         tonne: { type: 'num', dim: { M: 1 }, val: 1000 * KG, alt: ["tonnes"], desc: "metric ton" },
         carat: { type: 'num', dim: { M: 1 }, val: [ 200 * KG, 1000**2 ], alt: ["carats"] },
-        league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, hints: { uscu: true }, alt: ["leagues"], desc: "3 nautical miles" },
-        nmi: { type: 'num', dim: { L: 1 }, val: NMI, hints: { uscu: true }, desc: "nautical mile" },
-        knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], hints: { uscu: true }, alt: ["knots"], desc: "nautical mile per hour" },
+        league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, hints: { system: 'uscu' }, alt: ["leagues"], desc: "3 nautical miles" },
+        nmi: { type: 'num', dim: { L: 1 }, val: NMI, hints: { system: 'uscu' }, desc: "nautical mile" },
+        knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], hints: { system: 'uscu' }, alt: ["knots"], desc: "nautical mile per hour" },
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, display: null }, // :)
 
@@ -1284,7 +1284,13 @@
             desc: 'a dollar, no particular kind'},
         cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
             desc: 'a cent, no particular kind'},
-        // These are mostly for my amusement, but also useful debugging aids
+        // These are mostly for my amusement, but also useful as debugging aids
+        mks: { type: 'num', dim: {}, val: 1, desc: "display result in MKS system",
+            command: () => unitsSystem = 'mks', hints: { system: "mks" } },
+        cgs: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
+            command: () => unitsSystem = 'cgs', hints: { system: "cgs" } },
+        uscu: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
+            command: () => unitsSystem = 'uscu', hints: { system: "uscu" } },
         unit: { type: 'num', dim: {}, val: 1, desc: "one",
             desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, hints: { ratio: 'rat' }, alt: ["rat"],
@@ -1378,12 +1384,6 @@
               val: [ Math.atan2(Rat.number(numVal(val1)), Rat.number(numVal(val2)))*RADIAN, 1n ] };
         },
 
-        // Sets MKS or CGS preference
-        MKS: function SetMKS() { return { type: 'num', dim: {}, val: Rat.ZERO,
-            command: () => unitsSystem = 'mks' } },
-        CGS: function SetCGS() { unitsSystem = 'cgs'; return { type: 'num', dim: {}, val: Rat.ZERO,
-            command: () => unitsSystem = 'cgs' } },
-
         // For debugging
         SAVE: function DebugSaveSyms() { return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () => saveUserSymbols() } },
@@ -1391,18 +1391,12 @@
             command: () => toggleDeviceMode() } },
         UI: function ToggleLegacyMode() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () => toggleLegacyMode() } },
-
-        // Set logging level
-        LOGGING: function SetLogLevel(...params) {
-          if (params.length !== 1) throw new MessageError(`${this.sym}(): Needs one parameter`);
-          let val = params[0];
-          if (val.type !== 'num' || !Dim.isScalar(val.dim) || numVal(val) < 0 )
-            throw new MessageError(`${this.sym}(x): Illegal parameter`);
-          let oldLevel = logLevel;
-          let newLevel = Rat.number(numVal(val));
-          return { type: 'num', dim: {}, val: [ oldLevel, 1n ],
-              command: () => logLevel = newLevel };
-        },
+        SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
+            command: () => {
+              for (const s in systemSymbols)
+              console.log(s, JSON.stringify(systemSymbols[s],
+                (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
+            } } },
       };
 
       const metricPrefixes = [
@@ -1536,11 +1530,6 @@
                        <td><span class="stuff-text">/${name}</span><td>${helpDesc}`;
         }
         builtinSymbolsElement.innerHTML = html;
-        /*
-        for (const s in systemSymbols)
-          console.log(s, JSON.stringify(systemSymbols[s],
-            (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
-        */
       }
 
       groomSystemSymbols();
@@ -1777,7 +1766,7 @@
             // Things get weird when both mass and length are in a value. It's best
             // to revert to barebones CGS, MKS, or basic USCS units. Otherwise you get
             // things like "km cg" instead of "m gm"
-            if (hints?.uscu)
+            if (hints?.system === 'uscu')
               allowedCandidateUnits = candidateUnitsUSCU;
             else if (unitsSystem === 'mks' || opts?.saveMode)
               allowedCandidateUnits = candidateUnitsMKS;
@@ -1805,8 +1794,8 @@
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
               function cmp(a,b) {
                 // Units system should match, if possible
-                if (!a.unit.hints?.uscu !== !b.unit.hints?.uscu) {
-                  if (!hints?.uscu === !a.unit.hints?.uscu)
+                if (a.unit.hints?.system !== b.unit.hints?.system) {
+                  if (hints?.system === a.unit.hints?.system)
                     return -1;
                   return 1;
                 }
@@ -1878,7 +1867,7 @@
         let displayRatio = hints.ratio;
         if (displayRatio === undefined) {
           displayRatio = 'none';
-          if (hints.uscu)
+          if (hints.system === 'uscu')
           displayRatio = 'mix?';
         }
         if (displayRatio !== 'none' && typeof val[0] === 'bigint') {
@@ -2336,12 +2325,12 @@
             chunkDim = { L: 1 };
             unitVal = Number(FT5K)/Number(N5K);
             chunkVal = Rat.mul(chunkVal, [ BigInt(FT5K), BigInt(N5K) ]);
-            hints.uscu = true;
+            hints.system = 'uscu';
           } else if (take('"') && !ALPHA.includes(peekc())) {
             chunkDim = { L:1 };
             unitVal = Number(IN5K)/Number(N5K);
             chunkVal = Rat.mul(chunkVal, [ BigInt(IN5K), BigInt(N5K) ]);
-            hints.uscu = true;
+            hints.system = 'uscu';
           } else {
             parsePos = backtrackQuote; // un-eat the quote in case this is a nonce unit
             const res = parseUnitString(chunkVal, opts);
@@ -2780,6 +2769,8 @@
         userSymbols[sym] = val;
         // Do it here because iOS doesn't reliably deliver any kind of event when the app ends.
         saveUserSymbols();
+        if (sym === "loglevel" && val.type === 'num' && Dim.isScalar(val.dim))
+          logLevel = Rat.number(numVal(val));
       }
 
       function deleteDef(symName) {
@@ -2863,7 +2854,7 @@
               showUserSymbols();
               if (opts?.userHitEnter)
                 exprElement.value = "";
-            } else if (val.type === 'num' && val.hints?.uscu && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
+            } else if (val.type === 'num' && val.hints?.system === 'uscu' && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
               showFeetInchesResult(numVal(val));
             } else if (val.type === 'num') {
               showResult(val);
@@ -2929,7 +2920,7 @@
       }
 
       function symString(val, opts) {
-        if (val.dim && Dim.equal(val.dim, { L: 1 }) && val.hints?.uscu && !opts?.saveMode) {
+        if (val.dim && Dim.equal(val.dim, { L: 1 }) && val.hints?.system === 'uscu' && !opts?.saveMode) {
           let [ftStr, inStr, delta] = unitsToUSStringReps(Rat.number(numVal(val)));
           let str = `${val.sym} = ${ftStr}${delta}`;
           if (opts?.html)
