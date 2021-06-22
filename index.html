@@ -587,7 +587,8 @@
             <td> Returns the <i>angle</i> corresponding to the slope y/x, even when x is zero.
                  More formally, it's the angle from the x-axis of the vector (x,y).
         </table>
-        <p> Note that angles are neither degrees nor radians. They are <i>just angles</i> and can be
+        <p> For the purposes of this tool, angles are neither degrees nor radians.
+            They are <i>just angles</i> and can be
             specified or displayed using either notation. If, however, a plain number is given, it will be
             interpreted as radians. So <code>sin(45 degrees)</code>, <code>sin(pi/4radian)</code>
             and <code>sin(pi/4)</code> all mean the same thing.
@@ -799,6 +800,7 @@
 
       class Dim {
         static isScalar(dim) {
+          if (!dim) return true;
           for (const measure in dim)
             if (dim[measure] !== 0)
               return false;
@@ -1012,7 +1014,7 @@
       const AMP = 1, KELVIN = 1;
       const BIT = 1, BYTE = 8*BIT;
       const DEGREE = 1, RADIAN = 180*Number(DEGREE)/Math.PI;
-      const CANDLE = 1;
+      const CANDELA = 1;
       const PERSON = 1;
       const NONCE = 1;
       const CMPS = 299792458;
@@ -1109,17 +1111,24 @@
             desc: "Fahrenheit", alt: ["degf"], hints: { affineUnit: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             prefixSym: 'K',  prefixNames: ["kelvin"] },
+        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+            desc: "Boltzmann constant" },
 
         // Angles (RAD)
         //   A steradian can be thought of as a square radian because 2pi radians covers
         //   a circle and 4pi steradians covers a sphere. Even if not completely
-        //   sound, there are no operations on it that are harmed by the assumption.
+        //   sound, there are no operations on it that are harmed by the convention.
+        //   Further, angles are properly considered dimensionless in dimensional analysis
+        //   but are conventionally used in photometry. So for the purposes of this tool,
+        //   angles are considered dimensions and this lets us do things like convert
+        //   degress to radians.
         groupAngle: { group: "Angle Units" },
         radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"] },
         sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"] },
         degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, alt: ["degrees"] },
         arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"] },
         arcsec: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60*60 ], alt: ["arcsecond", "arcseconds"] },
+        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"] },
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
@@ -1153,9 +1162,12 @@
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
-        joule: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joules"],
-            prefixNames: ["joule", "joules"] },
-        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 * 10000000 ], alt: ["ergs"] },
+        J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joule", "joules"],
+            prefixSym: "J", prefixNames: ["joule", "joules"] },
+        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 * 10000000 ], alt: ["ergs"],
+            prefixNames: ["erg", "ergs"] },
+        cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M * M, 1000 * SEC**2 ], alt: ["calorie"],
+            prefixSym: "cal", prefixNames: ["calorie", "calories"] },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
@@ -1177,53 +1189,57 @@
             desc: "millimeter of mercury" },
         torr: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, 760 * M * SEC**2 ] },
 
-        // Electrical (A ...)
+        // Electrical (I ...)
         //   http://www.ebyte.it/library/educards/sidimensions/SiDimensionsAlfaList.html
         groupElectrical: { group: "Electrical Units" },
-        A: { type: 'num', dim: { A: 1 }, val: AMP, reserved: true, alt: ["ampere", "amperes", "amp", "amps"],
+        A: { type: 'num', dim: { I: 1 }, val: AMP, reserved: true, alt: ["ampere", "amperes", "amp", "amps"],
             prefixSym: "A", prefixNames: ["ampere", "amperes"] },
-        V: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -1 }, val: [KG * M**2, SEC**3 * AMP ],
+        V: { type: 'num', dim: { M: 1, L: 2, T: -3, I: -1 }, val: [KG * M**2, SEC**3 * AMP ],
             alt: ["volt", "volts"],
             prefixSym: "V", prefixNames: ["volt", "volts"] },
-        ohm: { type: 'num', dim: { M: 1, L: 2, T: -3, A: -2 }, val: [ KG * M**2, SEC**3 * AMP**2 ],
+        ohm: { type: 'num', dim: { M: 1, L: 2, T: -3, I: -2 }, val: [ KG * M**2, SEC**3 * AMP**2 ],
             display: OHMSYM, desc: "ohm", alt: ["ohms"],
             prefixSym: OHMSYM, prefixNames: ["ohm", "ohms"] },
-        S: { type: 'num', dim: { M: -1, L: -2, T: 3, A: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ], desc: "siemens" },
-        C: { type: 'num', dim: { T: 1, A: 1 }, val: SEC * AMP, desc: "coulomb" },
-        F: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ],
+        S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ], desc: "siemens" },
+        C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "coulomb, electric charge" },
+        F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ],
             alt: ["farad", "farads"],
             prefixSym: "F", prefixNames: ["farad", "farads"] },
-        Wb: { type: 'num', dim: { M: 1, L: 2, T: -2, A: -1 }, val: [ KG * M**2, SEC**2 * AMP ],
+        Wb: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -1 }, val: [ KG * M**2, SEC**2 * AMP ],
             desc: "weber, magnetic flux", alt: ["weber"],
             prefixSym: "Wb", prefixNames: ["weber", "webers"] },
-        T: { type: 'num', dim: { M: 1, T: -2, A: -1 }, val: [ KG, SEC**2 * AMP ],
+        T: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, SEC**2 * AMP ],
             desc: "tesla, magnetic flux density", alt: ["tesla"],
             prefixSym: "T", prefixNames: ["tesla", "teslas"] },
-        gauss: { type: 'num', dim: { M: 1, T: -2, A: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
+        gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
             desc: "gauss, magnetic flux density", alt: ["gauss"],
             prefixNames: ["gauss"] },
-        H: { type: 'num', dim: { M: 1, L: 2, T: -2, A: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
+        H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
             desc: "henry, mutual inductance ", alt: ["henry"],
            prefixSym: "H", prefixNames: ["henry"] },
 
-        // Lumosity (J...)
-        groupLuminosity: { group: "Lumosity Units" },  // TODO, revisit this
-        cd: { type: 'num', dim: { J: 1 }, val: CANDLE, reserved: true, desc: "candela, luminous intensity",
+        // Photometry (J...)
+        groupLuminosity: { group: "Lumosity Units" },
+        cd: { type: 'num', dim: { J: 1 }, val: CANDELA, reserved: true, desc: "luminous intensity",
             alt: ["candela", "candelas"] },
-        lx: { type: 'num', dim: { J: 1, RAD: 2, L: -2 }, val: [ CANDLE * RADIAN**2,  M**2 ],
-            desc: "lux, luminous emittance", alt: ["lux"] },
-        lm: { type: 'num', dim: { J: 1, RAD: 2 }, val: CANDLE * RADIAN**2,
-            desc: "lumen, luminous flux", alt: ["lumen", "lumens"] },
+        lx: { type: 'num', dim: { J: 1, RAD: 2, L: -2 }, val: [ CANDELA * RADIAN**2,  M**2 ],
+            desc: "luminous emittance", alt: ["lux"] },
+        lm: { type: 'num', dim: { J: 1, RAD: 2 }, val: CANDELA * RADIAN**2,
+            desc: "luminous flux", alt: ["lumen", "lumens"] },
+
+        // Chemical units (N)
+        // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
+        groupChemical: { group: "Chemical Units" },
+        mol: { type: 'num', dim: { N: 1 }, val: Rat.ONE, desc: "Mol, number of particles", alt: ["mols"] },
+        NA: { type: 'num', dim: { N: -1 }, val: 6.02214076e23, desc: "Avogadro's constant" },
+        N0: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number" },
+        Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
+            prefixSym: "Da", prefixNames: ["dalton", "daltons"] },
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: Math.PI, display: PISYM, desc: PISYM },
         tau: { type: 'num', dim: {}, val: 2 * Math.PI, display: TAUSYM, desc: `2${PISYM}` },
-        // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
-        mol: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number", alt: ["mols"] },
-        dalton: { type: 'num', dim: { M: 1 }, val: 1.6605390666e-27 * KG },
-        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
-            desc: "Boltzmann constant" },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
         parsec:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M * 648000 / Math.PI,
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
@@ -1448,7 +1464,7 @@
           let helpDesc = sym.desc || name;
           if (helpDesc === alts[0]) {
             alts.shift();
-            helpDesc = `<span class="stuff-text">${altName}</span>`;
+            helpDesc = `<span class="stuff-text">${helpDesc}</span>`;
           }
           if (sym.reserved)
             helpDesc += " <i>(reserved)</i>";
@@ -1636,7 +1652,7 @@
         "W", "kW",
         // seconds come after electrical and information units so that a coulomb
         // is an "A s", not an "s A"
-        's', 'K', 'person', '$', 'symbol',
+        's', 'K', 'person', '$', 'symbol', 'mol',
         'sr', 'radian', 'cd', 'lx', 'lm' ];
       const commonMetricUnits = [
         'joule', 'N', 'Pa', 'kPa', 'W', 'kW', 'mW' ];
@@ -1757,7 +1773,7 @@
             applyDesc(desc);
           }
           let allowedCandidateUnits = candidateUnits;
-          if (dim.L && dim.M || dim.A || dim.DC) {
+          if (dim.L && dim.M || dim.I || dim.J) {
             // Things get weird when both mass and length are in a value. It's best
             // to revert to barebones CGS, MKS, or basic USCS units. Otherwise you get
             // things like "km cg" instead of "m gm"
@@ -2207,7 +2223,7 @@
           implicitValue = true;
         }
         let backtrack1 = parsePos;
-        let unitVal = Rat.ONE, unitList = [], dim= {}, origin, hints;
+        let unitVal = Rat.ONE, unitList = [], dim = {}, origin, hints;
         while (true) {
           const backtrack2 = parsePos;
           let hasSlash = take('/');
@@ -2233,16 +2249,17 @@
             unitList.push([ 1, sym ]);
             continue;
           }
-          // Affine units can't combine with other units at all
-          if (origin || sym.origin && unitList.length > 0)
+          // Affine units can only combine with scalars
+          if (origin && !Dim.isScalar(sym.dim) || sym.origin && !Dim.isScalar(dim))
             throw new MessageError(`Implausible units`);
           if (sym.origin) {
             if (hasSlash) {
               // Affine units in the denominator lose their origin and affine hints
               let hints = sym.hints;
-              if (hints)  
-                delete hints.affineUnit;
-              sym = { ...sym, hints, origin: undefined };
+              if (hints)
+                hints = { ...hints, affineUnit: undefined };
+              if (hints || sym.origin)
+                sym = { ...sym, hints, origin: undefined };
             } else {
               // Affine units must appear alone with no exponents or in the denominator.
               // Affine units can only have a +1 exponent or a negative exponent.
@@ -2333,7 +2350,7 @@
             }
             hints = { ...res.hints, ...hints };  // first hint wins
             if (res.type === 'num') {
-              // can't combine affine units with anything else
+              // Can't combine affine units with anything
               if (origin || dim && res.origin) throw new MessageError("Implausible units");
               chunkVal = res.val;
               unitVal = Rat.number(res.unitVal);
@@ -2427,11 +2444,12 @@
             if (val.type === 'fn') throw new ChattyError("can't divide functions");
             if (val.type === 'parse')
               return { type: 'parse', op: 'recip', expr: val };
-            // No clear meaning to the reciprocal of an affine value, so remove hints about
-            // that. Not a principled stance, but it defers the issue.
-            let hints = { ...val.hints };
-            delete hints.affineUnit;
-            return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(numVal(val)), hints };
+            // No clear meaning to the reciprocal of an affine value,
+            // but we might as well match units behavior, where
+            // 1 /degc means the same as 1 /K, the logic being that we're talking
+            // about a degree of _change_. So we ignore the origin by NOT calling numval().
+            let hints = { ...val.hints, affineUnit: undefined };
+            return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), hints };
           }
           parsePos = backtrack;
           return null;
@@ -2530,6 +2548,10 @@
           let expVal = Rat.number(numVal(exp));
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
+          let hints = val.hints;
+          if (hints.affineUnit) {
+            hints = { ...hints, affineUnit: undefined };
+          }
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
             val: Rat.pow(numVal(val), numVal(exp)), hints: val.hints };
         }
@@ -2557,8 +2579,7 @@
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num') {
-              let hints = { ...val2.hints, ...val.hints };
-              delete hints.affineUnit;
+              let hints = { ...val2.hints, ...val.hints, affineUnit: undefined };
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
                   val: Rat.mul(numVal(val), numVal(val2)), hints };
             }
@@ -2575,16 +2596,16 @@
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '/', expr1: val, expr2: val2 };
             } else if (val.type === 'num' && val2.type === 'num') {
-              if ((val.origin || val2.origin) && Dim.equal(val.dim, val2.dim)) {
-                // Ratios with affine units should just be a ratio of their magnitudes
-                // so that degf / degc = 5/9
-                val = { ...val, origin: undefined };
-                val2 = { ...val2, origin: undefined };
-              }
-              let hints = { ...val2.hints, ...val.hints };
-              delete hints.affineUnit;
+              let hints = { ...val2.hints, ...val.hints, affineUnit: undefined };
+              // Ratios with an affine unit should just be a ratio of its rate of change.
+              // Ratios between affine units should be the ratios of their rates of change
+              // so that degf / degc = 5/9. But an afine unit divided by anything else
+              // should denature to its base unit so that dividing 32 degf by 2 should
+              // show the result as half the corresponding kelvin degrees.
+              if (val.origin && val2.origin)
+                 val = { ...val, origin: undefined }; // val2 is handled by not calling numval()
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
-                  val: Rat.div(numVal(val), numVal(val2)), hints };
+                  val: Rat.div(numVal(val), val2.val), hints };
             } else {
               throw new MessageError("Unknown value type");
             }
