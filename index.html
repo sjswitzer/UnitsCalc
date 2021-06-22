@@ -483,8 +483,7 @@
             <td> 1/4 mi2 / acres
             <td> The number of acres in a quarter of a square mile
         </table>
-        <p> Just for fun, try <code>furlongs/fortnight</code>, <code>9600 baud * 1 bit/symbol</code>,
-            or <code>gallons/cup</code>.
+        <p> Just for fun, try <code>furlongs/fortnight</code> or <code>gallons/cup</code>.
         <h2> Terms </h2>
         <p> Expressions are built up out of <i>terms</i> which are either
           <ul>
@@ -1189,30 +1188,26 @@
             prefixSym: OHMSYM, prefixNames: ["ohm", "ohms"] },
         S: { type: 'num', dim: { M: -1, L: -2, T: 3, A: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ], desc: "siemens" },
         C: { type: 'num', dim: { T: 1, A: 1 }, val: SEC * AMP, desc: "coulomb" },
-        // farads tend to be very small
         F: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ],
-            alt: ["farad", "farads"] },
-        mF: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, 1000 * KG * M**2 ],
-            alt: ["millifarad", "millifarads"] },
-        uF: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, 1000**2 * KG * M**2 ],
-            alt: ["microfarad", "microfarads"], display: MICROSYM+"F" },
-        nF: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, 1000**3 * KG * M**2 ],
-            alt: ["nanofarad", "nanofarads"] },
-        pF: { type: 'num', dim: { M: -1, L: -2, T: 4, A: 2 }, val: [ SEC**4 * AMP**2, 1000**4 * KG * M**2 ],
-            alt: ["picofarad", "picofarads"] },
+            alt: ["farad", "farads"],
+            prefixSym: "F", prefixNames: ["farad", "farads"] },
         Wb: { type: 'num', dim: { M: 1, L: 2, T: -2, A: -1 }, val: [ KG * M**2, SEC**2 * AMP ],
-            desc: "weber, magnetic flux", alt: ["weber"] },
+            desc: "weber, magnetic flux", alt: ["weber"],
+            prefixSym: "Wb", prefixNames: ["weber", "webers"] },
         T: { type: 'num', dim: { M: 1, T: -2, A: -1 }, val: [ KG, SEC**2 * AMP ],
-            desc: "tesla, magnetic flux density", alt: ["tesla"] },
+            desc: "tesla, magnetic flux density", alt: ["tesla"],
+            prefixSym: "T", prefixNames: ["tesla", "teslas"] },
         gauss: { type: 'num', dim: { M: 1, T: -2, A: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "gauss, magnetic flux density", alt: ["gauss"] },
+            desc: "gauss, magnetic flux density", alt: ["gauss"],
+            prefixNames: ["gauss"] },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, A: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
-            desc: "henry, mutual inductance ", alt: ["henry"] },
+            desc: "henry, mutual inductance ", alt: ["henry"],
+           prefixSym: "H", prefixNames: ["henry"] },
 
         // Lumosity (CD...)
-        groupLuminosity: { group: "Lumosity Units" },
-        cd: { type: 'num', dim: { CD: 1 }, val: CANDLE, reserved: true, desc: "candle, luminous intensity",
-            alt: ["candle", "candles"] },
+        groupLuminosity: { group: "Lumosity Units" },  // TODO, revisit this
+        cd: { type: 'num', dim: { CD: 1 }, val: CANDLE, reserved: true, desc: "candela, luminous intensity",
+            alt: ["candela", "candelas"] },
         lx: { type: 'num', dim: { CD: 1, RAD: 2, L: -2 }, val: [ CANDLE * RADIAN**2,  M**2 ],
             desc: "lux, luminous emittance", alt: ["lux"] },
         lm: { type: 'num', dim: { CD: 1, RAD: 2 }, val: CANDLE * RADIAN**2,
@@ -1871,11 +1866,11 @@
             num = 0n;
           }
           if (displayRatio === 'mix?') { // Is it worth displaying as a mixed fraction
-            // If the denom is a power of 10, it's not
+            // If the denom is a power of 10, it's not worth it
             let l10 = Math.log10(Number(denom));
             if (l10 === Math.trunc(l10)) {
               asFrac = false;
-            } else if (num > 12n || denom > 12n) { // num and/or denom too big
+            } else if (num !== 1n && (num > 12n || denom > 12n)) { // num and/or denom too big
               // unless we have a power of two in the denominator
               let lg2 = Math.log2(Number(denom));
               asFrac = (lg2 === Math.trunc(lg2) && lg2 <= 10);
