@@ -1041,7 +1041,7 @@
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
             reserved: true, hints: { system: 'uscu' } },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
-            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
+            prefixSym: 'm',  prefixNames: ["meter", "meters"], hints: { system: 'mks' } },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
@@ -1062,9 +1062,9 @@
         tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], hints: { system: 'uscu' }, alt: ["tablespoon", "tablespoons", "tbsps"] },
         tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], hints: { system: 'uscu' }, alt: ["teaspoon", "teaspoons", "tsps"] },
         floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", hints: { system: 'uscu' } },
-        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"] },
+        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"], hints: { system: 'mks' } },
         ml: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], alt: ["milliliter", "millilitre", "milliliters", "millilitres"] },
-        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
+        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter", hints: { system: 'cgs' } },
         gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], hints: { system: 'uscu' }, desc: "gill", alt:["gill", "gills"] },
         dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], hints: { system: 'uscu' }, alt: ["drams"] },
         minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], hints: { system: 'uscu' }, alt: ["minims"] },
@@ -1075,7 +1075,7 @@
         lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", hints: { system: 'uscu' }, alt: ["lbs", "pound", "pounds", "lbm"] },
         oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", hints: { system: 'uscu' }, alt: ["ounce", "ounces"]},
         gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
-          prefixSym: 'g',  prefixNames: ["gram", "grams"] },
+          prefixSym: 'g',  prefixNames: ["gram", "grams"], hints: { system: 'mks' } }, // gm gets patched to cgs later
 
         // Time (T)
         groupTime: { group: "Time Units" },
@@ -1103,7 +1103,7 @@
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
 
         // Temperature (THETA)
-        groupTemperature: { group: "Temperature Units" },
+        groupTemperature: { group: "Temperature & Thermodynamic Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
             desc: "Celsius", alt: ["degc"], hints: { affineUnit: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
@@ -1156,30 +1156,33 @@
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
         N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
-           prefixSym: "N", prefixNames: ["newton", "newtons"] },
-        dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 100000 * SEC**2 ], alt: ["dynes"] },
+           prefixSym: "N", prefixNames: ["newton", "newtons"], hints: { system: 'mks' } },
+        dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
+            prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], hints: { system: 'cgs' } },
         lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", hints: { system: 'uscu' } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
         J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joule", "joules"],
-            prefixSym: "J", prefixNames: ["joule", "joules"] },
-        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 * 10000000 ], alt: ["ergs"],
-            prefixNames: ["erg", "ergs"] },
+            prefixSym: "J", prefixNames: ["joule", "joules"], hints: { system: 'mks' } },
+        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M * M, SEC**2 ], alt: ["ergs"],
+            prefixNames: ["erg", "ergs"], hints: { system: 'cgs' } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M * M, 1000 * SEC**2 ], alt: ["calorie"],
             prefixSym: "cal", prefixNames: ["calorie", "calories"] },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], alt: ["watt", "watts"],
-            prefixSym: "W", prefixNames: ["watt", "watts"] },
+            prefixSym: "W", prefixNames: ["watt", "watts"], hints: { system: 'mks' } },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"],
             val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower", hints: { system: 'uscu' } },
 
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
         Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
-            prefixSym: "Pa", prefixNames: ["pascal", "pascals"] },
+            prefixSym: "Pa", prefixNames: ["pascal", "pascals"], hints: { system: 'mks' } },
+        Ba: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, 10 * M * SEC**2 ], alt: ["barye", "byryes"],
+            prefixSym: "Ba", prefixNames: ["barye", "byryes"], hints: { system: 'cgs' } },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
             desc: "pounds per square inch", hints: { system: 'uscu' } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
@@ -1393,9 +1396,7 @@
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () => {
-              for (const s in systemSymbols)
-              console.log(s, JSON.stringify(systemSymbols[s],
-                (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
+              console.dir(systemSymbols);
             } } },
       };
 
@@ -1530,6 +1531,8 @@
                        <td><span class="stuff-text">/${name}</span><td>${helpDesc}`;
         }
         builtinSymbolsElement.innerHTML = html;
+        // Patch cm to the cgs system
+        systemSymbols.cm.hints = { ...systemSymbols.cm.hints, system: 'cgs' };
       }
 
       groomSystemSymbols();
@@ -1644,7 +1647,7 @@
         's', 'K', 'person', '$', 'symbol', 'mol',
         'sr', 'radian', 'cd', 'lx', 'lm' ];
       const commonMetricUnits = [
-        'joule', 'N', 'Pa', 'kPa', 'W', 'kW', 'mW' ];
+        'joule', 'erg', 'N', 'dyne', 'Pa', 'Da', 'kPa', 'kBa', 'W', 'kW', 'mW' ];
       const candidateUnits = filterUnits([
         ...commonUnits, ... commonMetricUnits,
         'in', 'ft', 'mi', 'acre',
@@ -1718,9 +1721,10 @@
               // It's a measure of "how far from one" the valus is.
               let digits = Math.abs(Math.log10(Math.abs(newNum)));
               let favored = unit.favored ?? 0;
+              let hints = unit.hints ?? {};
               // A bunch of stuff that can be used in the sort function.
               return { unit, exp, newVal, newNum, reducedDim, reducedNormSquared,
-                favored, dotProduct, digits, expSum, nDims };
+                favored, dotProduct, digits, expSum, nDims, hints };
             }
             catch (e) {
               if (e instanceof OverflowError) // exponentiation failed somewhere along the line
@@ -1731,7 +1735,11 @@
           function applyDesc(unitDesc) {
             let unitList = unitDesc.unit.unitList ?? [ [ 1, unitDesc.unit ] ];
             for (let [exp, unit] of unitList) {
-              if (unit.hints?.ratio) continue; // special unit to force fractional representation
+              // Ignore special flag units
+              if (Dim.isScalar(unit.dim) && unit.val[0] === 1n && unit.val[1] === 1n) {
+                if (unit.hints?.ratio) continue;
+                if (unit.hints?.system) continue;                
+              }
               let str = " ";
               let displayExp = exp = unitDesc.exp * exp;
               if (displayExp < 0) {
@@ -1762,6 +1770,7 @@
             applyDesc(desc);
           }
           let allowedCandidateUnits = candidateUnits;
+          /*
           if (dim.L && dim.M || dim.I || dim.J) {
             // Things get weird when both mass and length are in a value. It's best
             // to revert to barebones CGS, MKS, or basic USCS units. Otherwise you get
@@ -1773,6 +1782,7 @@
             else if (unitsSystem === 'cgs')
               allowedCandidateUnits = candidateUnitsCGS;
           }
+          */
           allowedCandidateUnits = [ ...Object.values(nonceUnits), ...allowedCandidateUnits ];
           if (hints.affineUnit) {
             let affineUnit = getSymbol(hints.affineUnit);
@@ -1794,10 +1804,13 @@
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
               function cmp(a,b) {
                 // Units system should match, if possible
-                if (a.unit.hints?.system !== b.unit.hints?.system) {
-                  if (hints?.system === a.unit.hints?.system)
-                    return -1;
-                  return 1;
+                if (hints.system) {
+                  if (a.hints.system !== b.hints.system) {
+                    if (hints.system === a.hints.system)
+                      return -1;
+                    if (hints.system === b.hints.system)
+                      return 1;
+                  }
                 }
 
                 // Favored units
