@@ -1860,8 +1860,11 @@
           if (hints.uscu)
           displayRatio = 'mix?';
         }
-        let num = val[0], denom = val[1], intpart = 0n;
-        if (displayRatio !== 'none' && typeof num === 'bigint') {
+        if (displayRatio !== 'none' && typeof val[0] === 'bigint') {
+          let num = val[0], denom = val[1], intpart = 0n;
+          let neg = num < 0n;
+          if (neg)
+            num = -num;
           let asFrac = true;
           if (displayRatio === 'mix' || displayRatio === 'mix?') {
             intpart = num/denom;
@@ -1876,19 +1879,16 @@
             let l10 = Math.log10(Number(denom));
             if (l10 === Math.trunc(l10)) {
               asFrac = false;
-            } else if (num !== 1n && (num > 12n || denom > 12n)) { // num and/or denom too big
+            } else if (num > 3n && (num > 12n || denom > 12n)) { // num and/or denom too big
               // unless we have a power of two in the denominator
               let lg2 = Math.log2(Number(denom));
               asFrac = (lg2 === Math.trunc(lg2) && lg2 <= 10);
             }
           }
           if (asFrac) {
-            let neg = num < 0n;
             let str = "";
-            if (neg) {
-              num = -num;
+            if (neg)
               str += "-";
-            }
             if (intpart !== 0n || num === 0n) {
               str += String(intpart);
               if (num !== 0n)
