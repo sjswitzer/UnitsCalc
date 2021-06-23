@@ -777,16 +777,15 @@
       const divElement = document.getElementById('div');
       const numpadElement = document.getElementById('numpad');
 
-      const InternalError = Error;
       class MessageError extends Error {
         toString() { return this.message; }
       }
       class OverflowError extends MessageError {};
+      class InternalError extends Error {};
 
       // Errors that are too chatty to show while typing.
       //   (Error will be shown if the user hits "enter.")
       class ChattyError extends MessageError {}
-
 
       let logLevel = 0;
       function Log(level, msg, ...rest) {
