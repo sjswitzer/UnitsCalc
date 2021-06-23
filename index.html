@@ -781,7 +781,7 @@
         toString() { return this.message; }
       }
       class OverflowError extends MessageError {};
-      class InternalError extends Error {};
+      const InternalError = Error;
 
       // Errors that are too chatty to show while typing.
       //   (Error will be shown if the user hits "enter.")
@@ -791,7 +791,7 @@
       function Log(level, msg, ...rest) {
         if (level <= logLevel) {
           if (msg instanceof Function) msg = msg(logLevel);
-          if (msg instanceof Array) msg = [ ...res, ...rest ];
+          if (msg instanceof Array) msg = [ ...msg, ...rest ];
           else msg = [ msg, ...rest];
           console.log(...msg);
         }
