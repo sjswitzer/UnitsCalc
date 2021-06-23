@@ -14,7 +14,7 @@ onfetch = event => {
     return response;
   return fetch(event.request).then(response => {
     let cloned = response.clone();
-    caches.open(version).then(cache => cache.put(event.request, cloned));
+    caches.open("TODO-version").then(cache => cache.put(event.request, cloned));
     return response;
     });
   }));
