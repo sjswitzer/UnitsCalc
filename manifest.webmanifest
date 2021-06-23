@@ -1,0 +1,15 @@
+{
+    "background_color": "white",
+    "description": "Units Calculator",
+    "display": "fullscreen",
+    "icons": [
+      {
+        "src": "icon128.png",
+        "sizes": "128x128",
+        "type": "image/png"
+      }
+    ],
+    "name": "Units Calculator",
+    "short_name": "UnitsCalculator",
+    "start_url": "index.html"
+  }
