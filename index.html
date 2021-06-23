@@ -22,7 +22,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="version" content="1.2">
+    <meta name="version" content="1.3">
     <link rel="apple-touch-icon" href="icon128.png">
     <link rel="manifest" href="manifest.webmanifest">
     <base target="_blank"> <!-- all links open in a new tab/page -->
@@ -3280,8 +3280,11 @@
       ftElement.value = "5";  // populate wuth example content
       updateResult();
 
-      if ('serviceWorker' in navigator && window.location.protocol === 'https:')
-        navigator.serviceWorker.register('service-worker.js');
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        let worker = navigator.serviceWorker.register('service-worker.js');
+        version = "v" + String(Rat.number(systemSymbols.version.val));
+        worker.postMessage({ version });
+      }
 
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
    </script>
