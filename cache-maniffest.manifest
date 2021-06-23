@@ -1,0 +1,12 @@
+CACHE MANIFEST
+# Note: something in the manifest must change to trigger reload;
+# There's no versioning scheme yet, so just modify this jext line somehow.
+#   23 June 2021 - 1
+
+CACHE
+icon128.png
+
+NETWORK
+# Whitelist everything
+*
+
