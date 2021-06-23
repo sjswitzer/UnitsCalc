@@ -13,7 +13,7 @@
     This work is licensed under a Creative Commons Attribution-ShareAlike
     4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 -->
-<html manifest="cache-maniffest.manifest">
+<html>
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
@@ -22,7 +22,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="version" content="1.1">
+    <meta name="version" content="1.2">
     <link rel="apple-touch-icon" href="icon128.png">
     <base target="_blank"> <!-- all links open in a new tab/page -->
     <style type="text/css">
@@ -3278,6 +3278,10 @@
       addNumpadStuffs();
       ftElement.value = "5";  // populate wuth example content
       updateResult();
+
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:')
+        navigator.serviceWorker.register('service-worker.js');
+
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
    </script>
   </body>
