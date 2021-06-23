@@ -22,8 +22,8 @@
     <meta name="viewport" content="width=device-width">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="version" content="1.6">
     <link rel="apple-touch-icon" href="icon128.png">
+    <meta name="version" content="1.8">
     <link rel="manifest" href="manifest.webmanifest">
     <base target="_blank"> <!-- all links open in a new tab/page -->
     <style type="text/css">
@@ -1020,6 +1020,8 @@
       const NONCE = 1;
       const CMPS = 299792458;
 
+      let fullVersion, majorVersion; // populated from META tag
+
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
           PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F",
@@ -1560,6 +1562,7 @@
         for (let m of metas) {
           if (m.name === 'version') {
             let val = Number(m.content), factor = 1000000;
+            fullVersion = val, majorVersion = Math.trunc(val);
             val = Rat.normalize([ val * factor, factor ]); // rationalize the version
             val = { type: 'num', sym: 'version', val };
             systemSymbols[val.sym] = val;
@@ -3078,9 +3081,7 @@
         }
       }
 
-      const GUID = "ad1f9c32-ed69-457d-89a0-f966c81424bd";
-      const LOCAL_STORAGE_KEY = "UnitsCalculator-" + GUID;
-      const MAJOR = 1, MINOR = 0, PATCH = 0;
+      const LOCAL_STORAGE_KEY = "UnitsCalculator";
 
       function loadUserSymbols() {
         const localStorage = window.localStorage;
@@ -3090,7 +3091,7 @@
         if (!json)
           return false;
         let wad = JSON.parse(json);
-        if (!wad || !wad.major || wad.major > MAJOR)
+        if (!(wad?.majorVersion <= majorVersion))  // handles undefine implicitly
           return false;
         if (!wad.defs)
           return false;
@@ -3112,9 +3113,7 @@
         const localStorage = window.localStorage;
         if (!localStorage)
           return false;
-        const wad = {
-          major: MAJOR, minor: MINOR, patch: PATCH, defs: []
-        };
+        const wad = { majorVersion, fullVersion, defs: [] };
         // We rely on the fact that objects are enumerated in the order
         // items were added. Otherwise, function definitions might fail
         // due to their variable references being unsatisfied.
