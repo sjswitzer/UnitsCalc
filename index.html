@@ -3282,7 +3282,7 @@
 
       if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
         let worker = navigator.serviceWorker.register('service-worker.js');
-        version = "v" + String(Rat.number(systemSymbols.version.val));
+        let version = "v" + String(Rat.number(systemSymbols.version.val));
         worker.postMessage({ version });
       }
 
