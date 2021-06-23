@@ -3281,9 +3281,9 @@
       updateResult();
 
       if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-        let worker = navigator.serviceWorker.register('service-worker.js');
+        let workerPromise = navigator.serviceWorker.register('service-worker.js');
         let version = "v" + String(Rat.number(systemSymbols.version.val));
-        worker.postMessage({ version });
+        workerPromise.then( (worker) => worker.postMessage({ version }) );
       }
 
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
