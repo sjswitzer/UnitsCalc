@@ -1013,7 +1013,7 @@
       const GAL5K3 = 231*IN5K**3;
       const AMP = 1, KELVIN = 1;
       const BIT = 1, BYTE = 8*BIT;
-      const DEGREE = 1, RADIAN = 180*Number(DEGREE)/Math.PI;
+      const DEGREE = 1, CIRCLE = 360 * DEGREE, PI = Math.PI, RADIAN = CIRCLE/2/PI;
       const CANDELA = 1;
       const PERSON = 1;
       const NONCE = 1;
@@ -1022,12 +1022,13 @@
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
           PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F",
+          PLANCKHSYM = "\u210E", PLANCKHBARSYM = "\u210F", EPSILONSYM = "\u03B5",
           MULSYM = "\u00D7", DIVSYM = "\u00F7";
   ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        MICROSYM + OHMSYM + TAUSYM + PISYM + "$";
+        MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM + PLANCKHBARSYM + EPSILONSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
       const systemSymbols = {
@@ -1164,12 +1165,14 @@
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
-        J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M * M, SEC**2 ], alt: ["joule", "joules"],
+        J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M**2, SEC**2 ], alt: ["joule", "joules"],
             prefixSym: "J", prefixNames: ["joule", "joules"], smells: { system: 'mks' } },
-        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M * M, SEC**2 ], alt: ["ergs"],
+        erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M**2, SEC**2 ], alt: ["ergs"],
             prefixNames: ["erg", "ergs"], smells: { system: 'cgs' } },
-        cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M * M, 1000 * SEC**2 ], alt: ["calorie"],
+        cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie"],
             prefixSym: "cal", prefixNames: ["calorie", "calories"] },
+        eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1.602176634e-19 * KG * M**2, SEC**2 ], alt: ["electronvolt", "electronvolts"],
+            prefixSym: "eV", prefixNames: ["electronvolt", "electronvolts"], smells: { system: 'mks' } },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
@@ -1223,8 +1226,7 @@
             desc: "magnetic flux density", alt: ["gauss"], smells: { system: 'cgs' },
             prefixNames: ["gauss"] },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
-            desc: "mutual inductance", alt: ["henry"],
-           prefixSym: "H", prefixNames: ["henry"] },
+            desc: "mutual inductance", alt: ["henry"], prefixSym: "H", prefixNames: ["henry"] },
 
         // Photometry (J...)
         groupLuminosity: { group: "Lumosity Units" },
@@ -1246,10 +1248,10 @@
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
-        pi: { type: 'num', dim: {}, val: Math.PI, display: PISYM, desc: PISYM },
-        tau: { type: 'num', dim: {}, val: 2 * Math.PI, display: TAUSYM, desc: `2${PISYM}` },
+        pi: { type: 'num', dim: {}, val: PI, display: PISYM, desc: PISYM },
+        tau: { type: 'num', dim: {}, val: 2 * PI, display: TAUSYM, desc: `2${PISYM}` },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
-        parsec:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M * 648000 / Math.PI,
+        parsec:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M * 648000 / PI,
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
         barn: { type: 'num', dim: { L: 2 }, val: 10e-28 * M**2, alt: ["barns"] }, // Nuclear physicist in the house?
         darcy: { type: 'num', dim: { L: 2 }, val: 10e-12 * M**2, desc: "hydraulic permeability" },
@@ -1260,6 +1262,17 @@
         c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light"},
         lightyear: { type: 'num', dim: { L: 1 }, val: [ CMPS * 36525 * DAY, 100  ],
             desc: "distance light travels in a year", alt: ["ly"] },
+      /*
+        [PLANCKHSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
+            desc: "planck constant", smells: { system: 'mks' }, alt: ["planck"] },
+        // Representing hbar explicitly in angular units is a choice, and I have made it. Provisionally.
+        [PLANCKHBARSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
+            desc: "reduced planck constant", smells: { system: 'mks' }, alt: ["reducedplanck", "hbar"], smells: { system: 'mks' } },
+        [EPSILONSYM+"0"]: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { system: 'mks' }, 
+            val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity", alt: ["e0"] },
+        [MICROSYM+"0"]: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { system: 'mks' },
+            val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability", alt: ["u0"] },
+      */
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
