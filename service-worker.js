@@ -2,7 +2,7 @@
 let version = "v0.0";
 
 onmessage = event => {
-    console.log("onmessage", e);
+    console.log("onmessage", event);
     if (event.data.version)
       version = event.data.version;
 };
