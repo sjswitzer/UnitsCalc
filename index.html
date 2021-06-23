@@ -22,6 +22,7 @@
     <meta name="viewport" content="width=device-width">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="format-detection" content="telephone=no">
+    <meta name="version" content="1.1">
     <link rel="apple-touch-icon" href="icon128.png">
     <base target="_blank"> <!-- all links open in a new tab/page -->
     <style type="text/css">
@@ -1553,6 +1554,16 @@
         systemSymbols.gm.smells = { ...systemSymbols.gm.smells, system: 'cgs' };
         systemSymbols.m.smells = { ...systemSymbols.m.smells, system: 'mks' };
         systemSymbols.kg.smells = { ...systemSymbols.kg.smells, system: 'mks' };
+
+        const metas = document.getElementsByTagName('meta');
+        for (let m of metas) {
+          if (m.name === 'version') {
+            let val = Number(m.content), factor = 1000000;
+            val = Rat.normalize([ val * factor, factor ]); // rationalize the version
+            val = { type: 'num', sym: 'version', val };
+            systemSymbols[val.sym] = val;
+          }
+        }
       }
 
       groomSystemSymbols();
