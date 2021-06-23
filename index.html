@@ -3279,14 +3279,8 @@
       ftElement.value = "5";  // populate wuth example content
       updateResult();
 
-      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-        let workerPromise = navigator.serviceWorker.register('service-worker.js');
-        let version = "v" + String(Rat.number(systemSymbols.version.val));
-        workerPromise.then( (reg) => {
-          console.log("workerPromise", reg);
-          reg.active.postMessage({ version });
-        });
-      }
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:')
+        navigator.serviceWorker.register('service-worker.js');
 
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
    </script>
