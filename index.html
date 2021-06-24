@@ -23,7 +23,7 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="format-detection" content="telephone=no">
     <link rel="apple-touch-icon" href="icon128.png">
-    <meta name="version" content="1.8">
+    <meta name="version" content="1.0.1">
     <link rel="manifest" href="manifest.webmanifest">
     <base target="_blank"> <!-- all links open in a new tab/page -->
     <style type="text/css">
@@ -367,9 +367,9 @@
             autocomplete="off" spellcheck="false" autocorrect="off"
             autocapitalize="none">
         </div>
-        <div class="clear-text-button mobile-only" onclick="clearExpr()"><span></span></div>
+        <div class="clear-text-button mobile-only" onclick="clearExpr(event)"><span></span></div>
         <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
-          onclick="toggleNumpad()">#</span>
+          onclick="toggleNumpad(event)">#</span>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
           onclick="showHelp('help-expr')">?</span>
       </div>
@@ -1020,8 +1020,6 @@
       const NONCE = 1;
       const CMPS = 299792458;
 
-      let fullVersion, majorVersion; // populated from META tag
-
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
           PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F",
@@ -1033,6 +1031,11 @@
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
         MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM + PLANCKHBARSYM + EPSILONSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
+
+      let appVersion;
+      for (let meta of document.getElementsByTagName('meta'))
+        if (meta.name === 'version')
+          appVersion = meta.content;
 
       const systemSymbols = {
         // Length (L)
@@ -1416,9 +1419,8 @@
         UI: function ToggleLegacyMode() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
-            command: () => {
-              console.dir(systemSymbols);
-            } } },
+            command: () =>  console.dir(systemSymbols) } },
+        version: { type: 'num', dim: {}, val: 0, display: null, command: () => showResult(appVersion) },
       };
 
       const metricPrefixes = [
@@ -1557,17 +1559,6 @@
         systemSymbols.gm.smells = { ...systemSymbols.gm.smells, system: 'cgs' };
         systemSymbols.m.smells = { ...systemSymbols.m.smells, system: 'mks' };
         systemSymbols.kg.smells = { ...systemSymbols.kg.smells, system: 'mks' };
-
-        const metas = document.getElementsByTagName('meta');
-        for (let m of metas) {
-          if (m.name === 'version') {
-            let val = Number(m.content), factor = 1000000;
-            fullVersion = val, majorVersion = Math.trunc(val);
-            val = Rat.normalize([ val * factor, factor ]); // rationalize the version
-            val = { type: 'num', sym: 'version', val };
-            systemSymbols[val.sym] = val;
-          }
-        }
       }
 
       groomSystemSymbols();
@@ -2319,10 +2310,9 @@
           parsePos = backtrack1;
           return null;
         }
-        let desc;
         if (unitList.length === 1 && unitList[0][0] === 1)
-          desc = unitList[0][1].desc;
-        return { type, val, dim, origin, desc, unitVal, unitList, smells };
+          return { ...unitList[0][1], unitVal };
+        return { type, val, dim, origin, unitVal, unitList, smells };
       }
 
       // Parse a value, which is either a plain number (n) or a sequesnce of
@@ -2923,8 +2913,11 @@
         numberResultsElement.style.display = '';
         errorElement.style.display = 'none';
         numberResultsElement.style.color = '';
-
-        numberResultsDetailElement.innerHTML = val2str(val, { html: true, describe: true });
+        
+        if (typeof val === 'string')
+          numberResultsDetailElement.textContent = val;
+        else
+          numberResultsDetailElement.innerHTML = val2str(val, { html: true, describe: true });
       }
 
       function escapeHTML(str) {
@@ -3091,7 +3084,8 @@
         if (!json)
           return false;
         let wad = JSON.parse(json);
-        if (!(wad?.majorVersion <= majorVersion))  // handles undefine implicitly
+        let appVer = appVersion.split('.'), saveVer = wad.version.split('.');
+        if (!(saveVer[0] <= appVer[0]))  // handles undefined implicitly
           return false;
         if (!wad.defs)
           return false;
@@ -3113,7 +3107,7 @@
         const localStorage = window.localStorage;
         if (!localStorage)
           return false;
-        const wad = { majorVersion, fullVersion, defs: [] };
+        const wad = { version: appVersion, defs: [] };
         // We rely on the fact that objects are enumerated in the order
         // items were added. Otherwise, function definitions might fail
         // due to their variable references being unsatisfied.
@@ -3188,7 +3182,7 @@
               //   exprElement.focus();  /* no! */
               return;
             }
-            element = element.parentElement;
+            element = element.parentNode;
           }
           // clicked somewhere outside the numpad
           toggleNumpad(false);
@@ -3201,9 +3195,9 @@
         updateParse(opts);
       }
 
-      function clearExpr() {
+      function clearExpr(event) {
         stuffExpr("");
-        ignoreOneToggleNumpad = true;  // don't bring down the numpad!
+        event.stopPropagation();
       }
 
       function toggleLegacyMode(legacy) {
@@ -3228,24 +3222,17 @@
           document.body.removeAttribute(attr);
       }
 
-      let ignoreOneToggleNumpad = false;
-
       function toggleNumpad(mode) {
-        // This is to deal with the click that opens the numpad being itself "out of the box"
-        if (ignoreOneToggleNumpad) {
-          ignoreOneToggleNumpad = false;
-          return;
+        if (typeof mode === 'object') {
+          mode.stopPropagation();
+          mode = undefined;
         }
         const attr = 'data-numpad';
         const currValue = document.body.getAttribute(attr);
         if (mode !== false && (mode !== undefined || !currValue)) {
           document.body.setAttribute(attr, 'show');
           exprElement.value = exprElement.value + CARETSYM;
-          ignoreOneToggleNumpad = true;
           exprElement.blur();
-          window.setTimeout(function() {  // fires at next event loop
-            ignoreOneToggleNumpad = false;
-          });
         } else if (currValue) {
           document.body.removeAttribute(attr);
           exprElement.value = trimCaret(exprElement.value);
