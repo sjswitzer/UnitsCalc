@@ -1906,8 +1906,8 @@
         let displayRatio = smells.ratio;
         if (displayRatio === undefined) {
           displayRatio = 'none';
-          if (smells.system === 'uscu')
-          displayRatio = 'mix?';
+          if (smells.uscu)
+            displayRatio = 'mix?';
         }
         if (displayRatio !== 'none' && typeof val[0] === 'bigint') {
           let num = val[0], denom = val[1], intpart = 0n;
