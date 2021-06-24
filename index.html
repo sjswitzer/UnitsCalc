@@ -2310,7 +2310,7 @@
           parsePos = backtrack1;
           return null;
         }
-        if (unitList.length === 1 && unitList[0][0] === 1)
+        if (implicitValue && unitList.length === 1 && unitList[0][0] === 1)
           return { ...unitList[0][1], unitVal };
         return { type, val, dim, origin, unitVal, unitList, smells };
       }
