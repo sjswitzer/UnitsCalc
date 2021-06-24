@@ -624,7 +624,7 @@
                       A modern Energy Star refrigerator averages about 50 watts, but it totally
                       depends on usage and conditions. I'll pad it out to $65. -->
             <li> How much does it cost to run a typical refrigerator per month?
-                <code>ecost * 65W : mo</code>
+                <code>ecost * 65W : month</code>
             <li> How much does it cost to watch a large LED TV per hour?
                  <code>ecost * 450 watt : hr</code>
             <li> How about a year on standby?
@@ -1186,7 +1186,7 @@
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], smells: { mks: true },
-            prefixSym: "W", prefixNames: ["watt", "watts"] },
+            alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"] },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true },
             val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower" },
 
