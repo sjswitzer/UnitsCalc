@@ -244,7 +244,7 @@
 
       div#numpad {
         display: none;
-        font-size: 120%;
+        font-size: 125%;
         grid-template-columns: repeat(5, 1fr);
         gap: .2em;
         padding: .4em;
@@ -753,7 +753,7 @@
         <span style="font-size: 90%">abc</span> </div>
       <div class="span3" data-stuff=" "> space </div>
       <div class="span2" data-stuff="del">
-        <span style="font-size: 200%;">&#9003;</span> </div> <!-- back/erase symbol -->
+        <span style="font-size: 190%;">&#9003;</span> </div> <!-- back/erase symbol -->
     </div>
     <script type="text/javascript">
       "use strict";
@@ -3161,8 +3161,6 @@
               let action = styles.getPropertyValue("--click-action");
               if (action.trim() === "stuff-text") {
                 let text = event.target.textContent.trim();
-                // special handling for units that have offsets
-                let sym = getSymbol(text);
                 stuffExpr(text.trim(), { doAssigns: true, showErrors: true });
                 return;
               }
@@ -3179,7 +3177,7 @@
       }
 
       function addNumpadStuffs() {
-        document.body.addEventListener("click", function(event) {
+        document.documentElement.addEventListener("click", function(event) {
           let element = event.target;
           while (element) {
             if (element === numpadElement)
@@ -3207,7 +3205,8 @@
             element = element.parentNode;
           }
           // clicked somewhere outside the numpad
-          toggleNumpad(false);
+          if (!event.defaultPrevented)
+            toggleNumpad(false);
         });
       }
 
@@ -3219,7 +3218,7 @@
 
       function clearExpr(event) {
         stuffExpr("");
-        event.stopPropagation();
+        event.preventDefault();
       }
 
       function toggleLegacyMode(legacy) {
@@ -3245,9 +3244,9 @@
       }
 
       function toggleNumpad(mode) {
-        if (typeof mode === 'object') {
-          mode.stopPropagation();
-          mode = undefined;
+        if (typeof mode === 'object') {  // passed an event
+          mode.preventDefault();
+          mode = undefined;  // toggle it
         }
         const attr = 'data-numpad';
         const currValue = document.body.getAttribute(attr);
