@@ -1697,13 +1697,17 @@
           // Figure out which units system makes the most sense
           let uscu = false;
           let candidateUnits = defaultUnits;
-          if (smells.requestSystem === 'mks'|| smells.mks && !smells.cgs && !smells.uscu) {
+          if (smells.requestSystem === 'mks') {
             candidateUnits = mksUnits;
-          } else if (smells.requestSystem === 'cgs' || smells.cgs && !smells.mks && !smells.uscu) {
+          } else if (smells.requestSystem === 'cgs') {
             candidateUnits = cgsUnits;
           } else if (smells.requestSystem === 'uscu') {
             candidateUnits = uscuUnits;
             uscu = true;
+          } else if (smells.mks && !smells.cgs && !smells.uscu) {
+            candidateUnits = mksUnits;
+          } else if (smells.cgs && !smells.mks && !smells.uscu) {
+            candidateUnits = cgsUnits;
           }
           if (smells.uscu && !smells.mks && !smells.cgs)
             uscu = true;
