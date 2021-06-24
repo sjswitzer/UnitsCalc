@@ -1032,10 +1032,13 @@
         MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM + PLANCKHBARSYM + EPSILONSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
-      let appVersion;
+      let appVersion, appVersionVal;
       for (let meta of document.getElementsByTagName('meta'))
-        if (meta.name === 'version')
+        if (meta.name === 'version') {
           appVersion = meta.content;
+          let parts = appVersion.split('.');
+          appVersionVal = Number((parts[0]??'0') + '.' + (parts[1]??'0'));
+        }
 
       const systemSymbols = {
         // Length (L)
@@ -1420,7 +1423,7 @@
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () =>  console.dir(systemSymbols) } },
-        version: { type: 'num', dim: {}, val: Number(appVersion.split('.')[0]), display: null,
+        version: { type: 'num', dim: {}, val: appVersionVal, display: null,
             command: () => showResult("version " + appVersion) },
       };
 
