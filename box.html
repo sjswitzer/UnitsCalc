@@ -1,0 +1,59 @@
+<p>Text</p>
+<canvas id="canvas" width="300" height="300"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+ctx.scale(canvas.width/100, canvas.height/100);
+ctx.save();
+ctx.fillStyle = '#eeeeee';
+ctx.fillRect(0, 0, 100, 100);
+ctx.restore();
+drawClose(ctx, { box:'#ffaaaa' });
+
+function drawClose(ctx, opts = {}) {
+  let box = opts.box, r = opts.radius ?? 20;
+  let tt = opts.thickness ?? 12, ll = opts.length ?? 35, cc = opts.cap ?? tt/2;
+  let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
+  let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
+  ctx.save();
+  ctx.translate(50, 50);
+
+  if (box) {
+    let b = 50;
+    ctx.beginPath();
+    ctx.moveTo(-b+r, -b);
+    ctx.lineTo(b-r, -b);
+    ctx.arcTo(b, -b, b, b+r, r);
+    ctx.lineTo(b, b-r);
+    ctx.arcTo(b, b, b-r, b, r);
+    ctx.lineTo(-b+r, b);
+    ctx.arcTo(-b, b, -b, b-r, r);
+    ctx.lineTo(-b, -b+r);
+    ctx.arcTo(-b, -b, -b+r, -b, r);
+
+
+    ctx.closePath();
+    ctx.fillStyle = box;
+    ctx.fill();
+  }
+
+  let m = magic * c;
+  ctx.fillStyle = opts.color ?? 'black';
+  ctx.beginPath();
+  ctx.moveTo(t, 0);
+  for (let i = 0; i < 4; ++i) {
+    ctx.lineTo(t+l, l);
+    // ctx.lineTo(l, t+l);
+    // ctx.bezierCurveTo(t+l+c, l+c, l+c, t+l+c, l, t+l);
+    let mid = l + t/2 + c;
+    ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
+    ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
+    ctx.lineTo(0, t);
+    ctx.rotate(Math.PI/2);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+</script>
