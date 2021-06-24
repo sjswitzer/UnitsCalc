@@ -1420,7 +1420,8 @@
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () =>  console.dir(systemSymbols) } },
-        version: { type: 'num', dim: {}, val: 0, display: null, command: () => showResult(appVersion) },
+        version: { type: 'num', dim: {}, val: Number(appVersion.split('.')[0]), display: null,
+            command: () => showResult("version " + appVersion) },
       };
 
       const metricPrefixes = [
