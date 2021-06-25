@@ -52,8 +52,6 @@ function drawCloseButton(ctx, width, height, style) {
   ctx.moveTo(t, 0);
   for (let i = 0; i < 4; ++i) {
     ctx.lineTo(t+l, l);
-    // ctx.lineTo(l, t+l);
-    // ctx.bezierCurveTo(t+l+c, l+c, l+c, t+l+c, l, t+l);
     let mid = l + t/2 + c
     ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
     ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
