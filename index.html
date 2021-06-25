@@ -136,7 +136,6 @@
         margin-top: .25em;
         float: right;
         cursor: pointer;
-        transition: 0.3s;
       }
       div.help > span.close-button:hover {
         transform: scale(1.25);
@@ -209,7 +208,6 @@
         background: #4444ff;
         border-radius: .4em;
         color: white;
-        transition: 0.3s;
       }
       span.button:hover {
         background: #0000dd;
@@ -285,39 +283,13 @@
        * Animates the delete button for variable and function definitions
        */
       p.user-def {
-        margin: .25em 0em;
+        margin: .1em 0em;
       }
-      p.user-def > span.delete-button:hover {
-        background: #ff3333;
-        /* transform: scale(1.15); */
-      }
-      p.user-def > span.delete-button:active {
-        background: #ff0000;
-        /* transform: scale(1.3); */
-      }
-      p.user-def > span.delete-button {
-        display: inline-block; /* so that transform works */
+      p.user-def > close-button {
         cursor: pointer;
-        padding: 0em .25em;
-        background: #ff7777;
-        font-weight: bold;
-        border-radius: .3em;
-        margin-right: .5em;
+        --box-color: #f77;
         color: white;
-        transition: 0.1s;
-      }
-
-      p.user-def > span.delete-button:before {
-        content: "\d7"; /* Unicode times character */
-        /*
-         * What follows is a fudge to raise the baseline slightly;
-         * "times" is apparently designed to match lower-case characters.
-         */
-        position: relative;
-        top: -0.06em;
-      }
-      p.user-def:hover > span.delete-button {
-        visibility: visible;
+        vertical-align: -20%;
       }
 
       /*
@@ -2955,7 +2927,7 @@
           let symStr = symString(userSymbols[sym], { html: true });
           if (symStr)
             str += `<p class="user-def">
-              <span class="delete-button" onclick="deleteDef('${sym}')"></span>${symStr}</p>`;
+              <close-button onclick="deleteDef('${sym}')"></close-button> ${symStr} </p>`;
         }
         symdefsElement.innerHTML = str;
       }
@@ -3293,7 +3265,7 @@
         if (!style.getPropertyValue) // hack for if this is just a plain object
           style = { getPropertyValue(x) { return this[x] }, ...style };
         let boxColor = style.getPropertyValue('--box-color');
-        let r = parseFloat(style.getPropertyValue('--box-radius')) || 20;
+        let r = parseFloat(style.getPropertyValue('--box-radius')) || 25;
         let ll = (parseFloat(style.getPropertyValue('--size')) || (boxColor ? 50 : 80)) / 2;
         let tt = parseFloat(style.getPropertyValue('--thick')) || ll/2;
         let cc = parseFloat(style.getPropertyValue('--cap')) || tt/2;
