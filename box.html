@@ -1,89 +1,169 @@
 <body style="font: 100% caption, sans-serif">
-  <canvas id="canvas" width="300" height="300">What?</canvas>
-  <p><close-button></close-button> Text
-  <p><close-button style="color: white; vertical-align: -20%; --box-color: #888"></close-button> Text
-  <p><close-button style="color: white; --box-color: #8e8d92; --box-radius: 50; --size: 40"></close-button> Text
-<script>
-{
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.save();
-  ctx.fillStyle = '#eee';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.restore();
-  drawCloseButton(ctx, canvas.width, canvas.height, { color: 'black', '--box-color': '#f88' });
-}
+  <canvas id="canvas" width="200" height="200">What?</canvas>
+  <p>
+    <close-button></close-button> Text
+  <p style="font-size: 2em">
+    <close-button style="color: white; vertical-align: -20%; --box-color: blue"></close-button> Text
+    <close-button style="color: white; vertical-align: -20%; --box-color: blue"></close-button> Text
+    <close-button style="color: white; vertical-align: -20%; --box-color: blue"></close-button> Text
+  <p>
+    <close-button style="color: white; --box-color: #8e8d92; --box-radius: 50; --length: 40"></close-button> Text
+    <close-button style="color: white; --box-color: #8e8d92; --box-radius: 50; --length: 40"></close-button> Text
+    <close-button style="color: white; --box-color: #8e8d92; --box-radius: 50; --length: 40"></close-button> Text
+  <script>
+      {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        drawCloseButton(ctx, canvas.width, canvas.height, { boxColor: '#f88' });
+      }
 
-function drawCloseButton(ctx, width, height, style) {
-  if (!style.getPropertyValue) // hack for if this is just a plain object
-    style = { getPropertyValue(x) { return this[x] }, ...style };
-  let boxColor = style.getPropertyValue('--box-color');
-  let r = parseFloat(style.getPropertyValue('--box-radius')) || 20;
-  let ll = (parseFloat(style.getPropertyValue('--size')) || (boxColor ? 50 : 80)) / 2;
-  let tt = parseFloat(style.getPropertyValue('--thick')) || ll/2;
-  let cc = parseFloat(style.getPropertyValue('--cap')) || tt/2;
-  let color = style.getPropertyValue('color') || 'black';
-  let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
-  let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
-  let m = magic * c;
+      //
+      // Custom close button element
+      //   There's no good way to make a close button using fonts,
+      //   so it has come to this.
+      //
+      function drawCloseButton(ctx, width, height, opts) {
+        let boxColor = opts.boxColor;
+        let r = parseFloat(opts.radius) || 20;
+        let ll = (parseFloat(opts.xSize) || (boxColor ? 50 : 90)) / 2;
+        let tt = parseFloat(opts.thick) || ll/2;
+        let cc = parseFloat(opts.cap) || tt/2;
+        let color = opts.color || 'black';
+        let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
+        let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
+        let m = magic * c;
 
-  ctx.save();
-  // Scale to a 100x100 coord system with the origin in the center.
-  // The "-1" is to keep a pixel from being sheered off the bottom and right edges.
-  ctx.scale((width-1)/100, (height-1)/100);
-  ctx.translate(50, 50);
-  if (boxColor) {
-    let b = 50;
-    ctx.fillStyle = boxColor;
-    ctx.beginPath();
-    ctx.moveTo(-b+r, -b);
-    ctx.lineTo(b-r, -b);
-    ctx.arcTo(b, -b, b, b+r, r);
-    ctx.lineTo(b, b-r);
-    ctx.arcTo(b, b, b-r, b, r);
-    ctx.lineTo(-b+r, b);
-    ctx.arcTo(-b, b, -b, b-r, r);
-    ctx.lineTo(-b, -b+r);
-    ctx.arcTo(-b, -b, -b+r, -b, r);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(t, 0);
-  for (let i = 0; i < 4; ++i) {
-    ctx.lineTo(t+l, l);
-    let mid = l + t/2 + c
-    ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
-    ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
-    // Arcs are not as pretty
-    // ctx.arcTo(t+l+c, l+c, mid, mid, c);
-    // ctx.arcTo(l+c, t+l+c, l, t+l, c);
-    ctx.lineTo(0, t);
-    ctx.rotate(Math.PI/2);
-  }
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
+        ctx.save();
+        // scale to a 100x100 coord system with the origin in the center
+        // The "-1" is to keep a pixel from being sheered off the bottom and right edges.
+        ctx.scale((width-1)/100, (height-1)/100);
+        ctx.translate(50, 50);
+        if (boxColor) {
+          let b = 50;
+          ctx.fillStyle = boxColor;
+          ctx.beginPath();
+          ctx.moveTo(-b+r, -b);
+          ctx.lineTo(b-r, -b);
+          ctx.arcTo(b, -b, b, b+r, r);
+          ctx.lineTo(b, b-r);
+          ctx.arcTo(b, b, b-r, b, r);
+          ctx.lineTo(-b+r, b);
+          ctx.arcTo(-b, b, -b, b-r, r);
+          ctx.lineTo(-b, -b+r);
+          ctx.arcTo(-b, -b, -b+r, -b, r);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(t, 0);
+        for (let i = 0; i < 4; ++i) {
+          ctx.lineTo(t+l, l);
+          let mid = l + t/2 + c
+          ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
+          ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
+          // Arcs are not as pretty
+          // ctx.arcTo(t+l+c, l+c, mid, mid, c);
+          // ctx.arcTo(l+c, t+l+c, l, t+l, c);
+          ctx.lineTo(0, t);
+          ctx.rotate(Math.PI/2);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
 
-class CloseButton extends HTMLElement {
-  constructor() {
-    super();
-    let root = this.attachShadow({ mode: 'open' });
-    this.canvas = document.createElement('canvas');
-    root.appendChild(this.canvas);
-  }
-  connectedCallback() {
-    let style = getComputedStyle(this);
-    let size = 1.2 * parseFloat(style.fontSize);
-    this.canvas.setAttribute('width', size);
-    this.canvas.setAttribute('height', size);
-    const ctx = this.canvas.getContext('2d');
-    drawCloseButton(ctx, size, size, style);
-  }
-};
-customElements.define('close-button', CloseButton);
+      class MRU {   // MRU cache and memoizer
+        constructor(maxEntries = 20) {
+          this.maxEntries = maxEntries;
+          this._cache = new Map();
+          this._backCache = new Map();
+        }
+        get(key, fn) {
+          let val = this._cache.get(key);
+          if (!val) {
+            val = this._backCache.get(key);
+            if (val)
+              this._cache.set(key, val);
+            if (!val && fn) {
+              val = fn(key);
+              if (val !== undefined)
+                this.set(key, fn(key));
+            }
+          }
+          return val;
+        }
+        set(key, val) {
+          if (this._cache.size >= this.maxEntries) {
+            let t = this._backCache;
+            this._backCache = this._cache;
+            this._cache = t;
+            this._cache.clear(); 
+          }
+          this._cache.set(key, val);
+        }
+      }
 
-</script>
+      class CloseButtonElement extends HTMLElement {
+        constructor() {
+          super();
+          let root = this.attachShadow({ mode: 'open' });
+          this._canvas = document.createElement('canvas');
+          this._sig = undefined;
+          root.appendChild(this._canvas);
+          this.ontransitionend = event => this.render();
+        }
+
+        static resizeObserver = new ResizeObserver(function (entries, observer) {
+          for (let entry of entries) {
+            entry.target.render();
+          }
+        });
+
+        connectedCallback() {
+          this.render();
+          CloseButtonElement.resizeObserver.observe(this);
+        }
+
+        disconnectedCallback() {
+          CloseButtonElement.resizeObserver.unobserve(this);
+        }
+
+        static cache = new MRU(15);
+
+        render() {
+          let style = getComputedStyle(this);
+          let size = 1.2 * parseFloat(style.fontSize);
+          let xSize = style.getPropertyValue('--x-size').trim();
+          let boxColor = style.getPropertyValue('--box-color').trim();
+          let radius = style.getPropertyValue('--box-radius').trim();
+          let length = style.getPropertyValue('--length').trim();
+          let thick = style.getPropertyValue('--thick').trim();
+          let cap = style.getPropertyValue('--cap').trim();
+          let color = style.getPropertyValue('color'.trim());
+          let opts = { size, xSize, boxColor, radius, length, thick, cap, color };
+          let sig = Object.values(opts).join('/');
+          if (this._sig !== sig) {
+            let canvas = CloseButtonElement.cache.get(sig, () => {
+              let canvas = document.createElement('canvas');
+              canvas.setAttribute('width', size);
+              canvas.setAttribute('height', size);
+              const ctx = canvas.getContext('2d');
+              drawCloseButton(ctx, size, size, opts);
+              return canvas;
+            });
+            this._canvas.setAttribute('width', size);
+            this._canvas.setAttribute('height', size);
+            const ctx = this._canvas.getContext('2d');
+            ctx.drawImage(canvas, 0, 0);
+            this._sig = sig;
+          }
+        }
+      };
+      customElements.define('close-button', CloseButtonElement);
+  </script>
 </body>
