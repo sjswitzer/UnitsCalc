@@ -115,8 +115,8 @@
 
       /*
        * Initially-hidden help content.
-       * Help contains a <span class="close-button"> for a close button
-       * and a <div> for help content which is made scrollable.
+       * Help contains a custom <close-button> and
+       * a <div> for help content which is made scrollable.
        */
       div.help {
         padding: 0em .5em;
@@ -130,18 +130,13 @@
         border: .15em solid black;
         border-radius: .4em;
       }
-      div.help > span.close-button {
-        color: #888888;
-        font-weight: bold;
-        font-size: 250%;
+      div.help > close-button {
+        color: #888;
+        font-size: 125%;
+        margin-top: .25em;
         float: right;
         cursor: pointer;
         transition: 0.3s;
-      }
-      div.help > span.close-button:before {
-        content: "\d7"; /* Unicode times character */
-        position: relative;
-        top: -0.06em;
       }
       div.help > span.close-button:hover {
         transform: scale(1.25);
@@ -230,16 +225,16 @@
         position: relative;
         width: 0;
       }
-      .clear-text-button > span:before {
+      .clear-text-button > close-button {
         position: absolute;
-        content: "\d7"; /* Unicode times character */
-        bottom: .4em;
-        left: -1.7em;
+        bottom: .1em;
+        left: -2em;
         color: white;
-        background-color: #bbbbbb;
+        --box-color: #8e8d92;
+        --box-radius: 50;
+        --size: 40;
         cursor: pointer;
         padding: .05em .4em;
-        border-radius: .4em;
       }
 
       div#numpad {
@@ -367,7 +362,7 @@
             autocomplete="off" spellcheck="false" autocorrect="off"
             autocapitalize="none">
         </div>
-        <div class="clear-text-button mobile-only" onclick="clearExpr(event)"><span></span></div>
+        <div class="clear-text-button mobile-only" onclick="clearExpr(event)"><close-button></close-button></div>
         <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
           onclick="toggleNumpad(event)">#</span>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
@@ -394,7 +389,7 @@
       </div>
     </div>
     <div class="help" id="help-tips">
-      <span class="close-button" onclick="showHelp()"></span>
+      <close-button onclick="showHelp()"></close-button>
       <div>
         <h2> Help </h2>
         <p> Some quick tips to get you started:
@@ -410,7 +405,7 @@
       </div>
     </div>
     <div class="help" id="help-expr">
-      <span class="close-button" onclick="showHelp()"></span>
+      <close-button onclick="showHelp()"></close-button>
       <div>
         <h2> Expressions </h2>
         <p> Expressions can contain numbers, units and the operators
@@ -660,7 +655,7 @@
       </div>
     </div>
     <div class="help" id="help-boring">
-      <span class="close-button" onclick="showHelp()"></span>
+      <close-button onclick="showHelp()"></close-button>
       <div>
         <h2> Boring Details </h2>
         <p> This program started out as a quick and dirty tool to easily divide
@@ -757,7 +752,6 @@
     </div>
     <script type="text/javascript">
       "use strict";
-
       const exprElement = document.getElementById('expr');
       const errorElement = document.getElementById('error');
       const resultsElement = document.getElementById('results');
@@ -3289,6 +3283,81 @@
 
       if ('serviceWorker' in navigator && window.location.protocol === 'https:')
         navigator.serviceWorker.register('service-worker.js');
+
+      //
+      // Custom close button element
+      //   There's no good way to make a close button using fonts,
+      //   so it has come to this.
+      //
+      function drawCloseButton(ctx, width, height, style) {
+        if (!style.getPropertyValue) // hack for if this is just a plain object
+          style = { getPropertyValue(x) { return this[x] }, ...style };
+        let boxColor = style.getPropertyValue('--box-color');
+        let r = parseFloat(style.getPropertyValue('--box-radius')) || 20;
+        let ll = (parseFloat(style.getPropertyValue('--size')) || (boxColor ? 50 : 80)) / 2;
+        let tt = parseFloat(style.getPropertyValue('--thick')) || ll/2;
+        let cc = parseFloat(style.getPropertyValue('--cap')) || tt/2;
+        let color = style.getPropertyValue('color') || 'black';
+        let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
+        let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
+        let m = magic * c;
+
+        ctx.save();
+        // scale to a 100x100 coord system with the origin in the center
+        ctx.scale(width/100, height/100);
+        ctx.translate(50, 50);
+        if (boxColor) {
+          let b = 50;
+          ctx.fillStyle = boxColor;
+          ctx.beginPath();
+          ctx.moveTo(-b+r, -b);
+          ctx.lineTo(b-r, -b);
+          ctx.arcTo(b, -b, b, b+r, r);
+          ctx.lineTo(b, b-r);
+          ctx.arcTo(b, b, b-r, b, r);
+          ctx.lineTo(-b+r, b);
+          ctx.arcTo(-b, b, -b, b-r, r);
+          ctx.lineTo(-b, -b+r);
+          ctx.arcTo(-b, -b, -b+r, -b, r);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(t, 0);
+        for (let i = 0; i < 4; ++i) {
+          ctx.lineTo(t+l, l);
+          let mid = l + t/2 + c
+          ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
+          ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
+          // Arcs are not as pretty
+          // ctx.arcTo(t+l+c, l+c, mid, mid, c);
+          // ctx.arcTo(l+c, t+l+c, l, t+l, c);
+          ctx.lineTo(0, t);
+          ctx.rotate(Math.PI/2);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      class CloseButton extends HTMLElement {
+        constructor() {
+          super();
+          let root = this.attachShadow({ mode: 'open' });
+          this.canvas = document.createElement('canvas');
+          root.appendChild(this.canvas);
+        }
+        connectedCallback() {
+          let style = getComputedStyle(this);
+          let size = 1.2 * parseFloat(style.fontSize);
+          this.canvas.setAttribute('width', size);
+          this.canvas.setAttribute('height', size);
+          const ctx = this.canvas.getContext('2d');
+          drawCloseButton(ctx, size, size, style);
+        }
+      };
+      customElements.define('close-button', CloseButton);
 
       try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
    </script>
