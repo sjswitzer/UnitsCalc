@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.4.4">
+    <meta name="version" content="1.4.5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -345,12 +345,12 @@
         <sup>
           <input type="text" pattern="\d*" style="text-align: right;"
             oninput="updateResult(this)" size="2" align="right" id="num" value="">
-        </sup>/<sub>
+        </sup><span style="font-size: 150%">/</span><sub>
           <input type="text" pattern="\d*" oninput="updateResult(this)" size="2" id="denom" value="8">
         </sub> in
-        &nbsp;&nbsp; &times;
+        &nbsp;&nbsp; <span style="font-size: 150%">&times;</span>
         <input type="text" pattern="\d*" oninput="updateResult(this)" size="3" id="times" value="">
-        &nbsp; /
+        &nbsp; <span style="font-size: 150%">/</span>
         <input type="text" pattern="\d*" oninput="updateResult(this)" size="3" id="div" value="">
       </div>
       <div class="layout-row input-area">
