@@ -1,25 +1,39 @@
-<p>Text</p>
-<canvas id="canvas" width="300" height="300"></canvas>
+<body style="font: 100% caption, sans-serif">
+  <canvas id="canvas" width="300" height="300">What?</canvas>
+  <p><close-button></close-button> Text
+  <p><close-button style="color: white; vertical-align: -20%; --box-color: #888"></close-button> Text
+  <p><close-button style="color: white; --box-color: #8e8d92; --box-radius: 50; --size: 40"></close-button> Text
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-ctx.scale(canvas.width/100, canvas.height/100);
-ctx.save();
-ctx.fillStyle = '#eeeeee';
-ctx.fillRect(0, 0, 100, 100);
-ctx.restore();
-drawClose(ctx, { box:'#ffaaaa' });
+{
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.fillStyle = '#eee';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+  drawCloseButton(ctx, canvas.width, canvas.height, { color: 'black', '--box-color': '#f88' });
+}
 
-function drawClose(ctx, opts = {}) {
-  let box = opts.box, r = opts.radius ?? 20;
-  let tt = opts.thickness ?? 12, ll = opts.length ?? 35, cc = opts.cap ?? tt/2;
+function drawCloseButton(ctx, width, height, style) {
+  if (!style.getPropertyValue) // hack for if this is just a plain object
+    style = { getPropertyValue(x) { return this[x] }, ...style };
+  let boxColor = style.getPropertyValue('--box-color');
+  let r = parseFloat(style.getPropertyValue('--box-radius')) || 20;
+  let ll = (parseFloat(style.getPropertyValue('--size')) || (boxColor ? 50 : 80)) / 2;
+  let tt = parseFloat(style.getPropertyValue('--thick')) || ll/2;
+  let cc = parseFloat(style.getPropertyValue('--cap')) || tt/2;
+  let color = style.getPropertyValue('color') || 'black';
   let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
   let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
-  ctx.save();
-  ctx.translate(50, 50);
+  let m = magic * c;
 
-  if (box) {
+  ctx.save();
+  // scale to a 100x100 coord system with the origin in the center
+  ctx.scale(width/100, height/100);
+  ctx.translate(50, 50);
+  if (boxColor) {
     let b = 50;
+    ctx.fillStyle = boxColor;
     ctx.beginPath();
     ctx.moveTo(-b+r, -b);
     ctx.lineTo(b-r, -b);
@@ -30,30 +44,47 @@ function drawClose(ctx, opts = {}) {
     ctx.arcTo(-b, b, -b, b-r, r);
     ctx.lineTo(-b, -b+r);
     ctx.arcTo(-b, -b, -b+r, -b, r);
-
-
     ctx.closePath();
-    ctx.fillStyle = box;
     ctx.fill();
   }
-
-  let m = magic * c;
-  ctx.fillStyle = opts.color ?? 'black';
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(t, 0);
   for (let i = 0; i < 4; ++i) {
     ctx.lineTo(t+l, l);
     // ctx.lineTo(l, t+l);
     // ctx.bezierCurveTo(t+l+c, l+c, l+c, t+l+c, l, t+l);
-    let mid = l + t/2 + c;
+    let mid = l + t/2 + c
     ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
     ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
+    // Arcs are not as pretty
+    // ctx.arcTo(t+l+c, l+c, mid, mid, c);
+    // ctx.arcTo(l+c, t+l+c, l, t+l, c);
     ctx.lineTo(0, t);
     ctx.rotate(Math.PI/2);
   }
   ctx.closePath();
   ctx.fill();
-
   ctx.restore();
 }
+
+class CloseButton extends HTMLElement {
+  constructor() {
+    super();
+    let root = this.attachShadow({ mode: 'open' });
+    this.canvas = document.createElement('canvas');
+    root.appendChild(this.canvas);
+  }
+  connectedCallback() {
+    let style = getComputedStyle(this);
+    let size = 1.2 * parseFloat(style.fontSize);
+    this.canvas.setAttribute('width', size);
+    this.canvas.setAttribute('height', size);
+    const ctx = this.canvas.getContext('2d');
+    drawCloseButton(ctx, size, size, style);
+  }
+};
+customElements.define('close-button', CloseButton);
+
 </script>
+</body>
