@@ -113,6 +113,15 @@
         width: max-content;
       }
 
+      body > div.layout-column {
+        /* Without this, the user variables won't scroll */
+        position: fixed;  /* absolute works too */
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+
       /*
        * Initially-hidden help content.
        * Help contains a custom <close-button> and
@@ -136,13 +145,13 @@
         margin-top: .25em;
         float: right;
         cursor: pointer;
+        transition: .5s;
       }
-      div.help > span.close-button:hover {
-        transform: scale(1.25);
-        color: black;
-      }
-      div.help > span.close-button:active {
-        transform: scale(1.5);
+      div.help > close-button:hover {
+        transform: scale(1.1);
+        /* This works, but is too slow
+         *   font-size: 150%;
+         *   color: black;  */
       }
       div.help > div {
         overflow-y: auto;
@@ -1664,6 +1673,7 @@
           // Figure out which units system makes the most sense
           let uscu = false;
           let candidateUnits = defaultUnits;
+          // If a formal system is requested, use that
           if (smells.requestSystem === 'mks') {
             candidateUnits = mksUnits;
           } else if (smells.requestSystem === 'cgs') {
@@ -1672,12 +1682,15 @@
             candidateUnits = uscuUnits;
             uscu = true;
           } else if (smells.mks && !smells.cgs && !smells.uscu) {
+            // if very mks-specific units are specified and none others, use those
             candidateUnits = mksUnits;
           } else if (smells.cgs && !smells.mks && !smells.uscu) {
+            // if very cgs-specific units are specified and none others, use those
             candidateUnits = cgsUnits;
-          }
-          if (smells.uscu && !smells.mks && !smells.cgs)
+          } else if (smells.uscu && !smells.mks && !smells.cgs) {
+            // favor USCU units, but not strictly
             uscu = true;
+          }
           // always allow nonce units
           candidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
           // Add an affine unit if present (in practice this is degf or degc), could be generalized
@@ -3320,13 +3333,34 @@
           super();
           let root = this.attachShadow({ mode: 'open' });
           this.canvas = document.createElement('canvas');
+          this._size = undefined;
           root.appendChild(this.canvas);
+          this.ontransitionend = event => this.render();
         }
+
+        static resizeObserver = new ResizeObserver(function (entries, observer) {
+          for (let entry of entries) {
+            entry.target.render();
+          }
+        });
+
         connectedCallback() {
+          this.render();
+          CloseButton.resizeObserver.observe(this);
+        }
+
+        disconnectedCallback() {
+          CloseButton.resizeObserver.unobserve(this);
+        }
+
+        render() {
           let style = getComputedStyle(this);
           let size = 1.2 * parseFloat(style.fontSize);
-          this.canvas.setAttribute('width', size);
-          this.canvas.setAttribute('height', size);
+          if (size !== this._size) {
+            this._size = size;
+            this.canvas.setAttribute('width', size);
+            this.canvas.setAttribute('height', size);
+          }
           const ctx = this.canvas.getContext('2d');
           drawCloseButton(ctx, size, size, style);
         }
