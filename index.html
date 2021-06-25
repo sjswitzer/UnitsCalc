@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.4.6">
+    <meta name="version" content="1.4.7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -3213,8 +3213,11 @@
       }
 
       function clearExpr(event) {
+        const numpadShowing = document.body.getAttribute('data-numpad');
         stuffExpr("");
         event.preventDefault();
+        if (!numpadShowing)
+          exprElement.focus();
       }
 
       function toggleLegacyMode(legacy) {
