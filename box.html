@@ -28,8 +28,9 @@ function drawCloseButton(ctx, width, height, style) {
   let m = magic * c;
 
   ctx.save();
-  // scale to a 100x100 coord system with the origin in the center
-  ctx.scale(width/100, height/100);
+  // Scale to a 100x100 coord system with the origin in the center.
+  // The "-1" is to keep a pixel from being sheered off the bottom and right edges.
+  ctx.scale((width-1)/100, (height-1)/100);
   ctx.translate(50, 50);
   if (boxColor) {
     let b = 50;
