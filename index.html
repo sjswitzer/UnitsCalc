@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.4.1">
+    <meta name="version" content="1.4.2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -56,10 +56,10 @@
       }
       body[data-device="mobile"],
       body[data-device="mobile"] table {
-          font: 100% caption, sans-serif !important;
+          /* font: 100% caption, sans-serif !important; */
       }
       body[data-device="mobile"] div.input-area {
-        font-size: 130%;
+        font-size: 120%;
       }
       body:not([data-device="mobile"]) .mobile-only {
         display: none;
@@ -125,6 +125,14 @@
         bottom: 0;
         left: 0;
         right: 0;
+        font-size: 120%;
+      }
+      @media all and (orientation:portrait) {
+        /* iPhone crowds the screen in portrait but has lots of padding in landscape
+           because they don't give you the slot or curver corner areas. */
+        body > div.layout-column {
+          padding: 0px 4px;
+        }
       }
 
       /*
@@ -155,7 +163,7 @@
         transition: .5s;
       }
       div.help > close-button:hover {
-        transform: scale(1.1);
+        transform: scale(1.2);
         /* Too slow:
          *   font-size: 150%;
          *   color: black;
