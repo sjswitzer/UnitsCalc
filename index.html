@@ -1115,7 +1115,7 @@
             desc: "kilobyte", display: null },
         symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
         baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
-            prefixNames: ["baud"] },
+            prefixSym: "Bd", prefixNames: ["baud"] },
         //   https://www.ibm.com/docs/en/storage-insights?topic=overview-units-measurement-storage-data
         KiB: { type: 'num', dim: { BIT: 1 }, val: 2**10 * BYTE, alt: ["kibibyte", "kibibytes"] },
         MiB: { type: 'num', dim: { BIT: 1 }, val: 2**20 * BYTE, alt: ["mebibyte", "mebibytes"] },
@@ -1391,6 +1391,7 @@
       };
 
       const metricPrefixes = [
+        { name: "", symbol: "", val: [ 1n, 1n ] },
         { name: "deca", symbol: "da", val: [ 10n, 1n ] },
         { name: "hecto", symbol: "h", val: [ 100n, 1n ] },
         { name: "kilo", symbol: "k", val: [ 1000n, 1n ] },
@@ -1466,10 +1467,10 @@
             if (sym.prefixNames) {
               for (const nm of sym.prefixNames) {
                 if (helpName) {
+                  helpName = false;
                   helpDesc += sep + `<span class="stuff-text">kilo${nm}</span>, `+ 
                       `<span class="stuff-text">mega${nm}</span>`;
                   sep = ", ";
-                  helpName = false;
                   if (!sym.noFractionalPrefix)
                     helpDesc += sep +
                       `<span class="stuff-text">centi${nm}</span>, ` +
