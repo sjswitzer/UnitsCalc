@@ -1000,8 +1000,9 @@
       const NMI = 1852*M;
       const SEC = 1, MIN = 60*SEC, HR = 60*MIN, DAY = 24*HR;
       const KG = 1;
-      const EARTHG = 9.80665, LBM100M = 45359237 * KG, N100M = 100000000;
-      const LBFS2 = EARTHG * 0.45359237 * KG * M;
+      const EARTHG10K = 980665, N10K = 10**5;
+      const LBM100M = 45359237 * KG, N100M = 10**8;
+      const LBFSS10T = EARTHG10K * LBM100M * KG * M, N10T = 10**13;
       const GAL5K3 = 231*IN5K**3;
       const AMP = 1, KELVIN = 1;
       const BIT = 1, BYTE = 8*BIT;
@@ -1065,15 +1066,15 @@
         ml: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], alt: ["milliliter", "millilitre", "milliliters", "millilitres"] },
         cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
         gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], smells: { uscu: true }, desc: "gill", alt:["gill", "gills"] },
-        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 ], smells: { uscu: true }, alt: ["drams"] },
-        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 * 8 * 60 ], smells: { uscu: true }, alt: ["minims"] },
+        dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8) * BigInt(N5K)**3n ], smells: { uscu: true }, alt: ["drams"] },
+        minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8 * 60) * BigInt(N5K)**3n  ], smells: { uscu: true }, alt: ["minims"] },
         cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", smells: { uscu: true }, alt: ["cords"] },
 
         // Mass (M)
         groupMass: { group: "Mass Units" },
         lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", smells: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
         oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", smells: { uscu: true }, alt: ["ounce", "ounces"]},
-        gm: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, alt: ["gram", "grams"],
+        g: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, desc: "gram", alt: ["gram", "grams", "gm"],
             prefixSym: 'g',  prefixNames: ["gram", "grams"], },
 
         // Time (T)
@@ -1102,16 +1103,14 @@
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
 
         // Temperature (THETA)
-        groupTemperature: { group: "Temperature & Thermodynamic Units" },
+        groupTemperature: { group: "Temperature Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
-            desc: "Celsius", alt: ["degc"], smells: { affineUnit: "celsius"} },
+            desc: "Celsius", alt: ["degc"], smells: { bonusUnit: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
-            desc: "Fahrenheit", alt: ["degf"], smells: { affineUnit: "fahrenheit" } },
+            desc: "Fahrenheit", alt: ["degf"], smells: { bonusUnit: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             prefixSym: 'K',  prefixNames: ["kelvin"] },
-        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
-            desc: "Boltzmann constant" },
 
         // Angles (RAD)
         //   A steradian can be thought of as a square radian because 2pi radians covers
@@ -1138,16 +1137,16 @@
         // Because people expect it but it falls outside the prefix system (which uses lowercase 'k')
         KB: { type: 'num', dim: { BIT: 1 }, reserved: true, val: 1000 * BYTE,
             desc: "kilobyte", display: null },
-        symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
         baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
             prefixSym: "Bd", prefixNames: ["baud"] },
+        symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
         //   https://www.ibm.com/docs/en/storage-insights?topic=overview-units-measurement-storage-data
         KiB: { type: 'num', dim: { BIT: 1 }, val: 2**10 * BYTE, alt: ["kibibyte", "kibibytes"] },
         MiB: { type: 'num', dim: { BIT: 1 }, val: 2**20 * BYTE, alt: ["mebibyte", "mebibytes"] },
         GiB: { type: 'num', dim: { BIT: 1 }, val: 2**30 * BYTE, alt: ["gibibyte", "gibibytes"] },
         TiB: { type: 'num', dim: { BIT: 1 }, val: 2**40 * BYTE, alt: ["tebibyte", "tebibytes"] },
-        PiB: { type: 'num', dim: { BIT: 1 }, val: 2**50 * BYTE, alt: ["pebibyte", "pebibytes"] },
-        EiB: { type: 'num', dim: { BIT: 1 }, val: 2**60 * BYTE, alt: ["exbibyte", "exbibytes"]},
+        PiB: { type: 'num', dim: { BIT: 1 }, val: BigInt(2)**50n * BigInt(BYTE), alt: ["pebibyte", "pebibytes"] },
+        EiB: { type: 'num', dim: { BIT: 1 }, val: BigInt(2)**60n * BigInt(BYTE), alt: ["exbibyte", "exbibytes"]},
 
         // Population (PERSON)
         groupPop: { group: "Population Units" },
@@ -1161,7 +1160,7 @@
            prefixSym: "N", prefixNames: ["newton", "newtons"], smells: { mks: true } },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
             prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], smells: { cgs: true } },
-        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFS2, SEC**2 ], desc: "pound force", smells: { uscu: true } },
+        lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFSS10T, N10T * SEC**2 ], desc: "pound force", smells: { uscu: true } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
@@ -1179,7 +1178,8 @@
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], smells: { mks: true },
             alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"] },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true },
-            val: [ 550 * FT5K * LBFS2, N5K * SEC**3 ], desc: "mechanical horsepower" },
+            val: [ BigInt(550) * BigInt(FT5K) * BigInt(LBFSS10T), BigInt(N5K) * BigInt(N10T) * BigInt(SEC)**3n ],
+            desc: "mechanical horsepower" },
 
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
@@ -1187,7 +1187,8 @@
             prefixSym: "Pa", prefixNames: ["pascal", "pascals"], smells: { mks: true } },
         Ba: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, 10 * M * SEC**2 ], alt: ["barye", "baryes"],
             prefixSym: "Ba", prefixNames: ["barye", "baryes"], smells: { cgs: true } },
-        PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ LBFS2 * N5K**2, IN5K**2 * SEC**2 ],
+        PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 },
+            val: [ BigInt(LBFSS10T) * BigInt(N5K)**2n, BigInt(N10T) * BigInt(IN5K)**2n * BigInt(SEC)**2n ],
             desc: "pounds per square inch", smells: { uscu: true } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
         bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"] },
@@ -1221,7 +1222,8 @@
             desc: "magnetic flux density", alt: ["tesla"],
             prefixSym: "T", prefixNames: ["tesla", "teslas"] },
         gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "magnetic flux density", alt: ["gauss"], prefixNames: ["gauss"] },
+            desc: "magnetic flux density", alt: ["Gs"], prefixSym: "Gs", prefixNames: ["gauss"],
+            smells: { cgs: true } },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
             desc: "mutual inductance", alt: ["henry"], prefixSym: "H", prefixNames: ["henry"] },
 
@@ -1237,39 +1239,42 @@
         // Chemical units (N)
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         groupChemical: { group: "Chemical Units" },
-        mol: { type: 'num', dim: { N: 1 }, val: 6.02214076e23, desc: "Mol, number of particles", alt: ["mols"], reserved: true },
-        NA: { type: 'num', dim: { N: -1 }, val: 6.02214076e23, desc: "Avogadro's constant" },
-        N0: { type: 'num', dim: {}, val: 6.02214076e23, desc: "Avogadro's number" },
+        mol: { type: 'num', dim: { N: 1 }, desc: "number of particles", alt: ["mols"], reserved: true,
+            val: BigInt(602214076) * BigInt(10)**15n },
+        NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant",
+            val: [ 1, BigInt(602214076) * BigInt(10)**15n ] },
+        N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n , desc: "Avogadro's number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
-            prefixSym: "Da", prefixNames: ["dalton", "daltons"] },
+            prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: PI, display: PISYM, desc: PISYM },
         tau: { type: 'num', dim: {}, val: 2 * PI, display: TAUSYM, desc: `2${PISYM}` },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
-        parsec:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M * 648000 / PI,
+        parsec:  { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
-        barn: { type: 'num', dim: { L: 2 }, val: 10e-28 * M**2, alt: ["barns"] }, // Nuclear physicist in the house?
-        darcy: { type: 'num', dim: { L: 2 }, val: 10e-12 * M**2, desc: "hydraulic permeability" },
-        g: { type: 'num', dim: { L: 1, T:-2 }, val: [ EARTHG * M, SEC**2 ],
+        barn: { type: 'num', dim: { L: 2 }, val: 1e-28 * M**2, alt: ["barns"], smells: { mks: true },
+            prefixSym: "b", prefixNames: ["barn", "barns"] }, // Nuclear physicist in the house?
+        darcy: { type: 'num', dim: { L: 2 }, val: 9.869233e-13 * M**2, desc: "hydraulic permeability" },
+        earthg: { type: 'num', dim: { L: 1, T:-2 }, val: [ EARTHG10K * M, N10K * SEC**2 ],
             desc: "standard gravity (earth)"},
         G: { type: 'num', dim: { L: 3, M: -1, T:-2 }, val: [ 6.6743e-11 * M**3, KG * SEC**2 ],
-            desc: "universal gravitational constant" },
+            desc: "universal gravitational constant", smells: { mks: true } },
         c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light"},
-        lightyear: { type: 'num', dim: { L: 1 }, val: [ CMPS * 36525 * DAY, 100  ],
-            desc: "distance light travels in a year", alt: ["ly"] },
-      /*
+        lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100  ],
+            desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
+        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+            desc: "Boltzmann constant" },
         [PLANCKHSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
-            desc: "planck constant", alt: ["planck"] },
+            desc: "planck constant", alt: ["planck"], smells: { mks: true } },
         // Representing hbar explicitly in angular units is a choice, and I have made it. Provisionally.
         [PLANCKHBARSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
-            desc: "reduced planck constant", alt: ["reducedplanck", "hbar"] },
-        [EPSILONSYM+"0"]: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, 
+            desc: "reduced planck constant", alt: ["reducedplanck", "hbar"], smells: { mks: true } },
+        [EPSILONSYM+"0"]: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, 
             val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity", alt: ["e0"] },
-        [MICROSYM+"0"]: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 },
+        [MICROSYM+"0"]: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true },
             val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability", alt: ["u0"] },
-      */
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
@@ -1280,7 +1285,7 @@
         rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { uscu: true }, alt: ["rods"] },
         chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { uscu: true }, alt: ["chains"] },
         furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], smells: { uscu: true }, alt: ["furlongs"] },
-        township: { type: 'num', dim: { L: 2 }, val: [ (6 * MI5K)**2, N5K**2 ], smells: { uscu: true }, alt: ["townships"] },
+        township: { type: 'num', dim: { L: 2 }, val: [ BigInt(6 * MI5K)**2n, N5K**2 ], smells: { uscu: true }, alt: ["townships"] },
         are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
         grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], smells: { uscu: true } },
         stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], smells: { uscu: true }, desc: "UK stone" }, // no alt "stones"
@@ -1309,8 +1314,8 @@
             smells: { requestSystem: "cgs" } },
         uscu: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
             smells: { requestSystem: "uscu" } },
-        unit: { type: 'num', dim: {}, val: 1, desc: "one",
-            desc: 'to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
+        unit: { type: 'num', dim: {}, val: 1, alt: ["units"],
+            desc: 'simply one, to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, smells: { ratio: 'rat' }, alt: ["rat"],
             desc: 'normally units like meters are not displayed as ratios but <code>1.5 m ratio</code> is' },
         mixratio: { type: 'num', dim: {}, val: 1, smells: { ratio: 'mix' }, alt: ["mixrat", "ratmix"],
@@ -1456,8 +1461,14 @@
             sym.sym = name;
           if (typeof sym.val !== 'object') // array, really
             sym.val = [ sym.val, 1n ];
-          if (sym.val)
+          if (sym.val) {
+            // Check for loss of precicion
+            if (typeof sym.val[0] === 'number' && sym.val[0] > 1e15)
+              throw InternalError(`Numerator should be a BigInt ${sym.sym}`);
+            if (typeof sym.val[1] === 'number' && sym.val[1] > 1e15)
+              throw InternalError(`Denominator should be a BigInt: ${sym.sym}`);
             sym.val = Rat.normalize(sym.val);
+          }
           if (sym.origin)
             sym.origin = Rat.normalize(sym.origin);
           if (sym.type !== 'num' || sym.altOf || sym.display === null)
@@ -1658,19 +1669,19 @@
         's', 'K', 'person', '$', 'symbol', 'mol',
         'sr', 'radian', 'cd', 'lx', 'lm',
       ];
-      const mksUnits = filterUnits([ ...universalUnits, 'm', 'kg', 'N', 'J', 'Pa', 'W' ]);
-      const cgsUnits = filterUnits([ ...universalUnits, 'cm', 'gm', 'dyne', 'erg', 'Ba' ]);
+      const mksUnits = filterUnits([ ...universalUnits, 'm', 'kg', 'N', 'J', 'Pa', 'W', 'H' ]);
+      const cgsUnits = filterUnits([ ...universalUnits, 'cm', 'g', 'dyne', 'erg', 'Ba' ]);
       const uscuUnits = filterUnits([ ...universalUnits, 'ft', 'lb', 'lbf' ]);
       const defaultUnits = filterUnits([
         ...universalUnits,
-        'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb',
+        'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb', 'H',
         'kiloohm', 'mF', 'uF', 'nF', 'pF',
         'W', 'kW', 'MW', 'mW',
         'J', 'N', 'Pa', 'kPa',
         'um', 'mm', 'cm', 'm', 'cm', 'km', 'ml', 'liter',
         'in', 'ft', 'mi', 'acre',
         'tsp', 'tbsp', 'floz', 'cup', 'pint', 'quart', 'gallon',
-        'kg', 'gm', 'mg', 'ug',
+        'kg', 'g', 'mg', 'ug',
         'lbf', 'oz', 'lb',
         'min', 'hr', // 'us', 'ms' -- don't include or you get um/us instead of m/s!
       ]);
@@ -1709,12 +1720,13 @@
           }
           // always allow nonce units
           candidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
-          // Add an affine unit if present (in practice this is degf or degc), could be generalized
-          if (smells.affineUnit) {
-            let affineUnit = getSymbol(smells.affineUnit);
-            if (!affineUnit) throw InternalError(`Unknown unit ${smells.affineUnit})`);
-            affineUnit = { ...affineUnit, favored: 1 };
-            candidateUnits = [ affineUnit, ...candidateUnits ];
+          // Add a bonus unit if present
+          // This is usually degf or degc, but can be others
+          if (smells.bonusUnit) {
+            let bonusUnit = getSymbol(smells.bonusUnit);
+            if (!bonusUnit) throw InternalError(`Unknown unit ${smells.bonusUnit})`);
+            bonusUnit = { ...bonusUnit, favored: 1 };
+            candidateUnits = [ bonusUnit, ...candidateUnits ];
           }
           // If both L and M are present or any of the scientific or technical
           // units, we don't want to use unscientific units like hr and min
@@ -1733,7 +1745,7 @@
                 dotProduct += (dim[measure] ?? 0) * unit.dim[measure];
                 let q = dim[measure]/unit.dim[measure];
                 q = Math.abs(Math.trunc(q));
-                if (q < smallest)   // TODO: exclude zero?
+                if (q < smallest && q != 0)
                   smallest = q;
               }
               let exp = smallest;
@@ -1745,13 +1757,13 @@
                 exp = 1;
               }
               // Unit applied "exp" times; also ensures dotProduct is >= 0 unless forced.
-              // The dot product measures how aligned the units vectors are; the projection
-              // each vector on the other. Orthagonal units ha a product of zero; negative
+              // The dot product measures how similar the units vectors are; the projection
+              // each vector on the other. Orthagonal units have a product of zero; negative
               // dot products mean anti-aligned, but we flipped the exponent's sign in that case.
-              // The dot product tells us which unit is most aligned with the number and tells us
+              // The dot product tells us which unit is most similar to the number and tells us
               // the sign of the exponent, but it may not be the best unit to apply, for instance
               // it may not divide the dimensions evenly and we can't have fractional dimensions.
-              // Also, other factors may figure in chosing the unit such as which one reduces the
+              // Also, other factors may figure in chosing the unit such as which one most reduces the
               // total number of dimensions present. That's a bit heuristic and it's literally
               // sorted out later based on the qualities summarized in the returned "description."
               dotProduct = dotProduct * exp;
@@ -2286,7 +2298,7 @@
               // Affine units in the denominator lose their origin and affine smells
               let smells = sym.smells;
               if (smells)
-                smells = { ...smells, affineUnit: undefined };
+                smells = { ...smells, bonusUnit: undefined };
               if (smells || sym.origin)
                 sym = { ...sym, smells, origin: undefined };
             } else {
@@ -2476,7 +2488,7 @@
             // but we might as well match units behavior, where
             // 1 /degc means the same as 1 /K, the logic being that we're talking
             // about a degree of _change_. So we ignore the origin by NOT calling numval().
-            let smells = { ...val.smells, affineUnit: undefined };
+            let smells = { ...val.smells, bonusUnit: undefined };
             return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), smells };
           }
           parsePos = backtrack;
@@ -2577,8 +2589,8 @@
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
           let smells = val.smells;
-          if (smells.affineUnit)
-            smells = { ...smells, affineUnit: undefined };
+          if (smells?.bonusUnit)
+            smells = { ...smells, bonusUnit: undefined };
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
             val: Rat.pow(numVal(val), numVal(exp)), smells: val.smells };
         }
@@ -2606,7 +2618,7 @@
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num') {
-              let smells = { ...val2.smells, ...val.smells, affineUnit: undefined };
+              let smells = { ...val2.smells, ...val.smells, bonusUnit: undefined };
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
                   val: Rat.mul(numVal(val), numVal(val2)), smells };
             }
@@ -2623,7 +2635,7 @@
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '/', expr1: val, expr2: val2 };
             } else if (val.type === 'num' && val2.type === 'num') {
-              let smells = { ...val2.smells, ...val.smells, affineUnit: undefined };
+              let smells = { ...val2.smells, ...val.smells, bonusUnit: undefined };
               // Ratios with an affine unit should just be a ratio of its rate of change.
               // Ratios between affine units should be the ratios of their rates of change
               // so that degf / degc = 5/9. But an afine unit divided by anything else
