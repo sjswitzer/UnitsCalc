@@ -29,20 +29,35 @@
     <style type="text/css">
       html {
         -webkit-text-size-adjust:none
-      };
+      }
+
+      * { /* input elements lay out bizarrely without this since their borders aren't part of their size */
+        box-sizing: border-box;
+      }
 
       body {
         padding: .2em .5em;
         margin: 0em 0em;
         background-color: #f8f8f8;
         text-size-adjust: none;   /* keep mobile browsers from getting fancy */
+
+        /* Without fixed or absolute placement, the user variables won't scroll */
+        position: fixed;  /* absolute works too */
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 120%;
       }
       body, table  {
         font: 110% caption, sans-serif;
       }
-      * {
-        /* input elements behave bizarrely without this since their borders aren't part of their size */
-        box-sizing: border-box;
+      @media all and (orientation:landscape) {
+        /* iPhone crowds the screen in portrait but has lots of padding in landscape
+           because they don't give you the slot or curver corner areas. So kill the padding there. */
+        body[data-device="mobile"] {
+          padding: 0px 0px;
+        }
       }
 
       /*
@@ -116,23 +131,6 @@
       }
       div.force-width {
         width: max-content;
-      }
-
-      body > div.layout-column {
-        /* Without this, the user variables won't scroll */
-        position: fixed;  /* absolute works too */
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        font-size: 120%;
-      }
-      @media all and (orientation:portrait) {
-        /* iPhone crowds the screen in portrait but has lots of padding in landscape
-           because they don't give you the slot or curver corner areas. */
-        body > div.layout-column {
-          padding: 0px 4px;
-        }
       }
 
       /*
