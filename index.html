@@ -591,9 +591,12 @@
             then a unit or series of units.
             For instance, <code>100 km/hr : mi</code> displays the speed in miles/minute.
             <code>100 km/hr : mi/hr</code> displays the speed in terms of miles/hour.
+        <p> The special units <code>mks</code>, <code>cgs</code> and <code>uscu</code>
+            request results in the those systems, e.g. <code>60 mi/hr : mks</code>.
         <p>
           <ul>
-            <li> How many watts in 10 horsepower? <code>10 horsepower : W</code>
+            <li> How many watts in 10 horsepower? <code>10 horsepower : W</code>, alternatively
+                 <code>10 horsepower : mks</code>
             <li> How many tablespoons in a cup? <code>cup : tbsp</code>
             <li> How many cups in a tablespoon? <code>tbsp : cup</code>
             <li> Sea-level air pressure in PSI? <code>atm : PSI</code>
@@ -1105,12 +1108,12 @@
         // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
-            desc: "Celsius", alt: ["degc"], smells: { bonusUnit: "celsius"} },
+            desc: "degree celsius", alt: ["degc"], smells: { bonusAffine: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
-            desc: "Fahrenheit", alt: ["degf"], smells: { bonusUnit: "fahrenheit" } },
+            desc: "degree fahrenheit", alt: ["degf"], smells: { bonusAffine: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
-            prefixSym: 'K',  prefixNames: ["kelvin"] },
+            desc: "degree kelvin", prefixSym: 'K', prefixNames: ["kelvin"] },
 
         // Angles (RAD)
         //   A steradian can be thought of as a square radian because 2pi radians covers
@@ -1177,7 +1180,7 @@
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], smells: { mks: true },
             alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"] },
-        hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true },
+        hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true, requestSystem: "uscu" },
             val: [ BigInt(550) * BigInt(FT5K) * BigInt(LBFSS10T), BigInt(N5K) * BigInt(N10T) * BigInt(SEC)**3n ],
             desc: "mechanical horsepower" },
 
@@ -1191,8 +1194,8 @@
             val: [ BigInt(LBFSS10T) * BigInt(N5K)**2n, BigInt(N10T) * BigInt(IN5K)**2n * BigInt(SEC)**2n ],
             desc: "pounds per square inch", smells: { uscu: true } },
         atm: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, M * SEC**2 ], desc: "atmosphere" },
-        bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"] },
-        millibar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100 * KG, M * SEC**2 ], alt: ["millibars"] },
+        bar: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 100000 * KG, M * SEC**2 ], alt: ["bars"],
+            prefixSym: "bar", prefixNames: ["bar", "bars"] },
         mmHg: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 133.322387415 * KG, M * SEC**2 ],
             desc: "millimeter of mercury" },
         torr: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ 101325 * KG, 760 * M * SEC**2 ] },
@@ -1239,7 +1242,7 @@
         // Chemical units (N)
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
         groupChemical: { group: "Chemical Units" },
-        mol: { type: 'num', dim: { N: 1 }, desc: "number of particles", alt: ["mols"], reserved: true,
+        mol: { type: 'num', dim: { N: 1 }, desc: "mole", alt: ["mols"], reserved: true,
             val: BigInt(602214076) * BigInt(10)**15n },
         NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant", val: 1 }, // "mol" already contains the number
         N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n , desc: "Avogadro's number" },
@@ -1253,8 +1256,10 @@
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
         parsec:  { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
+        // it's just too annoying for "b" by itself to be predefined and kb is confusable with
+        // KB (kB), so the prefix symbol for is deliberately omitted.
         barn: { type: 'num', dim: { L: 2 }, val: 1e-28 * M**2, alt: ["barns"], smells: { mks: true },
-            prefixSym: "b", prefixNames: ["barn", "barns"] }, // Nuclear physicist in the house?
+            prefixNames: ["barn", "barns"] }, // Nuclear physicist in the house?
         darcy: { type: 'num', dim: { L: 2 }, val: 9.869233e-13 * M**2, desc: "hydraulic permeability" },
         earthg: { type: 'num', dim: { L: 1, T:-2 }, val: [ EARTHG10K * M, N10K * SEC**2 ],
             desc: "standard gravity (earth)"},
@@ -1266,7 +1271,7 @@
         boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
             desc: "Boltzmann constant" },
         [PLANCKHSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
-            desc: "planck constant", alt: ["planck"], smells: { mks: true } },
+            desc: "planck constant", alt: ["planck"], smells: { mks: true, bonusHz: "Hz" } },
         // Representing hbar explicitly in angular units is a choice, and I have made it. Provisionally.
         [PLANCKHBARSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
             desc: "reduced planck constant", alt: ["reducedplanck", "hbar"], smells: { mks: true } },
@@ -1311,7 +1316,7 @@
             smells: { requestSystem: "mks" } },
         cgs: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
             smells: { requestSystem: "cgs" } },
-        uscu: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
+        uscu: { type: 'num', dim: {}, val: 1, desc: "display result in US Conventional units",
             smells: { requestSystem: "uscu" } },
         unit: { type: 'num', dim: {}, val: 1, alt: ["units"],
             desc: 'simply one, to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
@@ -1477,11 +1482,10 @@
           let altName = alts.length > 1 && alts[0] || name;
           if (!sym.desc)
             sym.desc = altName;
-          let display = sym.display || altName;
           if (sym.display)
             alts.unshift(sym.display);
           for (const alt of alts)
-            systemSymbols[alt] = { ...sym, sym: alt, display, altOf: name, alt: undefined, reserved: false };
+            systemSymbols[alt] = { ...sym, sym: alt, altOf: name, alt: undefined, reserved: false };
           let helpDesc = sym.desc || name;
           if (helpDesc === alts[0]) {
             alts.shift();
@@ -1719,13 +1723,16 @@
           }
           // always allow nonce units
           candidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
-          // Add a bonus unit if present
+          // Add a bonus units if present
           // This is usually degf or degc, but can be others
-          if (smells.bonusUnit) {
-            let bonusUnit = getSymbol(smells.bonusUnit);
-            if (!bonusUnit) throw InternalError(`Unknown unit ${smells.bonusUnit})`);
-            bonusUnit = { ...bonusUnit, favored: 1 };
-            candidateUnits = [ bonusUnit, ...candidateUnits ];
+          for (let smell in smells) {
+            if (smell.startsWith('bonus') && smells[smell]) {
+              let bonusUnit = getSymbol(smells[smell]);
+              if (!bonusUnit) throw InternalError(`Unknown unit ${smells[smell]})`);
+              if (bonusUnit.offset)  // favor affine units
+                bonusUnit = { ...bonusUnit, favored: 1 };
+              candidateUnits = [ bonusUnit, ...candidateUnits ];
+            }
           }
           // If both L and M are present or any of the scientific or technical
           // units, we don't want to use unscientific units like hr and min
@@ -1733,9 +1740,17 @@
             || dim.L && dim.M || dim.I || dim.J || dim.THETA || dim.BIT || dim.N;
           function describeUnit(unit, opts) {
             try {
-              let uscu = !!unit.smells?.uscu;
               if (excludeUnscientific && unit.smells?.unscientific && !opts?.forceUnit)
                 return null;
+              let uscu = !!unit.smells?.uscu, timeOnly = undefined;
+              for (let measure in unit.dim) {
+                if (measure !== 'T')
+                  timeOnly = false;
+                else if (timeOnly === undefined)
+                  timeOnly = true;
+              }
+              if (timeOnly)  // a time dimension is in neither (or both) metric and uscu systems
+                uscu = null;
               let normSquared = Dim.normSquared(dim);
               let measures = {...dim, ...unit.dim }, smallest = Number.POSITIVE_INFINITY, dotProduct = 0;
               for (const measure in measures) {
@@ -1844,7 +1859,8 @@
             }
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
               function cmp(a,b) {
-                if (a.uscu !== b.uscu) {
+                // favor same system if possible
+                if (a.uscu !== null && b.uscu != null && a.uscu !== b.uscu) {
                   if (uscu === a.uscu)
                     return -1;
                   return 1;
@@ -2297,7 +2313,7 @@
               // Affine units in the denominator lose their origin and affine smells
               let smells = sym.smells;
               if (smells)
-                smells = { ...smells, bonusUnit: undefined };
+                smells = { ...smells, bonusAffine: undefined };
               if (smells || sym.origin)
                 sym = { ...sym, smells, origin: undefined };
             } else {
@@ -2487,7 +2503,7 @@
             // but we might as well match units behavior, where
             // 1 /degc means the same as 1 /K, the logic being that we're talking
             // about a degree of _change_. So we ignore the origin by NOT calling numval().
-            let smells = { ...val.smells, bonusUnit: undefined };
+            let smells = { ...val.smells, bonusAffine: undefined };
             return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), smells };
           }
           parsePos = backtrack;
@@ -2588,8 +2604,8 @@
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
           let smells = val.smells;
-          if (smells?.bonusUnit)
-            smells = { ...smells, bonusUnit: undefined };
+          if (smells?.bonusAffine)
+            smells = { ...smells, bonusAffine: undefined };
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
             val: Rat.pow(numVal(val), numVal(exp)), smells: val.smells };
         }
@@ -2617,7 +2633,7 @@
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num') {
-              let smells = { ...val2.smells, ...val.smells, bonusUnit: undefined };
+              let smells = { ...val2.smells, ...val.smells, bonusAffine: undefined };
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
                   val: Rat.mul(numVal(val), numVal(val2)), smells };
             }
@@ -2634,12 +2650,12 @@
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '/', expr1: val, expr2: val2 };
             } else if (val.type === 'num' && val2.type === 'num') {
-              let smells = { ...val2.smells, ...val.smells, bonusUnit: undefined };
               // Ratios with an affine unit should just be a ratio of its rate of change.
               // Ratios between affine units should be the ratios of their rates of change
               // so that degf / degc = 5/9. But an afine unit divided by anything else
               // should denature to its base unit so that dividing 32 degf by 2 should
               // show the result as half the corresponding kelvin degrees.
+              let smells = { ...val2.smells, ...val.smells, bonusAffine: undefined };
               if (val.origin && val2.origin)
                  val = { ...val, origin: undefined }; // val2 is handled by not calling numval()
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
