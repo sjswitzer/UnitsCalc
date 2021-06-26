@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.4.7">
+    <meta name="version" content="1.5.1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1757,7 +1757,7 @@
                 dotProduct += (dim[measure] ?? 0) * unit.dim[measure];
                 let q = dim[measure]/unit.dim[measure];
                 q = Math.abs(Math.trunc(q));
-                if (q < smallest && q != 0)
+                if (q < smallest && q !== 0)
                   smallest = q;
               }
               let exp = smallest;
@@ -1856,9 +1856,9 @@
                 unitDescs.push(unitDesc)
             }
             unitDescs.sort((a,b) => {  // Note that we're sorting from best to worst
+            // favor same system if possible
               function cmp(a,b) {
-                // favor same system if possible
-                if (a.uscu !== null && b.uscu != null && a.uscu !== b.uscu) {
+                if (a.uscu !== null && b.uscu !== null && a.uscu !== b.uscu) {
                   if (uscu === a.uscu)
                     return -1;
                   return 1;
