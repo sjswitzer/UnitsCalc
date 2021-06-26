@@ -1241,8 +1241,7 @@
         groupChemical: { group: "Chemical Units" },
         mol: { type: 'num', dim: { N: 1 }, desc: "number of particles", alt: ["mols"], reserved: true,
             val: BigInt(602214076) * BigInt(10)**15n },
-        NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant",
-            val: [ 1, BigInt(602214076) * BigInt(10)**15n ] },
+        NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant", val: 1 }, // "mol" already contains the number
         N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n , desc: "Avogadro's number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
             prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
