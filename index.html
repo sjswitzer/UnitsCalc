@@ -1017,14 +1017,15 @@
 
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
-          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F",
+          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F", NAUGHTSYM = "\u2080",
           PLANCKHSYM = "\u210E", PLANCKHBARSYM = "\u210F", EPSILONSYM = "\u03B5",
           MULSYM = "\u00D7", DIVSYM = "\u00F7";
   ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM + PLANCKHBARSYM + EPSILONSYM + "$";
+        MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM +
+        PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
       let appVersion, appVersionVal;
@@ -1034,6 +1035,8 @@
           let parts = appVersion.split('.');
           appVersionVal = Number((parts[0]??'0') + '.' + (parts[1]??'0'));
         }
+
+      let angleSmell = "radian";
 
       const systemSymbols = {
         // Length (L)
@@ -1124,12 +1127,15 @@
         //   angles are considered dimensions and this lets us do things like convert
         //   degress to radians.
         groupAngle: { group: "Angle Units" },
-        radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"] },
+        radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"],
+            command: () => { angleSmell = 'radian'; } },
         sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"] },
-        degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, alt: ["degrees"], smells: { BonusAngle: "degree" } },
+        degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, desc: "degree", alt: ["degrees", "deg"],
+            command: () => { angleSmell = 'degree'; }, smells: { BonusAngle: "degree" } },
         arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"], smells: { BonusAngle: "degree", ratio: 'rat' } },
         arcsec: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60*60 ], alt: ["arcsecond", "arcseconds"], smells: { BonusAngle: "degree", ratio: 'rat' } },
-        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"], smells: { BonusAngle: "grad" } },
+        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"],
+            command: () => { angleSmell = 'grad'; }, smells: { BonusAngle: "grad" } },
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
@@ -1247,7 +1253,8 @@
         mol: { type: 'num', dim: { N: 1 }, desc: "mole", alt: ["mols"], reserved: true,
             val: BigInt(602214076) * BigInt(10)**15n },
         NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant", val: 1 }, // "mol" already contains the number
-        N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n , desc: "Avogadro's number" },
+        N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n ,
+            display: "N" + NAUGHTSYM, desc: "Avogadro's number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
             prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
 
@@ -1272,15 +1279,15 @@
             desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
         boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
             desc: "Boltzmann constant" },
-        [PLANCKHSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
-            desc: "planck constant", alt: ["planck"], smells: { mks: true, bonusHz: "Hz" } },
-        // Representing hbar explicitly in angular units is a choice, and I have made it. Provisionally.
-        [PLANCKHBARSYM]: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
-            desc: "reduced planck constant", alt: ["reducedplanck", "hbar"], smells: { mks: true } },
-        [EPSILONSYM+"0"]: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, 
-            val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity", alt: ["e0"] },
-        [MICROSYM+"0"]: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true },
-            val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability", alt: ["u0"] },
+        h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
+            display: PLANCKHSYM, desc: "planck constant", alt: ["planck"], smells: { mks: true, bonusHz: "Hz" } },
+        // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
+        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
+            display: PLANCKHBARSYM, desc: "reduced planck constant", alt: ["reducedplanck"], smells: { mks: true } },
+        e0: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, display: EPSILONSYM + NAUGHTSYM, 
+            val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity" },
+        u0: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true }, display: MICROSYM + NAUGHTSYM,
+            val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
@@ -1409,7 +1416,7 @@
           let val1 = params[0], val2 = params[1];
           if (!Dim.equal(val1.dim, val2.dim)) throw new MessageError(`${this.sym}(): Parameter types incompatible`);
           // Doesn't propagate smells since result is altogether different in kind
-          return { type: 'num', dim: { RAD: 1 },
+          return { type: 'num', dim: { RAD: 1 }, smells: { BonusAffine: angleSmell },
               val: [ Math.atan2(Rat.number(numVal(val1)), Rat.number(numVal(val2)))*RADIAN, 1n ] };
         },
 
@@ -1674,10 +1681,10 @@
         's', 'K', 'person', '$', 'symbol', 'mol',
         'sr', 'radian', 'cd', 'lx', 'lm',
       ];
-      const mksUnits = filterUnits([ ...universalUnits, 'm', 'kg', 'N', 'J', 'Pa', 'W', 'H' ]);
-      const cgsUnits = filterUnits([ ...universalUnits, 'cm', 'g', 'dyne', 'erg', 'Ba' ]);
-      const uscuUnits = filterUnits([ ...universalUnits, 'ft', 'lb', 'lbf' ]);
-      const defaultUnits = filterUnits([
+      const mksUnits = [ ...universalUnits, 'm', 'kg', 'N', 'J', 'Pa', 'W', 'H' ];
+      const cgsUnits = [ ...universalUnits, 'cm', 'g', 'dyne', 'erg', 'Ba' ];
+      const uscuUnits = [ ...universalUnits, 'ft', 'lb', 'lbf' ];
+      const defaultUnits = [
         ...universalUnits,
         'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb', 'H',
         'kiloohm', 'mF', 'uF', 'nF', 'pF',
@@ -1689,7 +1696,7 @@
         'kg', 'g', 'mg', 'ug',
         'lbf', 'oz', 'lb',
         'min', 'hr', // 'us', 'ms' -- don't include or you get um/us instead of m/s!
-      ]);
+      ];
 
       function val2str(val, opts) {
         let descStr = "";
@@ -1723,6 +1730,7 @@
             // favor USCU units, but not strictly
             uscu = true;
           }
+          candidateUnits = filterUnits(candidateUnits);
           // always allow nonce units
           candidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
           // Add a bonus units if present
