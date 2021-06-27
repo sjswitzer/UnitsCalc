@@ -1108,10 +1108,10 @@
         // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
-            desc: "degree celsius", alt: ["degc"], smells: { bonusAffine: "celsius"} },
+            desc: "degree celsius", alt: ["degc"], smells: { BonusAffine: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
-            desc: "degree fahrenheit", alt: ["degf"], smells: { bonusAffine: "fahrenheit" } },
+            desc: "degree fahrenheit", alt: ["degf"], smells: { BonusAffine: "fahrenheit" } },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
             desc: "degree kelvin", prefixSym: 'K', prefixNames: ["kelvin"] },
 
@@ -1126,10 +1126,10 @@
         groupAngle: { group: "Angle Units" },
         radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"] },
         sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"] },
-        degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, alt: ["degrees"] },
-        arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"] },
-        arcsec: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60*60 ], alt: ["arcsecond", "arcseconds"] },
-        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"] },
+        degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, alt: ["degrees"], smells: { BonusAngle: "degree" } },
+        arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"], smells: { BonusAngle: "degree", ratio: 'rat' } },
+        arcsec: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60*60 ], alt: ["arcsecond", "arcseconds"], smells: { BonusAngle: "degree", ratio: 'rat' } },
+        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"], smells: { BonusAngle: "grad" } },
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
@@ -1728,10 +1728,10 @@
           // Add a bonus units if present
           // This is usually degf or degc, but can be others
           for (let smell in smells) {
-            if (smell.startsWith('bonus') && smells[smell]) {
+            if ((smell.startsWith('bonus') || smell.startsWith('Bonus')) && smells[smell]) {
               let bonusUnit = getSymbol(smells[smell]);
               if (!bonusUnit) throw InternalError(`Unknown unit ${smells[smell]})`);
-              if (bonusUnit.offset)  // favor affine units
+              if (smell.startsWith('Bonus'))  // Favor capital Bonus
                 bonusUnit = { ...bonusUnit, favored: 1 };
               candidateUnits = [ bonusUnit, ...candidateUnits ];
             }
@@ -2325,7 +2325,7 @@
               // Affine units in the denominator lose their origin and affine smells
               let smells = sym.smells;
               if (smells)
-                smells = { ...smells, bonusAffine: undefined };
+                smells = { ...smells, BonusAffine: undefined };
               if (smells || sym.origin)
                 sym = { ...sym, smells, origin: undefined };
             } else {
@@ -2515,7 +2515,7 @@
             // but we might as well match units behavior, where
             // 1 /degc means the same as 1 /K, the logic being that we're talking
             // about a degree of _change_. So we ignore the origin by NOT calling numval().
-            let smells = { ...val.smells, bonusAffine: undefined };
+            let smells = { ...val.smells, BonusAffine: undefined };
             return { type: val.type, dim: Dim.mul(val.dim, -1), val: Rat.recip(val.val), smells };
           }
           parsePos = backtrack;
@@ -2616,8 +2616,8 @@
           if (!Dim.isScalar(val.dim) && expVal !== Math.trunc(expVal))
             throw new MessageError("Cannot exponentiate non-scalars by non-integers");
           let smells = val.smells;
-          if (smells?.bonusAffine)
-            smells = { ...smells, bonusAffine: undefined };
+          if (smells?.BonusAffine)
+            smells = { ...smells, BonusAffine: undefined };
           return { type: 'num', dim: Dim.mul(val.dim, Rat.number(exp.val)),
             val: Rat.pow(numVal(val), numVal(exp)), smells: val.smells };
         }
@@ -2645,7 +2645,7 @@
             if (val.type === 'parse' || val2.type === 'parse')
               val = { type: 'parse', op: '*', expr1: val, expr2: val2 };
             else if (val.type === 'num' && val2.type === 'num') {
-              let smells = { ...val2.smells, ...val.smells, bonusAffine: undefined };
+              let smells = { ...val2.smells, ...val.smells, BonusAffine: undefined };
               val = { type: 'num', dim: Dim.add(val.dim, val2.dim),
                   val: Rat.mul(numVal(val), numVal(val2)), smells };
             }
@@ -2667,7 +2667,7 @@
               // so that degf / degc = 5/9. But an afine unit divided by anything else
               // should denature to its base unit so that dividing 32 degf by 2 should
               // show the result as half the corresponding kelvin degrees.
-              let smells = { ...val2.smells, ...val.smells, bonusAffine: undefined };
+              let smells = { ...val2.smells, ...val.smells, BonusAffine: undefined };
               if (val.origin && val2.origin)
                  val = { ...val, origin: undefined }; // val2 is handled by not calling numval()
               val = { type: 'num', dim: Dim.sub(val.dim, val2.dim),
