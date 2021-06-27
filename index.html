@@ -2034,6 +2034,41 @@
           }
         }
 
+        // Last chance for full precision; can it be an exact decimal?
+        if (typeof val[0] === 'bigint') {
+          let factor = 1n, exp = 0, val2 = val, minus = false;
+          if (val2[0] < 0n) {
+            val2[0] = -val2[0];
+            minus = true;
+          }
+          if (val2[1] !== 1n) {
+            exp = 50;
+            factor = 10n**BigInt(exp);
+            val2 = Rat.mul(val, [ factor, 1n ]);
+          }
+          if (val2[1] === 1n && val2[0] !== 0n) { // yay!
+            let str = String(val2[0]), trailingZeros = 0;
+            for (let n = str.length-1; n >= 0 && str.charAt(n) === '0'; --n)
+              ++trailingZeros;
+            exp = str.length - exp - 1;
+            str = str.substr(0, str.length-trailingZeros);
+            if (exp > 15 || exp < -15) {
+              if (str.length > 1)
+                 str = str.charAt(0) + '.' + str.substr(1);
+              if (minus)
+                str = '-' + str;
+              str += (exp > 0 ? 'e+' : 'e') + String(exp);
+              return str + unitsStr + invUnitsStr + descStr;
+            }
+            if (exp > 0) {
+              str += '0'.repeat(exp-str.length + 1);
+            } else if (exp < 0) {
+              str = '0.' + '0'.repeat(-exp-1) + str;
+            }
+            return str + unitsStr + invUnitsStr + descStr;
+          }
+        }
+
         val = Rat.number(val);   // Finally, smash it into a JS number
         let absVal = Math.abs(val);
         if (absVal > 0 && absVal < 1) {
