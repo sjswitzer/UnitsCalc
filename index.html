@@ -1051,9 +1051,9 @@
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
-        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], reserved: true, smells: { uscu: true }, alt: ["acres"],
+        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["acres"],
             desc: "66' \u00D7 660'" },
-        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares"],
+        hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares", "ha"],
             desc: "100 meters \u00D7 100 meters" },
 
         // Volume (L^3)
@@ -1144,7 +1144,7 @@
         byte: { type: 'num', dim: { BIT: 1 }, reserved: true, val: BYTE, alt: ["bytes"],
             prefixSym: "B", prefixNames: ["byte", "bytes"], noFractionalPrefix: true },
         // Because people expect it but it falls outside the prefix system (which uses lowercase 'k')
-        KB: { type: 'num', dim: { BIT: 1 }, reserved: true, val: 1000 * BYTE,
+        KB: { type: 'num', dim: { BIT: 1 }, val: 1000 * BYTE,
             desc: "kilobyte", display: null },
         baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
             prefixSym: "Bd", prefixNames: ["baud"] },
@@ -1257,6 +1257,22 @@
             display: "N" + NAUGHTSYM, desc: "Avogadro's number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
             prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
+        kat: { type: 'num', dim: { N: 1, T: -1 }, desc: "catalytic activity", alt: ["katal", "katals"],
+            prefixSym: "kat", prefixNames: ["katal", "katals"], val: [ BigInt(602214076) * BigInt(10)**15n, SEC ] },
+
+        // Radiation units (L^2, T^-2)
+        groupRadiation: { group: "Radiation & Radioactivity Units" },
+        Gy: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, SEC**2 ], alt: ["gray", "grays"],
+            prefixSym: "Gy", prefixNames: ["gray", "grays"], smells: { mks: true } },
+        rad: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, 100 * SEC**2 ], alt: ["rads"],
+            prefixSym: "rad", prefixNames: ["rad", "rads"], smells: { cgs: true } },
+        // (T^-1) -- Indistinguishable from Hz
+        Bq: { type: 'num', dim: { T: -1 }, val: [1, SEC ], alt: ["becquerel", "becquerels"],
+            prefixSym: "Bq", prefixNames: ["becquerel", "becquerel"], smells: { mks: true } },
+        Ci: { type: 'num', dim: { T: -1 }, val: [37 * 10**9, SEC ], alt: ["curie", "curies"],
+            prefixSym: "Ci", prefixNames: ["curie", "curies"] },
+        Rd: { type: 'num', dim: { T: -1 }, val: [10**6, SEC ], alt: ["rutherford", "rutherfords"],
+            prefixSym: "Rd", prefixNames: ["rutherford", "rutherfords"] },
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
@@ -1494,7 +1510,7 @@
           if (sym.display)
             alts.unshift(sym.display);
           for (const alt of alts)
-            systemSymbols[alt] = { ...sym, sym: alt, altOf: name, alt: undefined, reserved: false };
+            systemSymbols[alt] = { ...sym, sym: alt, altOf: name, alt: undefined, reserved: undefined };
           let helpDesc = sym.desc || name;
           if (helpDesc === alts[0]) {
             alts.shift();
@@ -1533,7 +1549,7 @@
                   desc = s;
                 }
                 if (!systemSymbols[s])
-                  systemSymbols[s] = { ...sym, sym: s, display, desc, alt: undefined, reserved: false,
+                  systemSymbols[s] = { ...sym, sym: s, display, desc, alt: undefined, reserved: undefined,
                       val: Rat.mul(sym.val, pref.val) };
               }
             }
@@ -1556,7 +1572,7 @@
                 if (sym.prefixNames)
                   desc = `${pref.name}${sym.prefixNames[0]}`;
                 if (!systemSymbols[s]) {
-                  systemSymbols[s] = { ...sym, sym: s, display: s, alt: undefined, reserved: false, desc,
+                  systemSymbols[s] = { ...sym, sym: s, display: s, alt: undefined, reserved: undefined, desc,
                       val: Rat.mul(sym.val, pref.val) };
                   if (pref.symbol === MICROSYM)
                     systemSymbols[`u${sym.prefixSym}`] = systemSymbols[s];
@@ -1569,6 +1585,7 @@
           html += `<tr><td><span class="stuff-text">${name}<span>
                        <td><span class="stuff-text">/${name}</span><td>${helpDesc}`;
         }
+        systemSymbols.kg.reserved = true; // The system doesn't get this one automatically
         builtinSymbolsElement.innerHTML = html;
       }
 
@@ -1934,7 +1951,7 @@
             });
             Log(2, (level) =>  // use a function here to defer evaluation unless we're logging
                 "======== " + parseStr + " unit candidates for " + val + " " +
-                JSON.stringify(dim) + " " + val.smells + " ========\n" +
+                JSON.stringify(dim) + " " + valSmells + " ========\n" +
                 JSON.stringify(unitDescs, (k, v) => typeof v === 'bigint' ? String(v)+"n" : v, 2));
             if (unitDescs.length < 1)
               throw new InternalError("Insufficient basis units");
