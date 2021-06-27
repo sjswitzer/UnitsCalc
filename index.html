@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.1">
+    <meta name="version" content="1.5.3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -609,7 +609,7 @@
             <li> What's <code>pi/4</code> radians in degrees? <code>pi/4 radians : degrees</code>
             <li> How much does it cost to run a 100 watt lightbulb for a year,
                  assuming electricity costs $0.20 per kilowatt hour
-                 (<code>ecost = 0.20$ / kW hr</code>)?
+                 (<code>ecost = 0.20$ / kWh</code>)?
                  That would be, <code>ecost * 100 watts : year</code>, about $175
             <li> Alternatively, it's about $1.75 per watt per year
                  <code>ecost * watt : yr</code>
@@ -930,6 +930,8 @@
           return Rat.normalize([ a[0]*b[0], a[1]*b[1] ]);
         }
         static div(a, b) {
+          if (typeof b[0] === 'bigint') // Invertable quotient? Invert it and multiply!
+            return this.mul(a, [b[1], b[0]]);
           if (typeof a[0] === 'number' || typeof b[0] === 'number')
             return Rat.normalize([ Number(a[0])*Number(b[1])/Number(b[0]), a[1] ]); // Normalize might make num a BigInt
           return Rat.normalize([ a[0]*b[1], a[1]*b[0] ]);
@@ -1171,6 +1173,8 @@
             prefixNames: ["erg", "ergs"], smells: { cgs: true } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie"],
             prefixSym: "cal", prefixNames: ["calorie", "calories"] },
+        kWh: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1000 * KG * M**2 * HR, SEC**3 ],
+            desc: "kilowatt-hour", smells: { unscientific: true } },
         eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1.602176634e-19 * KG * M**2, SEC**2 ], alt: ["electronvolt", "electronvolts"],
             prefixSym: "eV", prefixNames: ["electronvolt", "electronvolts"] },
 
@@ -1678,7 +1682,7 @@
         'mA', 'uA', 'V', 'kV', 'mV','uV', 'Wb', 'H',
         'kiloohm', 'mF', 'uF', 'nF', 'pF',
         'W', 'kW', 'MW', 'mW',
-        'J', 'N', 'Pa', 'kPa',
+        'J', 'N', 'Pa', 'kPa', 'kWh',
         'um', 'mm', 'cm', 'm', 'cm', 'km', 'ml', 'liter',
         'in', 'ft', 'mi', 'acre',
         'tsp', 'tbsp', 'floz', 'cup', 'pint', 'quart', 'gallon',
@@ -1689,7 +1693,7 @@
 
       function val2str(val, opts) {
         let descStr = "";
-        let smells = val.smells ?? {}, displayUnits = val.displayUnits ?? [];
+        let smells = val.smells ?? {}, valSmells = smells, displayUnits = val.displayUnits ?? [];
         for (const dispUnit of displayUnits)
           smells = { ...smells, ...dispUnit?.smells };
         if (opts?.describe && val.desc && displayUnits.length === 0)
@@ -1733,9 +1737,12 @@
             }
           }
           // If both L and M are present or any of the scientific or technical
-          // units, we don't want to use unscientific units like hr and min
+          // units, we don't want to use unscientific units like hr and min...
           let excludeUnscientific = smells.system === 'mks' || smells.system === 'cgs'
             || dim.L && dim.M || dim.I || dim.J || dim.THETA || dim.BIT || dim.N;
+          // UNLESS those units were in the original value
+          if (valSmells.unscientific)
+            excludeUnscientific = false;
           function describeUnit(unit, opts) {
             try {
               if (excludeUnscientific && unit.smells?.unscientific && !opts?.forceUnit)
@@ -1819,7 +1826,7 @@
               let displayExp = exp = unitDesc.exp * exp;
               if (displayExp < 0) {
                 displayExp = -displayExp;
-                str += " /"
+                str += "/"
               }
               if (unit.display && !opts?.saveMode)
                 str += unit.display;
@@ -1927,6 +1934,17 @@
           }
         }
 
+        if (opts?.saveMode) { // special path for saving; preserve rationality whenever possible
+          let str;
+          if (typeof val[0] === 'number')
+            str = val[0].toExponential();  // forces the JS parser for numbers on input
+          else
+            str = String(val[0]);
+          if (val[1] !== 1n)
+            str += '/' + String(val[1]);
+          return str + unitsStr + invUnitsStr;
+        }
+
         // Now, should it be represented as a (mixed) fraction?
         let displayRatio = smells.ratio;
         if (displayRatio === undefined) {
@@ -1975,10 +1993,6 @@
         }
 
         val = Rat.number(val);   // Finally, smash it into a JS number
-        if (opts?.saveMode) {
-          // full precision value
-          return String(val) + unitsStr + invUnitsStr;
-        }
         let absVal = Math.abs(val);
         if (absVal > 0 && absVal < 1) {
           // We want to display things like 0.0000001 when possible, but not if
@@ -2829,8 +2843,6 @@
                 display: undefined, reserved: undefined, alt: undefined };
         delete userSymbols[sym];  // remove from list so new value now shows up first (in reverse listing)
         userSymbols[sym] = val;
-        // Do it here because iOS doesn't reliably deliver any kind of event when the app ends.
-        saveUserSymbols();
         if (sym === "loglevel" && val.type === 'num' && Dim.isScalar(val.dim))
           logLevel = Rat.number(numVal(val));
       }
@@ -2919,6 +2931,8 @@
               showUserSymbols();
               if (opts?.userHitEnter)
                 exprElement.value = "";
+              // Save here because iOS doesn't reliably deliver any kind of event when the app closes.
+              saveUserSymbols();
             } else if (val.type === 'num' && uscu && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
               showFeetInchesResult(numVal(val));
             } else if (val.type === 'num') {
@@ -3157,10 +3171,14 @@
         for (const sym in userSymbols) {
           if (userSymbols[sym].native || userSymbols[sym].origin)
             continue;  // can't save these types now
-          let symStr = symString(userSymbols[sym], { saveMode: true });
-          if (symStr) {
-            wad.defs.push(symStr);
-            Log(1, `Saving: ${symStr}`);
+          try { // Any save could theoretically fail for lack of basis units because of a user redefinition
+            let symStr = symString(userSymbols[sym], { saveMode: true });
+            if (symStr) {
+              wad.defs.push(symStr);
+              Log(1, `Saving: ${symStr}`);
+            }
+          } catch (e) {
+            console.error(e);
           }
         }
         let json = JSON.stringify(wad);
