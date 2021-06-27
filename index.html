@@ -1017,14 +1017,14 @@
 
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
-          PISYM = "\uD835\uDF0B", TAUSYM = "\uD835\uDF0F", NAUGHTSYM = "\u2080",
+          PISYM = "\uD835\uDF0B", NAUGHTSYM = "\u2080",
           PLANCKHSYM = "\u210E", PLANCKHBARSYM = "\u210F", EPSILONSYM = "\u03B5",
           MULSYM = "\u00D7", DIVSYM = "\u00F7";
   ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        MICROSYM + OHMSYM + TAUSYM + PISYM + PLANCKHSYM +
+        MICROSYM + OHMSYM + PISYM + PLANCKHSYM +
         PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
@@ -1241,11 +1241,11 @@
         // Photometry (J...)
         groupLuminosity: { group: "Lumosity Units" },
         cd: { type: 'num', dim: { J: 1 }, val: CANDELA, reserved: true, desc: "luminous intensity",
-            alt: ["candela", "candelas"] },
+            prefixSym: "cd", prefixNames: ["candela", "candelas"], alt: ["candela", "candelas"] },
         lx: { type: 'num', dim: { J: 1, RAD: 2, L: -2 }, val: [ CANDELA * RADIAN**2,  M**2 ],
-            desc: "luminous emittance", alt: ["lux"] },
+            desc: "luminous emittance", alt: ["lux"], prefixSym: "lx", prefixNames: ["lux"] },
         lm: { type: 'num', dim: { J: 1, RAD: 2 }, val: CANDELA * RADIAN**2,
-            desc: "luminous flux", alt: ["lumen", "lumens"] },
+            desc: "luminous flux", alt: ["lumen", "lumens"], prefixSym: "lm", prefixNames: ["lumen", "lumens"] },
 
         // Chemical units (N)
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
@@ -1277,7 +1277,6 @@
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: PI, display: PISYM, desc: PISYM },
-        tau: { type: 'num', dim: {}, val: 2 * PI, display: TAUSYM, desc: `2${PISYM}` },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
         parsec:  { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
@@ -1304,6 +1303,12 @@
             val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity" },
         u0: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true }, display: MICROSYM + NAUGHTSYM,
             val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
+        deltavCs: { type: 'num', dim: { T: -1 }, smells: { mks: true },
+            val: [ 9192631770, SEC ], desc: "time standard, hyperfine transition frequency of Caesium" },
+        e: { type: 'num', dim: { T: 1, I: 1 }, smells: { mks: true },
+            val: [ 1602176634 * SEC * AMP, 10n**28n ], desc: "elementary charge" },
+        Kcd: { type: 'num', dim: { J: 1, RAD: 2, L: -2, M: -1, T: 3 }, smells: { mks: true },
+            val: [ 683 * CANDELA * RADIAN**2 * SEC**3, M**2 * KG ], desc: "luminosity standard, luminous efficacy of 540 THz radiation" },
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
