@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.3">
+    <meta name="version" content="1.5.4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -68,10 +68,6 @@
        */
       @media (hover: none) {
         body { --device: mobile; }
-      }
-      body[data-device="mobile"],
-      body[data-device="mobile"] table {
-          /* font: 100% caption, sans-serif !important; */
       }
       body[data-device="mobile"] div.input-area {
         font-size: 120%;
@@ -905,6 +901,7 @@
           if (num === 0n || num === 0)
             return Rat.ZERO;
           if (typeof num === 'number') {
+            if (!isFinite(num)) throw new MessageError("Divide by zero");
             if (num !== Math.trunc(num))
               return [ num, denom ];
             num = BigInt(num);
@@ -1222,7 +1219,7 @@
         S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ],
             desc: "conductance", alt: ["siemens", "mho"] },
         C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "electric charge", alt: ["coulomb", "coulombs"],
-            prefixSym: "C", prefixNames: ["coulomb", "coulombs"]},
+            prefixSym: "C", prefixNames: ["coulomb", "coulombs"] },
         F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ], desc: "capacitance",
             alt: ["farad", "farads"],
             prefixSym: "F", prefixNames: ["farad", "farads"] },
@@ -1252,9 +1249,9 @@
         groupChemical: { group: "Chemical Units" },
         mol: { type: 'num', dim: { N: 1 }, desc: "mole", alt: ["mols"], reserved: true,
             val: BigInt(602214076) * BigInt(10)**15n },
-        NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro's constant", val: 1 }, // "mol" already contains the number
-        N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n ,
-            display: "N" + NAUGHTSYM, desc: "Avogadro's number" },
+        NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro constant", val: 1 }, // "mol" already contains the number
+        N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n,
+            display: "N" + NAUGHTSYM, desc: "Avogadro number" },
         Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
             prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
         kat: { type: 'num', dim: { N: 1, T: -1 }, desc: "catalytic activity", alt: ["katal", "katals"],
@@ -1289,26 +1286,31 @@
             desc: "standard gravity (earth)"},
         G: { type: 'num', dim: { L: 3, M: -1, T:-2 }, val: [ 6.6743e-11 * M**3, KG * SEC**2 ],
             desc: "universal gravitational constant", smells: { mks: true } },
-        c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light"},
-        lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100  ],
+        c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light", smells: { mks: true } },
+        lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100 ],
             desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
-        k: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
-            desc: "Boltzmann constant", alt: ["boltz", "boltzmann"] },
-        h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
-            display: PLANCKHSYM, desc: "planck constant", alt: ["planck"], smells: { mks: true, bonusHz: "Hz" } },
-        // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
-        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
-            display: PLANCKHBARSYM, desc: "reduced planck constant", alt: ["reducedplanck"], smells: { mks: true } },
+
+        // SI defining constants
+        definingGroup: { group: "SI Defining Constants & Related" },
+        deltavCs: { type: 'num', dim: { T: -1 }, smells: { mks: true }, BonusHz: 'Hz',
+            val: [ 9192631770, SEC ], desc: "hyperfine transition frequency of Caesium, defines Hz, hence the second" },
+        repeatC: { repeat: 'c', desc: "speed of light, defines velocity, hence the meter" },
         e0: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, display: EPSILONSYM + NAUGHTSYM, 
             val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity" },
         u0: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true }, display: MICROSYM + NAUGHTSYM,
             val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
-        deltavCs: { type: 'num', dim: { T: -1 }, smells: { mks: true },
-            val: [ 9192631770, SEC ], desc: "time standard, hyperfine transition frequency of Caesium" },
-        e: { type: 'num', dim: { T: 1, I: 1 }, smells: { mks: true },
-            val: [ 1602176634 * SEC * AMP, 10n**28n ], desc: "elementary charge" },
+        h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
+            display: PLANCKHSYM, desc: "Planck constant, defines the joule", alt: ["planck"], smells: { mks: true }, bonusHz: "Hz" },
+        // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
+        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
+            display: PLANCKHBARSYM, desc: "reduced Planck constant", alt: ["reducedplanck"], smells: { mks: true } },
+        e: { type: 'num', dim: { T: 1, I: 1 }, smells: { mks: true }, BonusCoulomb: 'C',
+            val: [ 1602176634 * SEC * AMP, 10n**28n ], desc: "elementary charge, defines the coulomb" },
+        k: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+            desc: "Boltzmann constant, defines the kelvin", alt: ["boltz", "boltzmann"], smells: { mks: true } },
+        repeatNA: { repeat: 'NA', desc: "Avogodro constant, defines the mol" },
         Kcd: { type: 'num', dim: { J: 1, RAD: 2, L: -2, M: -1, T: 3 }, smells: { mks: true },
-            val: [ 683 * CANDELA * RADIAN**2 * SEC**3, M**2 * KG ], desc: "luminosity standard, luminous efficacy of 540 THz radiation" },
+            val: [ 683 * CANDELA * RADIAN**2 * SEC**3, M**2 * KG ], desc: "luminosity standard, luminous efficacy of 540 THz radiation, defines the candela" },
 
         // Obscure/whimsical units
         groupObscure: { group: "Et Cetera" },
@@ -1481,9 +1483,16 @@
       // Groom the system symbols and inject help text
       function groomSystemSymbols() {
         let html = "";
+        let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
           if (sym.group) {
             html += `<tr><td colspan="3" class="group">${sym.group}`;
+            delete systemSymbols[name];
+            continue;
+          }
+          if (sym.repeat) {
+            let backRef = backRefs[sym.repeat];
+            html += backRef.row + (sym.desc ?? backRef.helpDesc);
             delete systemSymbols[name];
             continue;
           }
@@ -1587,8 +1596,10 @@
           }
           if (sep === ", ")
             helpDesc += ", etc.";
-          html += `<tr><td><span class="stuff-text">${name}<span>
-                       <td><span class="stuff-text">/${name}</span><td>${helpDesc}`;
+          let row = `<tr><td><span class="stuff-text">${name}<span>
+                       <td><span class="stuff-text">/${name}</span><td>`;
+          backRefs[name] = { row, helpDesc };
+          html += row + helpDesc;
         }
         systemSymbols.kg.reserved = true; // The system doesn't get this one automatically
         builtinSymbolsElement.innerHTML = html;
@@ -1721,7 +1732,7 @@
       ];
 
       function val2str(val, opts) {
-        let descStr = "";
+        let descStr = "", origVal = val;
         let smells = val.smells ?? {}, valSmells = smells, displayUnits = val.displayUnits ?? [];
         for (const dispUnit of displayUnits)
           smells = { ...smells, ...dispUnit?.smells };
@@ -1755,12 +1766,13 @@
           candidateUnits = filterUnits(candidateUnits);
           // always allow nonce units
           candidateUnits = [ ...Object.values(nonceUnits), ...candidateUnits ];
-          // Add a bonus units if present
+          // Add bonus units if present
           // This is usually degf or degc, but can be others
-          for (let smell in smells) {
-            if ((smell.startsWith('bonus') || smell.startsWith('Bonus')) && smells[smell]) {
-              let bonusUnit = getSymbol(smells[smell]);
-              if (!bonusUnit) throw InternalError(`Unknown unit ${smells[smell]})`);
+          let bonusSet = { ...origVal, ...smells }; // look for bonus units in the val and its smells
+          for (let smell in bonusSet) {
+            if ((smell.startsWith('bonus') || smell.startsWith('Bonus')) && bonusSet[smell]) {
+              let bonusUnit = getSymbol(bonusSet[smell]);
+              if (!bonusUnit) throw InternalError(`Unknown unit ${bonusSet[smell]})`);
               if (smell.startsWith('Bonus'))  // Favor capital Bonus
                 bonusUnit = { ...bonusUnit, favored: 1 };
               candidateUnits = [ bonusUnit, ...candidateUnits ];
@@ -3064,16 +3076,16 @@
       }
 
       function showFeetInchesResult(val, opts) {
-        let totalUnits = Rat.number(val);
+        val = Rat.normalize(val);
         resultsElement.style.display = '';
         numberResultsElement.style.display = 'none';
         errorElement.style.display = 'none';
         resultsElement.style.color = '';
 
-        resultInElement.textContent = val2str([ totalUnits * Number(N5K), IN5K ]);
-        resultFtElement.textContent = val2str([ totalUnits * Number(N5K), FT5K ]);
+        resultInElement.textContent = val2str(Rat.mul(val, [ BigInt(N5K), BigInt(IN5K) ]));
+        resultFtElement.textContent = val2str(Rat.mul( val, [ BigInt(N5K), BigInt(FT5K) ]));
 
-        let [ftStr, inStr, delta] = unitsToUSStringReps(totalUnits);
+        let [ftStr, inStr, delta] = unitsToUSStringReps(Rat.number(val));
         resultFtDetailElement.textContent = ftStr + delta;
         if (opts?.updateExpr)
           exprElement.value = ftStr + delta;
@@ -3082,13 +3094,13 @@
 
         // show metric for good measure
         resultMetersElement.textContent =
-          val2str([ totalUnits, M ]);
+          val2str(Rat.mul( val, [ 1n, BigInt(M) ]));
         resultMetersMetricFeetElement.textContent =
-          val2str([ totalUnits*250, M*254 ])
+          val2str(Rat.mul( val, [ 250n, BigInt(M*254) ]));
       }
 
       function unitsToUSStringReps(totalUnits) {
-        let totalInches = Number(N5K) * totalUnits/Number(IN5K);
+        let totalInches = N5K * totalUnits / IN5K;
         let minus = "";
         if (totalInches < 0) {
           totalInches = -totalInches;
