@@ -1293,8 +1293,8 @@
         c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light"},
         lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100  ],
             desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
-        boltz: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
-            desc: "Boltzmann constant" },
+        k: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+            desc: "Boltzmann constant", alt: ["boltz", "boltzmann"] },
         h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
             display: PLANCKHSYM, desc: "planck constant", alt: ["planck"], smells: { mks: true, bonusHz: "Hz" } },
         // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
