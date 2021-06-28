@@ -1281,7 +1281,7 @@
         // KB (kB), so the prefix symbol for is deliberately omitted.
         barn: { type: 'num', dim: { L: 2 }, val: 1e-28 * M**2, alt: ["barns"], smells: { mks: true },
             prefixNames: ["barn", "barns"] }, // Nuclear physicist in the house?
-        darcy: { type: 'num', dim: { L: 2 }, val: 9.869233e-13 * M**2, desc: "hydraulic permeability" },
+        darcy: { type: 'num', dim: { L: 2 }, val: [ M**2, 101325n * 10n**7n ], desc: "hydraulic permeability" },
         earthg: { type: 'num', dim: { L: 1, T:-2 }, val: [ EARTHG10K * M, N10K * SEC**2 ],
             desc: "standard gravity (earth)"},
         G: { type: 'num', dim: { L: 3, M: -1, T:-2 }, val: [ 6.6743e-11 * M**3, KG * SEC**2 ],
@@ -1296,17 +1296,17 @@
             val: [ 9192631770, SEC ], desc: "hyperfine transition frequency of Caesium, defines Hz, hence the second" },
         repeatC: { repeat: 'c', desc: "speed of light, defines velocity, hence the meter" },
         e0: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, display: EPSILONSYM + NAUGHTSYM, 
-            val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity" },
+            val: [ 88541878128 * SEC**4 * AMP**2, 10n**22n * BigInt(KG * M**3) ], desc: "vacuum (electric) permittivity" },
         u0: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true }, display: MICROSYM + NAUGHTSYM,
-            val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
-        h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC ],
+            val: [ 125663706212 * KG * M, 10n**17n * BigInt(SEC**2 * AMP**2) ], desc: "vacuum (magnetic) permeability" },
+        h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC) ],
             display: PLANCKHSYM, desc: "Planck constant, defines the joule", alt: ["planck"], smells: { mks: true }, bonusHz: "Hz" },
         // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
-        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 6.62607015e-34 * M**2 * KG, SEC * CIRCLE ],
+        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC * CIRCLE) ],
             display: PLANCKHBARSYM, desc: "reduced Planck constant", alt: ["reducedplanck"], smells: { mks: true } },
         e: { type: 'num', dim: { T: 1, I: 1 }, smells: { mks: true }, BonusCoulomb: 'C',
             val: [ 1602176634 * SEC * AMP, 10n**28n ], desc: "elementary charge, defines the coulomb" },
-        k: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1.380649e-23 * KG * M**2, SEC**2 * KELVIN ],
+        k: { type: 'num', dim: { L: 2, M: 1, T:-2, THETA: -1 }, val: [ 1380649 * KG * M**2, 10n**29n * BigInt(SEC**2 * KELVIN) ],
             desc: "Boltzmann constant, defines the kelvin", alt: ["boltz", "boltzmann"], smells: { mks: true } },
         repeatNA: { repeat: 'NA', desc: "Avogodro constant, defines the mol" },
         Kcd: { type: 'num', dim: { J: 1, RAD: 2, L: -2, M: -1, T: 3 }, smells: { mks: true },
@@ -1739,9 +1739,14 @@
         if (opts?.describe && val.desc && displayUnits.length === 0)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
+        let minus = '';
         if (val.val !== undefined) {
           let dim = val.dim;
           val = Rat.normalize(numVal(val));
+          if (val[0] < 0) {
+            val[0] = -val[0];
+            minus = '-';
+          }
           // Figure out which units system makes the most sense
           let uscu = false;
           let candidateUnits = defaultUnits;
@@ -1974,6 +1979,12 @@
               throw new InternalError("Insufficient basis units");
             applyDesc(unitDescs[0]);
           }
+        } else {
+          val = Rat.normalize(val);
+          if (val[0] < 0) {
+            val[0] = -val[0];
+            minus = '-';
+          }
         }
 
         if (opts?.saveMode) { // special path for saving; preserve rationality whenever possible
@@ -1984,7 +1995,7 @@
             str = String(val[0]);
           if (val[1] !== 1n)
             str += '/' + String(val[1]);
-          return str + unitsStr + invUnitsStr;
+          return minus + str + unitsStr + invUnitsStr;
         }
 
         // Now, should it be represented as a (mixed) fraction?
@@ -2030,17 +2041,13 @@
             }
             if (num !== 0n)
               str += String(num) + "/" + String(denom);
-            return str + unitsStr + invUnitsStr + descStr;
+            return minus + str + unitsStr + invUnitsStr + descStr;
           }
         }
 
         // Last chance for full precision; can it be an exact decimal?
         if (typeof val[0] === 'bigint' && val[0] !== 0n) {
-          let exp = 0, significantDigits = 0, val2 = val, minus = '';
-          if (val2[0] < 0n) {
-            val2[0] = -val2[0];
-            minus = '-';
-          }
+          let exp = 0, significantDigits = 0, val2 = val;
           while (val2[1] !== 1n && exp > -2000 && significantDigits < 20) {
             val2 = Rat.normalize([ val2[0]*10n, val2[1] ]);
             --exp;
@@ -2059,22 +2066,22 @@
             for (let n = str.length-1; n >= 0 && str.charAt(n) === '0'; --n)
               ++trailingZeros;
             str = str.substr(0, str.length-trailingZeros);
-            if (exp > 15 || exp < -15) {
+            if (exp > 15 || exp < -5) {
               if (str.length > 1)
                 str = str.charAt(0) + '.' + str.substr(1);
-              str = minus + str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
-              return str + unitsStr + invUnitsStr + descStr;
+              str = str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
+              return minus + str + unitsStr + invUnitsStr + descStr;
             }
             if (exp >= 0) {
               let pos = exp + 1;
               if (pos < str.length)
-                str = minus + str.substr(0, pos) + '.' + str.substr(pos);
+                str = str.substr(0, pos) + '.' + str.substr(pos);
               else
-                str = minus + str + '0'.repeat(pos-str.length);
+                str = str + '0'.repeat(pos-str.length);
             } else if (exp < 0) {
-              str = minus + '0.' + '0'.repeat(-exp-1) + str;
+              str = '0.' + '0'.repeat(-exp-1) + str;
             }
-            return str + ellipsis + unitsStr + invUnitsStr + descStr;
+            return minus + str + ellipsis + unitsStr + invUnitsStr + descStr;
           }
         }
 
@@ -2086,10 +2093,10 @@
           // The 0.1 test is to avoid getting a lot of 0.999999 values that should be 1
           let val2 = absVal * 10**DIGITS_PRECISION;
           if (absVal < 0.001 && (Math.trunc(val2) === 0 || val2 - Math.trunc(val2) > EPSILON))
-            return val.toExponential() + unitsStr + invUnitsStr + descStr;
+            return minus + val.toExponential() + unitsStr + invUnitsStr + descStr;
         }
         if (absVal > 1e15) // toFixed can't be trusted with numbers bigger than this
-            return val.toExponential() + unitsStr + invUnitsStr + descStr;
+            return minus + val.toExponential() + unitsStr + invUnitsStr + descStr;
         // Avoids display of nonsense like 2.5000...001 while
         // maintaining accuracy to "DIGITS_PRECISION" decimal digits.
         val = val.toFixed(DIGITS_PRECISION);
