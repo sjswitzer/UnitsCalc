@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.12">
+    <meta name="version" content="1.5.14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -604,7 +604,7 @@
             <li> How much does it cost to run a 100 watt lightbulb for a year,
                  assuming electricity costs $0.20 per kilowatt hour
                  (<code>ecost = 0.20$ / kWh</code>)?
-                 That would be, <code>ecost * 100 watts : year</code>, about $175
+                 That would be, <code>ecost * 100 watts : year</code>, about $175. Use LEDs!
             <li> Alternatively, it's about $1.75 per watt per year
                  <code>ecost * watt : yr</code>
                  <!-- Refrigerator wattage ratings are maximum draw, for rating the electrical service
@@ -1058,8 +1058,7 @@
         in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
         ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
         yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
-        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
-            reserved: true, smells: { uscu: true } },
+        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"], smells: { uscu: true } },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
@@ -1100,7 +1099,7 @@
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
             alt: ["second", "seconds", "sec", "secs"],
             prefixSym: 's',  prefixNames: ["second", "seconds"] },
-        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
+        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"], reserved: true,
             prefixSym: 'Hz',  prefixNames: ["hertz"] },
         min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], smells: { unscientific: true } },
         hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], smells: { unscientific: true } },
@@ -1141,7 +1140,7 @@
         groupAngle: { group: "Angle Units" },
         radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"],
             command: () => { angleSmell = 'radian'; } },
-        sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"] },
+        sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"], reserved: true, },
         degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, desc: "degree", alt: ["degrees", "deg"],
             command: () => { angleSmell = 'degree'; }, smells: { BonusAngle: "degree" } },
         arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"], smells: { BonusAngle: "degree", ratio: 'rat' } },
@@ -1178,7 +1177,7 @@
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
         N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
-           prefixSym: "N", prefixNames: ["newton", "newtons"], smells: { mks: true } },
+           prefixSym: "N", prefixNames: ["newton", "newtons"], smells: { mks: true }, reserved: true },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
             prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], smells: { cgs: true } },
         lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFSS10T, N10T * SEC**2 ], desc: "pound force", smells: { uscu: true } },
@@ -1186,7 +1185,7 @@
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
         J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M**2, SEC**2 ], alt: ["joule", "joules"],
-            prefixSym: "J", prefixNames: ["joule", "joules"], smells: { mks: true } },
+            prefixSym: "J", prefixNames: ["joule", "joules"], smells: { mks: true }, reserved: true },
         erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M**2, SEC**2 ], alt: ["ergs"],
             prefixNames: ["erg", "ergs"], smells: { cgs: true } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie", "calories" ],
@@ -1199,7 +1198,7 @@
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], smells: { mks: true },
-            alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"] },
+            alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"], reserved: true },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true, requestSystem: "uscu" },
             val: [ BigInt(550) * BigInt(FT5K) * BigInt(LBFSS10T), BigInt(N5K) * BigInt(N10T) * BigInt(SEC)**3n ],
             desc: "mechanical horsepower" },
@@ -1275,7 +1274,7 @@
         // Radiation units (L^2, T^-2)
         groupRadiation: { group: "Radiation & Radioactivity Units" },
         Gy: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, SEC**2 ], alt: ["gray", "grays"],
-            prefixSym: "Gy", prefixNames: ["gray", "grays"], smells: { mks: true } },
+            prefixSym: "Gy", prefixNames: ["gray", "grays"], smells: { mks: true }, reserved: true },
         rad: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, 100 * SEC**2 ], alt: ["rads"],
             prefixSym: "rad", prefixNames: ["rad", "rads"], smells: { cgs: true } },
         // (T^-1) -- Indistinguishable from Hz
@@ -1616,8 +1615,13 @@
           backRefs[name] = { row, helpDesc };
           html += row + helpDesc;
         }
-        systemSymbols.kg.reserved = true; // The system doesn't get this one automatically
         builtinSymbolsElement.innerHTML = html;
+
+        // The system doesn't get these ones automatically
+        systemSymbols.kg.reserved = true; 
+        systemSymbols.cm.reserved = true; 
+        systemSymbols.gm.reserved = true;
+        systemSymbols.kg.reserved = true;
       }
 
       groomSystemSymbols();
