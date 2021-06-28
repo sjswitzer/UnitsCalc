@@ -2035,37 +2035,46 @@
         }
 
         // Last chance for full precision; can it be an exact decimal?
-        if (typeof val[0] === 'bigint') {
-          let factor = 1n, exp = 0, val2 = val, minus = false;
+        if (typeof val[0] === 'bigint' && val[0] !== 0n) {
+          let exp = 0, significantDigits = 0, val2 = val, minus = '';
           if (val2[0] < 0n) {
             val2[0] = -val2[0];
-            minus = true;
+            minus = '-';
           }
+          while (val2[1] !== 1n && exp > -2000 && significantDigits < 20) {
+            val2 = Rat.normalize([ val2[0]*10n, val2[1] ]);
+            --exp;
+            if (val2[0] > val2[1])
+              significantDigits += 1;
+          }
+          let ellipsis = '';
           if (val2[1] !== 1n) {
-            exp = 50;
-            factor = 10n**BigInt(exp);
-            val2 = Rat.mul(val, [ factor, 1n ]);
+            val2[0] = val2[0]/val2[1];
+            val2[1] = 1n;
+            ellipsis = '\u2026';
           }
-          if (val2[1] === 1n && val2[0] !== 0n) { // yay!
+          if (val2[1] === 1n) { // yay!
             let str = String(val2[0]), trailingZeros = 0;
+            exp += str.length-1;
             for (let n = str.length-1; n >= 0 && str.charAt(n) === '0'; --n)
               ++trailingZeros;
-            exp = str.length - exp - 1;
             str = str.substr(0, str.length-trailingZeros);
             if (exp > 15 || exp < -15) {
               if (str.length > 1)
-                 str = str.charAt(0) + '.' + str.substr(1);
-              if (minus)
-                str = '-' + str;
-              str += (exp > 0 ? 'e+' : 'e') + String(exp);
+                str = str.charAt(0) + '.' + str.substr(1);
+              str = minus + str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
               return str + unitsStr + invUnitsStr + descStr;
             }
-            if (exp > 0) {
-              str += '0'.repeat(exp-str.length + 1);
+            if (exp >= 0) {
+              let pos = exp + 1;
+              if (pos < str.length)
+                str = minus + str.substr(0, pos) + '.' + str.substr(pos);
+              else
+                str = minus + str + '0'.repeat(pos-str.length);
             } else if (exp < 0) {
-              str = '0.' + '0'.repeat(-exp-1) + str;
+              str = minus + '0.' + '0'.repeat(-exp-1) + str;
             }
-            return str + unitsStr + invUnitsStr + descStr;
+            return str + ellipsis + unitsStr + invUnitsStr + descStr;
           }
         }
 
