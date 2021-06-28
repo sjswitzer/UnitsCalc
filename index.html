@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.6">
+    <meta name="version" content="1.5.7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1037,26 +1037,29 @@
       const systemSymbols = {
         // Length (L)
         groupLength: { group: "Length Units" },
+        m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
+            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
         in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
         ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
         yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
         mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
             reserved: true, smells: { uscu: true } },
-        m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
-            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
-        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["acres"],
-            desc: "66' \u00D7 660'" },
         hectare: { type: 'num', dim: { L: 2 }, val: (100*M)**2, alt: ["hectares", "ha"],
             desc: "100 meters \u00D7 100 meters" },
+        acre: { type: 'num', dim: { L: 2 }, val: [ 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["acres"],
+            desc: "66' \u00D7 660'" },
 
         // Volume (L^3)
         //    Sadly, there's ambiguity in units between liquid volume, dry volume, and mass
         //    and, further, differences between the US and Imperial systems.
         //    When in conflict, I've chosen liquid volumes and US units.
         groupVolume: { group: "Volume Units" },
+        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"],
+            prefixSym: "l", prefixNames: [ "liter", "liters", "litre", "litres" ] },
+        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
         gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], smells: { uscu: true }, alt: ["gallons"] },
         quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], smells: { uscu: true }, alt: ["quarts"] },
         pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], smells: { uscu: true }, alt:["pints"] },
@@ -1064,9 +1067,6 @@
         tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], smells: { uscu: true }, alt: ["tablespoon", "tablespoons", "tbsps"] },
         tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], smells: { uscu: true }, alt: ["teaspoon", "teaspoons", "tsps"] },
         floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", smells: { uscu: true } },
-        liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"] },
-        ml: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], alt: ["milliliter", "millilitre", "milliliters", "millilitres"] },
-        cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
         gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], smells: { uscu: true }, desc: "gill", alt:["gill", "gills"] },
         dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8) * BigInt(N5K)**3n ], smells: { uscu: true }, alt: ["drams"] },
         minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8 * 60) * BigInt(N5K)**3n  ], smells: { uscu: true }, alt: ["minims"] },
@@ -1074,18 +1074,20 @@
 
         // Mass (M)
         groupMass: { group: "Mass Units" },
-        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", smells: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
-        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", smells: { uscu: true }, alt: ["ounce", "ounces"]},
         g: { type: 'num', dim: { M: 1 }, val: [ KG, 1000 ], reserved: true, desc: "gram", alt: ["gram", "grams", "gm"],
             prefixSym: 'g',  prefixNames: ["gram", "grams"], },
+        lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", smells: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
+        oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", smells: { uscu: true }, alt: ["ounce", "ounces"]},
 
         // Time (T)
         groupTime: { group: "Time Units" },
-        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], smells: { unscientific: true } },
-        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], smells: { unscientific: true } },
         s: { type: 'num', dim: { T: 1 }, val: SEC, reserved: true,
             alt: ["second", "seconds", "sec", "secs"],
             prefixSym: 's',  prefixNames: ["second", "seconds"] },
+        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
+            prefixSym: 'Hz',  prefixNames: ["hertz"] },
+        min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], smells: { unscientific: true } },
+        hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], smells: { unscientific: true } },
         day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"], smells: { unscientific: true } },
         // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
@@ -1101,18 +1103,16 @@
             desc: "mean Gregorian year", alt: ["ag"] },
         mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], smells: { unscientific: true },
             desc: "mean julian month", alt: ["month", "months"] },
-        Hz: { type: 'num', dim: { T: -1 }, val: [ 1, SEC ], desc: "hertz", alt: ["hertz"],
-            prefixSym: 'Hz',  prefixNames: ["hertz"] },
 
         // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
+        K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
+            desc: "degree kelvin", prefixSym: 'K', prefixNames: ["kelvin"] },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
             desc: "degree celsius", alt: ["degc"], smells: { BonusAffine: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
             origin: [ 27315*KELVIN*9 - 3200*5*KELVIN, 900 ], // KELVIN*(273.15-32*5/9)
             desc: "degree fahrenheit", alt: ["degf"], smells: { BonusAffine: "fahrenheit" } },
-        K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
-            desc: "degree kelvin", prefixSym: 'K', prefixNames: ["kelvin"] },
 
         // Angles (RAD)
         //   A steradian can be thought of as a square radian because 2pi radians covers
@@ -1173,11 +1173,11 @@
             prefixSym: "J", prefixNames: ["joule", "joules"], smells: { mks: true } },
         erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M**2, SEC**2 ], alt: ["ergs"],
             prefixNames: ["erg", "ergs"], smells: { cgs: true } },
-        cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie"],
+        cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie", "calories" ],
             prefixSym: "cal", prefixNames: ["calorie", "calories"] },
         kWh: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1000 * KG * M**2 * HR, SEC**3 ],
             desc: "kilowatt-hour", smells: { unscientific: true } },
-        eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1.602176634e-19 * KG * M**2, SEC**2 ], alt: ["electronvolt", "electronvolts"],
+        eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1602176634 * KG * M**2, 10n**28n * BigInt(SEC**2) ], alt: ["electronvolt", "electronvolts"],
             prefixSym: "eV", prefixNames: ["electronvolt", "electronvolts"] },
 
         // Power (L^2 M T^-3)
@@ -1278,7 +1278,7 @@
             desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
         // it's just too annoying for "b" by itself to be predefined and kb is confusable with
         // KB (kB), so the prefix symbol for is deliberately omitted.
-        barn: { type: 'num', dim: { L: 2 }, val: 1e-28 * M**2, alt: ["barns"], smells: { mks: true },
+        barn: { type: 'num', dim: { L: 2 }, val: [ M**2, 10n**28n ], alt: ["barns"], smells: { mks: true },
             prefixNames: ["barn", "barns"] }, // Nuclear physicist in the house?
         darcy: { type: 'num', dim: { L: 2 }, val: [ M**2, 101325n * 10n**7n ], desc: "hydraulic permeability" },
         earthg: { type: 'num', dim: { L: 1, T:-2 }, val: [ EARTHG10K * M, N10K * SEC**2 ],
@@ -1289,15 +1289,15 @@
         lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100 ],
             desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
 
-        // SI defining constants
+        // SI defining constants & related
         definingGroup: { group: "SI Defining Constants & Related" },
         deltavCs: { type: 'num', dim: { T: -1 }, smells: { mks: true }, BonusHz: 'Hz',
             val: [ 9192631770, SEC ], desc: "hyperfine transition frequency of Caesium, defines Hz, hence the second" },
         repeatC: { repeat: 'c', desc: "speed of light, defines velocity, hence the meter" },
         e0: { type: 'num', dim: { M: -1, L: -3, T: 4, I: 2 }, smells: { mks: true }, display: EPSILONSYM + NAUGHTSYM, 
-            val: [ 88541878128 * SEC**4 * AMP**2, 10n**22n * BigInt(KG * M**3) ], desc: "vacuum (electric) permittivity" },
+            val: [ 8.8541878128e-12 * SEC**4 * AMP**2, KG * M**3 ], desc: "vacuum (electric) permittivity" },
         u0: { type: 'num', dim: { M: 1, L: 1, T: -2, I: -2 }, smells: { mks: true }, display: MICROSYM + NAUGHTSYM,
-            val: [ 125663706212 * KG * M, 10n**17n * BigInt(SEC**2 * AMP**2) ], desc: "vacuum (magnetic) permeability" },
+            val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
         h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC) ],
             display: PLANCKHSYM, desc: "Planck constant, defines the joule", alt: ["planck"], smells: { mks: true }, bonusHz: "Hz" },
         // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
