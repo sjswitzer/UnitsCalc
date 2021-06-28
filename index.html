@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.9">
+    <meta name="version" content="1.5.10">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -39,8 +39,7 @@
         padding: .2em .5em;
         margin: 0em 0em;
         background-color: #f8f8f8;
-        font-size: 120%;
-        text-size-adjust: none;   /* keep mobile browsers from getting fancy */
+        text-size-adjust: none;   /* keep mobile browsers from getting sneaky with sizing */
         /* Without fixed or absolute placement, the user variables won't scroll */
         position: fixed;
         top: 0;
@@ -703,7 +702,7 @@
           <div>
             <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
               <img style="vertical-align: text-top;" alt="Creative Commons License" style="border-width:0"
-                src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a>
+                src="by-sa-4-0-88x31.png"></a>
           </div>
           <div style="margin: 0 0 0 .5em">
             This work is licensed under a
@@ -733,14 +732,20 @@
             <!-- table contents inserted here at onload event -->
           </tbody>
         </table>
-        <a href="https://www.bipm.org/en/measurement-units">
-          <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
-              style="width: 25%; float: left">
-        </a>
-        <p> References:
-        <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>
-        <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a> 
-        <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
+        <div class="layout-row">
+          <div>
+            <a href="https://www.bipm.org/en/measurement-units">
+              <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
+                  style="width: 10em">
+            </a>
+          </div>
+          <div style="margin: 0 0 0 .5em">
+            <p> References:
+              <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>
+              <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a> 
+              <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
+          </div>
+        </div>
       </div>
     </div>
     <div id="numpad">
