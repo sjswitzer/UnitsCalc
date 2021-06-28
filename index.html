@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.8">
+    <meta name="version" content="1.5.9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -696,7 +696,9 @@
         <p> A-B-C. A-Always. B-Be. C-Coding.
         <p> Copyright &copy; 2021, Stan Switzer
         <p> Icon made by <a href="https://www.freepik.com" title="Freepik">Freepik</a>
-            from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+            from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>.
+        <p> The SI Units Logo, from the BIPM, is
+            <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a>.
         <div class="layout-row">
           <div>
             <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
@@ -731,6 +733,14 @@
             <!-- table contents inserted here at onload event -->
           </tbody>
         </table>
+        <a href="https://www.bipm.org/en/measurement-units">
+          <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
+              style="width: 25%; float: left">
+        </a>
+        <p> References:
+        <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>
+        <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a> 
+        <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
       </div>
     </div>
     <div id="numpad">
@@ -776,7 +786,8 @@
       //   (Error will be shown if the user hits "enter.")
       class ChattyError extends MessageError {}
 
-      let logLevel = 0;
+      let logLevel = 0, decimalPrecision = 16;
+
       function Log(level, msg, ...rest) {
         if (level <= logLevel) {
           if (msg instanceof Function) msg = msg(logLevel);
@@ -2045,9 +2056,16 @@
         }
 
         // Last chance for full precision; can it be an exact decimal?
-        if (typeof val[0] === 'bigint' && val[0] !== 0n) {
+        //   (decimalPrecision check lets tester force fallback path)
+        // Interestingly, exactly-defined phsyical constants are sometimes not
+        // exactly representablle in binary floating point for the simple reason
+        // that .1 isn't either. For example, the electron-volt is
+        // defined to be 1.6021766341e-19 EEXACTLY, but as floating point that
+        // results in 1.6021766340000001e-19 when displayed. How annoying, since
+        // it is represented exactly internally. Hence this business here.
+        if (typeof val[0] === 'bigint' && decimalPrecision > 0) {
           let exp = 0, significantDigits = 0, val2 = val;
-          while (val2[1] !== 1n && exp > -2000 && significantDigits < 16) {
+          while (val2[1] !== 1n && exp > -2000 && significantDigits < decimalPrecision) {
             val2 = Rat.normalize([ val2[0]*10n, val2[1] ]);
             --exp;
             if (val2[0] > val2[1])
@@ -2062,7 +2080,7 @@
           if (val2[1] === 1n) { // yay!
             let str = String(val2[0]), trailingZeros = 0;
             exp += str.length-1;
-            for (let n = str.length-1; n >= 0 && str.charAt(n) === '0'; --n)
+            for (let n = str.length-1; n > 0 && str.charAt(n) === '0'; --n)
               ++trailingZeros;
             str = str.substr(0, str.length-trailingZeros);
             if (exp > 20 || exp < -6) {
@@ -2935,8 +2953,13 @@
                 display: undefined, reserved: undefined, alt: undefined };
         delete userSymbols[sym];  // remove from list so new value now shows up first (in reverse listing)
         userSymbols[sym] = val;
-        if (sym === "loglevel" && val.type === 'num' && Dim.isScalar(val.dim))
-          logLevel = Rat.number(numVal(val));
+        // Seccret side-effects
+        if (val.type === 'num' && Dim.isScalar(val.dim)) {
+          if (sym === 'loglevel')
+            logLevel = Rat.number(numVal(val));
+          else if (sym === 'precision')
+            decimalPrecision = Rat.number(numVal(val));
+        }
       }
 
       function deleteDef(symName) {
