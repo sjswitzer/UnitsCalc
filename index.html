@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.5">
+    <meta name="version" content="1.5.6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -39,15 +39,14 @@
         padding: .2em .5em;
         margin: 0em 0em;
         background-color: #f8f8f8;
+        font-size: 120%;
         text-size-adjust: none;   /* keep mobile browsers from getting fancy */
-
         /* Without fixed or absolute placement, the user variables won't scroll */
-        position: fixed;  /* absolute works too */
+        position: fixed;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0;
-        font-size: 120%;
       }
       body, table  {
         font: 110% caption, sans-serif;
@@ -2048,7 +2047,7 @@
         // Last chance for full precision; can it be an exact decimal?
         if (typeof val[0] === 'bigint' && val[0] !== 0n) {
           let exp = 0, significantDigits = 0, val2 = val;
-          while (val2[1] !== 1n && exp > -2000 && significantDigits < 20) {
+          while (val2[1] !== 1n && exp > -2000 && significantDigits < 16) {
             val2 = Rat.normalize([ val2[0]*10n, val2[1] ]);
             --exp;
             if (val2[0] > val2[1])
@@ -2066,7 +2065,7 @@
             for (let n = str.length-1; n >= 0 && str.charAt(n) === '0'; --n)
               ++trailingZeros;
             str = str.substr(0, str.length-trailingZeros);
-            if (exp > 15 || exp < -5) {
+            if (exp > 20 || exp < -6) {
               if (str.length > 1)
                 str = str.charAt(0) + '.' + str.substr(1);
               str = str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
