@@ -6,7 +6,10 @@ onfetch = event => {
     // Issue a fetch regardless
     let fetchRequest = fetch(event.request).then(fetchResponse => {
       let clonedResponse = fetchResponse.clone();
-      caches.open("UnitsCalc-v1").then(cache => cache.put(event.request, clonedResponse));
+      caches.open("UnitsCalc-v1").then(cache => {
+        cache.put(event.request, clonedResponse);
+        console.log("cached", event, clonedResponse);
+      });
       return fetchResponse;
     });
     // If the cache had a response, use it immediately
