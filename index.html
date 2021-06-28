@@ -1058,7 +1058,8 @@
         in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
         ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
         yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
-        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"], smells: { uscu: true } },
+        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
+            reserved: true, smells: { uscu: true } },
 
         // Area (L^2)
         groupArea: { group: "Area Units" },
@@ -1618,7 +1619,7 @@
         builtinSymbolsElement.innerHTML = html;
 
         // The system doesn't get these ones automatically
-        systemSymbols.kg.reserved = true; 
+        systemSymbols.km.reserved = true;
         systemSymbols.cm.reserved = true; 
         systemSymbols.gm.reserved = true;
         systemSymbols.kg.reserved = true;
