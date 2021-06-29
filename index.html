@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.14">
+    <meta name="version" content="1.5.15">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -146,11 +146,11 @@
       }
       div.help > close-button {
         color: #888;
-        font-size: 125%;
-        margin-top: .25em;
+        font-size: 120%;
+        --x-thick: 35;
         position: absolute;
-        top: .2em;
-        right: .2em;
+        top: .3em;
+        right: .3em;
         cursor: pointer;
         transition: .5s;
       }
@@ -247,7 +247,8 @@
         color: white;
         --box-color: #8e8d92;
         --box-radius: 50;
-        --size: 40;
+        --x-thick: 25;
+        --x-size: 55;
         cursor: pointer;
         padding: .05em .4em;
       }
@@ -305,6 +306,8 @@
       p.user-def > close-button {
         cursor: pointer;
         --box-color: #f77;
+        --x-thick: 25;
+        --x-size: 65;
         color: white;
         vertical-align: -20%;
       }
@@ -741,8 +744,8 @@
           </div>
           <div style="margin: 0 0 0 .5em">
             <p> References:
-              <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>
-              <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a> 
+              <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>;
+              <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a>;
               <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
           </div>
         </div>
@@ -3462,23 +3465,31 @@
       //   There's no good way to make a close button using fonts,
       //   so it has come to this.
       //
-      function drawCloseButton(ctx, width, height, opts) {
-        let boxColor = opts.boxColor;
-        let r = parseFloat(opts.radius) || 20;
-        let ll = (parseFloat(opts.xSize) || (boxColor ? 50 : 90)) / 2;
-        let tt = parseFloat(opts.thick) || ll/2;
-        let cc = parseFloat(opts.cap) || tt/2;
+      function drawCloseButton(ctx, width, height, opts = {}) {
+        function pf(s) { // like parseFloat, but returns undefined for non-numbers
+          let res = parseFloat(s);
+          if (isFinite(res))
+            return res;
+          return undefined;
+        }
         let color = opts.color || 'black';
-        let t = tt*Math.SQRT1_2, l = ll*Math.SQRT1_2, c = cc*Math.SQRT1_2;
+        let boxColor = opts.boxColor;
+        if (boxColor === 'rgba(0, 0, 0, 0)' || boxColor === 'rgba(0,0,0,0)')
+          boxColor = '';
+        let r = pf(opts.boxRadius) ?? 20;
+        let ll = (pf(opts.xSize) ?? (boxColor ? 80 : 100)) / 2;
+        let tt = (pf(opts.xThick) ?? ll/2)/2;
+        let cc = pf(opts.xCap) ?? tt/2;
+        ll = ll - tt - cc/2;
         let magic = 0.551915024494; // https://spencermortensen.com/articles/bezier-circle/
-        let m = magic * c;
+        let m = magic * cc;
 
         ctx.save();
         // scale to a 100x100 coord system with the origin in the center
         // The "-1" is to keep a pixel from being sheered off the bottom and right edges.
         ctx.scale((width-1)/100, (height-1)/100);
         ctx.translate(50, 50);
-        if (boxColor) {
+        if (boxColor) { // "transparent"
           let b = 50;
           ctx.fillStyle = boxColor;
           ctx.beginPath();
@@ -3496,16 +3507,16 @@
         }
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.moveTo(t, 0);
+        ctx.moveTo(tt, 0);
         for (let i = 0; i < 4; ++i) {
-          ctx.lineTo(t+l, l);
-          let mid = l + t/2 + c
-          ctx.bezierCurveTo(t+l+m, l+m, mid+m, mid-m, mid, mid);
-          ctx.bezierCurveTo(mid-m, mid+m, l+m, t+l+m, l, t+l);
+          ctx.lineTo(tt+ll, ll);
+          let mid = ll + tt/2 + cc
+          ctx.bezierCurveTo(tt+ll+m, ll+m, mid+m, mid-m, mid, mid);
+          ctx.bezierCurveTo(mid-m, mid+m, ll+m, tt+ll+m, ll, tt+ll);
           // Arcs are not as pretty
           // ctx.arcTo(t+l+c, l+c, mid, mid, c);
           // ctx.arcTo(l+c, t+l+c, l, t+l, c);
-          ctx.lineTo(0, t);
+          ctx.lineTo(0, tt);
           ctx.rotate(Math.PI/2);
         }
         ctx.closePath();
@@ -3513,34 +3524,35 @@
         ctx.restore();
       }
 
-      class MRU {   // MRU cache and memoizer
+      class MRUCache {
         constructor(maxEntries = 20) {
           this.maxEntries = maxEntries;
           this._cache = new Map();
           this._backCache = new Map();
         }
-        get(key, fn) {
-          let val = this._cache.get(key);
+        get(signature, fn) {
+          let val = this._cache.get(signature);
           if (!val) {
-            val = this._backCache.get(key);
-            if (val)
-              this._cache.set(key, val);
+            val = this._backCache.get(signature);
+            if (val)  // promote item from backup cache to main cache
+              this._cache.set(signature, val);
             if (!val && fn) {
-              val = fn(key);
+              val = fn(signature);
               if (val !== undefined)
-                this.set(key, fn(key));
+                this.set(signature, fn(signature));
             }
           }
           return val;
         }
-        set(key, val) {
+        set(signature, val) {
           if (this._cache.size >= this.maxEntries) {
-            let t = this._backCache;
+            // console.info("cache evicting");
+            let tmp = this._backCache;
             this._backCache = this._cache;
-            this._cache = t;
+            this._cache = tmp;
             this._cache.clear(); 
           }
-          this._cache.set(key, val);
+          this._cache.set(signature, val);
         }
       }
 
@@ -3549,42 +3561,57 @@
           super();
           let root = this.attachShadow({ mode: 'open' });
           this._canvas = document.createElement('canvas');
-          this._sig = undefined;
+          this._signature = undefined;
           root.appendChild(this._canvas);
-          this.ontransitionend = event => this.render();
+          // Seems you have to register all of these.
+          // It would be better if there were just one event called
+          // when you should update. If there is, I haven't seen it.
+          this.ontransitionstart = event => this.transitionStart();
+          this.ontransitionend = event => this.transitionEnd();
+          this.ontransitioncancel = event => this.transitionEnd();
+          this.onanimationstart = event => this.transitionStart();
+          this.onanimationend = event => this.transitionEnd();
+          this.ontransitioncancel = event => this.transitionEnd();
         }
-
-        static resizeObserver = new ResizeObserver(function (entries, observer) {
-          for (let entry of entries) {
-            entry.target.render();
-          }
-        });
 
         connectedCallback() {
           this.render();
-          CloseButtonElement.resizeObserver.observe(this);
         }
 
         disconnectedCallback() {
-          CloseButtonElement.resizeObserver.unobserve(this);
+          clearInterval(this._intervalTimer);
         }
 
-        static cache = new MRU(15);
+        transitionStart() {
+          this._transitionRenders = 0;
+          this._intervalTimer = setInterval(() => {
+            ++this._transitionRenders;
+            this.render();
+          }, 50);  // 20 times per second
+        }
+
+        transitionEnd() {
+          // console.info(`transition renders ${this._transitionRenders}`);
+          this._transitionRenders = 0;
+          clearInterval(this._intervalTimer);
+          this.render();
+        }
+
+        static cache = new MRUCache(100);
 
         render() {
           let style = getComputedStyle(this);
           let size = 1.2 * parseFloat(style.fontSize);
-          let xSize = style.getPropertyValue('--x-size').trim();
-          let boxColor = style.getPropertyValue('--box-color').trim();
-          let radius = style.getPropertyValue('--box-radius').trim();
-          let length = style.getPropertyValue('--length').trim();
-          let thick = style.getPropertyValue('--thick').trim();
-          let cap = style.getPropertyValue('--cap').trim();
           let color = style.getPropertyValue('color'.trim());
-          let opts = { size, xSize, boxColor, radius, length, thick, cap, color };
-          let sig = Object.values(opts).join('/');
-          if (this._sig !== sig) {
-            let canvas = CloseButtonElement.cache.get(sig, () => {
+          let xSize = style.getPropertyValue('--x-size').trim();
+          let xThick = style.getPropertyValue('--x-thick').trim();
+          let xCap = style.getPropertyValue('--x-cap').trim();
+          let boxColor = style.getPropertyValue('--box-color').trim();
+          let boxRadius = style.getPropertyValue('--box-radius').trim();
+          let opts = { size, color, xSize, xThick, xCap, boxColor, boxRadius };
+          let signature = Object.values(opts).join('/');
+          if (this._signature !== signature) {
+            let canvas = CloseButtonElement.cache.get(signature, () => {
               let canvas = document.createElement('canvas');
               canvas.setAttribute('width', size);
               canvas.setAttribute('height', size);
@@ -3596,7 +3623,7 @@
             this._canvas.setAttribute('height', size);
             const ctx = this._canvas.getContext('2d');
             ctx.drawImage(canvas, 0, 0);
-            this._sig = sig;
+            this._signature = signature;
           }
         }
       };
