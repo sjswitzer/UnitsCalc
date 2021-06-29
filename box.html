@@ -172,7 +172,7 @@
 
       class MRUCache {
         constructor(maxEntries = 20) {
-          this.maxEntries = maxEntries;
+          this._maxEntries = maxEntries;
           this._cache = new Map();
           this._backCache = new Map();
         }
@@ -191,7 +191,7 @@
           return val;
         }
         set(signature, val) {
-          if (this._cache.size >= this.maxEntries) {
+          if (this._cache.size >= this._maxEntries) {
             // console.info("cache evicting");
             let tmp = this._backCache;
             this._backCache = this._cache;
@@ -209,43 +209,53 @@
           this._canvas = document.createElement('canvas');
           this._signature = undefined;
           root.appendChild(this._canvas);
-          // Seems you have to register all of these.
-          // It would be better if there were just one event called
-          // when you should update. If there is, I haven't seen it.
-          this.ontransitionstart = event => this.transitionStart();
-          this.ontransitionend = event => this.transitionEnd();
-          this.ontransitioncancel = event => this.transitionEnd();
-          this.onanimationstart = event => this.transitionStart();
-          this.onanimationend = event => this.transitionEnd();
-          this.ontransitioncancel = event => this.transitionEnd();
+          // share the closures among events
+          this._startClosure = event => this._transitionStart();
+          this._endClosure = event => this._transitionEnd();
         }
 
         connectedCallback() {
-          this.render();
+          // Seems you have to register all of these.
+          // It would be better if there were just one event called
+          // when you should update. If there is, I haven't seen it.
+          this.addEventListener('transitionstart', this._startClosure);
+          this.addEventListener('transitionend', this._endClosure);
+          this.addEventListener('transitioncancel', this._endClosure);
+          this.addEventListener('animationstart', this._startClosure);
+          this.addEventListener('animationend', this._endClosure);
+          this.addEventListener('animationcancel', this._endClosure);
+          this._render();
         }
 
         disconnectedCallback() {
           clearInterval(this._intervalTimer);
+          // GC will probably remove these, but why make it work harder?
+          this.removeEventListener('transitionstart', this._startClosure);
+          this.removeEventListener('transitionend', this._endClosure);
+          this.removeEventListener('transitioncancel', this._endClosure);
+          this.removeEventListener('animationstart', this._startClosure);
+          this.removeEventListener('animationend', this._endClosure);
+          this.removeEventListener('animationcancel', this._endClosure);
         }
 
-        transitionStart() {
+        _transitionStart() {
           this._transitionRenders = 0;
           this._intervalTimer = setInterval(() => {
             ++this._transitionRenders;
-            this.render();
-          }, 50);  // 20 times per second
+            this._render();
+          }, 1000/20);  // 20 times per second
         }
 
-        transitionEnd() {
+        _transitionEnd() {
           // console.info(`transition renders ${this._transitionRenders}`);
           this._transitionRenders = 0;
           clearInterval(this._intervalTimer);
-          this.render();
+          this._render();
         }
 
-        static cache = new MRUCache(100);
+        static _cache = new MRUCache(100);
 
-        render() {
+        _render() {
           let style = getComputedStyle(this);
           let size = 1.2 * parseFloat(style.fontSize);
           let color = style.getPropertyValue('color'.trim());
@@ -257,7 +267,7 @@
           let opts = { size, color, xSize, xThick, xCap, boxColor, boxRadius };
           let signature = Object.values(opts).join('/');
           if (this._signature !== signature) {
-            let canvas = CloseButtonElement.cache.get(signature, () => {
+            let canvas = CloseButtonElement._cache.get(signature, () => {
               let canvas = document.createElement('canvas');
               canvas.setAttribute('width', size);
               canvas.setAttribute('height', size);
