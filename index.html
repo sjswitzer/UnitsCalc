@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.18">
+    <meta name="version" content="1.5.19">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -305,6 +305,11 @@
         --close-button-x-size: 65%;
         color: white;
         vertical-align: -20%;
+        transition: .5s;
+        transition-property: --close-button-box-color;
+      }
+      p.user-def > close-button:hover {
+        --close-button-box-color: #f11;
       }
 
       /*
@@ -512,12 +517,68 @@
             but <code>1 / 2 in</code> or even
             <code>1/ 2 in</code> means one over 2 inches. <i>Just avoid putting spaces around
             the slash in a fractional unit and you'll be fine.</i>
+        <h2> Unit Conversions </h2>
+        <p> To display results in terms of specific units, follow an expression by <code>:</code>
+            then a unit or series of units.
+            For instance, <code>100 km/hr : mi</code> displays the speed in miles/minute.
+            <code>100 km/hr : mi/hr</code> displays the speed in terms of miles/hour.
+        <p> The special units <code>mks</code>, <code>cgs</code> and <code>uscu</code>
+            request results in the those systems, e.g. <code>60 mi/hr : mks</code>.
+        <p>
+          <ul>
+            <li> How many watts in 10 horsepower? <code>10 horsepower : W</code>, alternatively
+                  <code>10 horsepower : mks</code>
+            <li> How many tablespoons in a cup? <code>cup : tbsp</code>
+            <li> How many cups in a tablespoon? <code>tbsp : cup</code>
+            <li> Sea-level air pressure in PSI? <code>atm : PSI</code>
+            <li> What's 20 degrees celsius in fahrenheit? <code>20 celsius : fahrenheit</code>
+            <li> What about absolute zero? <code>0K : degf</code>
+            <li> What <i>is</i> 20000 leagues anyway? <code>20000 league : mi</code>.
+                  That's deep! <!-- SNL skit reference -->
+            <li> How far away is the Sun in miles? <code>au : mi</code>
+            <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
+            <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
+                  <code>5V / 2000 ohm</code>
+            <li> What's <code>pi/4</code> radians in degrees? <code>pi/4 radians : degrees</code>
+            <li> How much does it cost to run a 100 watt lightbulb for a year,
+                  assuming electricity costs $0.20 per kilowatt hour
+                  (<code>ecost = 0.20$ / kWh</code>)?
+                  That would be, <code>ecost * 100 watts : year</code>, about $175. Use LEDs!
+            <!-- Refrigerator wattage ratings are for maximum draw, for rating the electrical service
+                they require, but refrigerators cycle and use much less power on average.
+                A modern Energy Star refrigerator averages about 50 watts, but it totally
+                depends on usage and conditions. I'll pad it out to $65. -->
+            <li> How much does it cost to run a typical refrigerator per month?
+                <code>ecost * 65W : month</code>
+            <li> How much does it cost to watch a large LED TV per hour?
+                  <code>ecost * 450 watt : hr</code>
+            <li> How about a year on standby?
+                  <code>ecost * .5 watt : yr</code>
+            <li> An electric kettle per minute?
+                  <code>ecost * 3000 watt : min</code>, just one cent.
+            <li> What's 45 mpg as km/liter? <code>45 mi/gallon : km/liter</code>
+            <li> How many meals do you eat in a year if you eat 3 meals per day?
+                  <code>3 'meals'/day : yr</code>
+            <li> How much does a gallon of water weigh in pounds? <code>kg/liter*gallon : lb</code>
+            <li> What's a kilobyte per meter in kilometers? <code>kB/m : km</code>.
+                  It seems rather silly, but it might be a length of magnetic tape
+            <li> Remember old modems? <code>9600 baud * 1 bit/symbol</code>
+            <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
+                  and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
+                  <code>220 ISK/liter : $/gallon</code>
+            <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
+          </ul>
+        <p> As an exercise, suppose an elephant weighs <code>elephantWeight = 8000lbf</code>
+            (I've used <i>pounds of force</i>) and an elephant's foot is about
+            <code>elephantFoot = 45cm</code> across, and it's standing evenly on four legs,
+            then the pressure under its feet, expressed in pounds per square inch, is
+            <code>elephantWeight/(pi*(elephantFoot/2)^2)/4 : PSI</code>, about 8 PSI.
         <h2> Variables </h2>
         <p> To define variables type <code class="abstract">name = expression</code>
             then hit &ldquo;enter.&rdquo;
             For instance, <code>frontage = 45'4 3/4"</code>. You can then use those values
             in later expressions, e.g. <code>frontage/3</code>.
-            Amusingly, perhaps, because <code>frontage</code> is a length, it can also be
+            And because <code>frontage</code> is a length, it can also be
             used as a unit: <code>1/3 frontage</code> or <code>1/3frontage</code>.
         <p> The variables <code>ft</code>, <code>in</code>, <code>m</code>, <code>cm</code>,
             etc. described in "Units" above
@@ -576,62 +637,6 @@
             specified or displayed using either notation. If, however, a plain number is given, it will be
             interpreted as radians. So <code>sin(45 degrees)</code>, <code>sin(pi/4radian)</code>
             and <code>sin(pi/4)</code> all mean the same thing.
-        <h2> Unit Conversions </h2>
-        <p> To display results in terms of specific units, follow an expression by <code>:</code>
-            then a unit or series of units.
-            For instance, <code>100 km/hr : mi</code> displays the speed in miles/minute.
-            <code>100 km/hr : mi/hr</code> displays the speed in terms of miles/hour.
-        <p> The special units <code>mks</code>, <code>cgs</code> and <code>uscu</code>
-            request results in the those systems, e.g. <code>60 mi/hr : mks</code>.
-        <p>
-          <ul>
-            <li> How many watts in 10 horsepower? <code>10 horsepower : W</code>, alternatively
-                 <code>10 horsepower : mks</code>
-            <li> How many tablespoons in a cup? <code>cup : tbsp</code>
-            <li> How many cups in a tablespoon? <code>tbsp : cup</code>
-            <li> Sea-level air pressure in PSI? <code>atm : PSI</code>
-            <li> What's 20 degrees celsius in fahrenheit? <code>20 celsius : fahrenheit</code>
-            <li> What about absolute zero? <code>0K : degf</code>
-            <li> What <i>is</i> 20000 leagues anyway? <code>20000 league : mi</code>.
-                 That's deep! <!-- SNL skit reference -->
-            <li> How far away is the Sun in miles? <code>au : mi</code>
-            <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
-            <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
-                 <code>5V / 2000 ohm</code>
-            <li> What's <code>pi/4</code> radians in degrees? <code>pi/4 radians : degrees</code>
-            <li> How much does it cost to run a 100 watt lightbulb for a year,
-                 assuming electricity costs $0.20 per kilowatt hour
-                 (<code>ecost = 0.20$ / kWh</code>)?
-                 That would be, <code>ecost * 100 watts : year</code>, about $175. Use LEDs!
-            <!-- Refrigerator wattage ratings are for maximum draw, for rating the electrical service
-                they require, but refrigerators cycle and use much less power on average.
-                A modern Energy Star refrigerator averages about 50 watts, but it totally
-                depends on usage and conditions. I'll pad it out to $65. -->
-            <li> How much does it cost to run a typical refrigerator per month?
-                <code>ecost * 65W : month</code>
-            <li> How much does it cost to watch a large LED TV per hour?
-                 <code>ecost * 450 watt : hr</code>
-            <li> How about a year on standby?
-                 <code>ecost * .5 watt : yr</code>
-            <li> An electric kettle per minute?
-                 <code>ecost * 3000 watt : min</code>, just one cent.
-            <li> What's 45 mpg as km/liter? <code>45 mi/gallon : km/liter</code>
-            <li> How many meals do you eat in a year if you eat 3 meals per day?
-                 <code>3 'meals'/day : yr</code>
-            <li> How much does a gallon of water weigh in pounds? <code>kg/liter*gallon : lb</code>
-            <li> What's a kilobyte per meter in kilometers? <code>kB/m : km</code>.
-                 It seems rather silly, but it might be a length of magnetic tape
-            <li> Remember old modems? <code>9600 baud * 1 bit/symbol</code>
-            <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
-                 and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
-                 <code>220 ISK/liter : $/gallon</code>
-            <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
-          </ul>
-        <p> As an exercise, suppose an elephant weighs <code>elephantWeight = 8000lbf</code>
-            (I've used <i>pounds of force</i>) and an elephant's foot is about
-            <code>elephantFoot = 45cm</code> across, and it's standing evenly on four legs,
-            then the pressure under its feet, expressed in pounds per square inch, is
-            <code>elephantWeight/(pi*(elephantFoot/2)^2)/4 : PSI</code>, about 8 PSI.
         <h2> Metric Feet </h2>
         <p> Results presented in feet and inches show an alternate interpretation assuming measurements
             are in "metric feet." A &ldquo;metric foot&rdquo; is a convention used by the construction
@@ -1026,14 +1031,14 @@
 
       const DIGITS = "0123456789";
       const MICROSYM = "\u00B5", OHMSYM = "\u2126", CARETSYM = '\u2038',
-          PISYM = "\uD835\uDF0B", NAUGHTSYM = "\u2080",
+          PISYM = "\uD835\uDF0B", TAUSYM = '\uD835\uDF0F', NAUGHTSYM = "\u2080",
           PLANCKHSYM = "\u210E", PLANCKHBARSYM = "\u210F", EPSILONSYM = "\u03B5",
           MULSYM = "\u00D7", DIVSYM = "\u00F7";
   ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        MICROSYM + OHMSYM + PISYM + PLANCKHSYM +
+        MICROSYM + OHMSYM + PISYM + TAUSYM + PLANCKHSYM +
         PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
@@ -1051,7 +1056,7 @@
         // Length (L)
         groupLength: { group: "Length Units" },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
-            prefixSym: 'm',  prefixNames: ["meter", "meters"] },
+            prefixSym: 'm',  prefixNames: "alts" },
         in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
         ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
         yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
@@ -1120,7 +1125,7 @@
         // Temperature (THETA)
         groupTemperature: { group: "Temperature Units" },
         K: { type: 'num', dim: { THETA: 1 }, val: KELVIN, reserved: true,  alt: ["kelvin", "kelvins"],
-            desc: "degree kelvin", prefixSym: 'K', prefixNames: ["kelvin"] },
+            desc: "degree kelvin", prefixSym: 'K', prefixNames: "alts" },
         celsius: { type: 'num', dim: { THETA: 1 }, val: KELVIN, origin: [ 27315 * KELVIN, 100 ],
             desc: "degree celsius", alt: ["degc"], smells: { BonusAffine: "celsius"} },
         fahrenheit: { type: 'num', dim: { THETA: 1 }, val: [ 5 * KELVIN, 9 ],
@@ -1154,7 +1159,7 @@
             prefixSym: "B", prefixNames: ["byte", "bytes"], noFractionalPrefix: true },
         // Because people expect it but it falls outside the prefix system (which uses lowercase 'k')
         KB: { type: 'num', dim: { BIT: 1 }, val: 1000 * BYTE,
-            desc: "kilobyte", display: null },
+            desc: "kilobyte", hidden: true },
         baud: { type: 'num', dim: { SYMBOL: 1, T: -1 }, val: [ 1, SEC ], // NOT bits/second
             prefixSym: "Bd", prefixNames: ["baud"] },
         symbol: { type: 'num', dim: { SYMBOL: 1 }, reserved: true, val: 1, alt: ["symbols"] },
@@ -1175,28 +1180,28 @@
         // Force (L M T^-2)
         groupForce: { group: "Force Units" },
         N: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, SEC**2 ], alt: ["newton", "newtons"],
-           prefixSym: "N", prefixNames: ["newton", "newtons"], smells: { mks: true }, reserved: true },
+           prefixSym: "N", prefixNames: "alts", smells: { mks: true }, reserved: true },
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
-            prefixSym: "dyn", prefixNames: ["dyne, dynes"], alt: ["dynes"], smells: { cgs: true } },
+            prefixSym: "dyn", prefixNames: ["dyne", "dynes"], alt: ["dynes"], smells: { cgs: true } },
         lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFSS10T, N10T * SEC**2 ], desc: "pound force", smells: { uscu: true } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
         J: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ KG * M**2, SEC**2 ], alt: ["joule", "joules"],
-            prefixSym: "J", prefixNames: ["joule", "joules"], smells: { mks: true }, reserved: true },
+            prefixSym: "J", prefixNames: "alts", smells: { mks: true }, reserved: true },
         erg: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**7 * KG * M**2, SEC**2 ], alt: ["ergs"],
             prefixNames: ["erg", "ergs"], smells: { cgs: true } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie", "calories" ],
-            prefixSym: "cal", prefixNames: ["calorie", "calories"] },
+            prefixSym: "cal", prefixNames: "alts" },
         kWh: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1000 * KG * M**2 * HR, SEC**3 ],
             desc: "kilowatt-hour", smells: { unscientific: true } },
         eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1602176634 * KG * M**2, 10n**28n * BigInt(SEC**2) ], alt: ["electronvolt", "electronvolts"],
-            prefixSym: "eV", prefixNames: ["electronvolt", "electronvolts"] },
+            prefixSym: "eV", prefixNames: "alts" },
 
         // Power (L^2 M T^-3)
         groupPower: { group: "Power Units" },
         W: { type: 'num', dim: { L: 2, M: 1, T:-3 }, val: [ KG * M**2, SEC**3 ], smells: { mks: true },
-            alt: ["watt", "watts"], prefixSym: "W", prefixNames: ["watt", "watts"], reserved: true },
+            alt: ["watt", "watts"], prefixSym: "W", prefixNames: "alts", reserved: true },
         hp: { type: 'num', dim: { L: 2, M: 1, T:-3 }, alt: ["horsepower"], smells: { uscu: true, requestSystem: "uscu" },
             val: [ BigInt(550) * BigInt(FT5K) * BigInt(LBFSS10T), BigInt(N5K) * BigInt(N10T) * BigInt(SEC)**3n ],
             desc: "mechanical horsepower" },
@@ -1204,9 +1209,9 @@
         // Pressure (L^-1 M T^-2)
         groupPressure: { group: "Pressure Units" },
         Pa: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, M * SEC**2 ], alt: ["pascal", "pascals"],
-            prefixSym: "Pa", prefixNames: ["pascal", "pascals"], smells: { mks: true } },
+            prefixSym: "Pa", prefixNames: "alts", smells: { mks: true } },
         Ba: { type: 'num', dim: { L: -1, M: 1, T:-2 }, val: [ KG, 10 * M * SEC**2 ], alt: ["barye", "baryes"],
-            prefixSym: "Ba", prefixNames: ["barye", "baryes"], smells: { cgs: true } },
+            prefixSym: "Ba", prefixNames: "alts", smells: { cgs: true } },
         PSI: { type: 'num', dim: { L: -1, M: 1, T:-2 },
             val: [ BigInt(LBFSS10T) * BigInt(N5K)**2n, BigInt(N10T) * BigInt(IN5K)**2n * BigInt(SEC)**2n ],
             desc: "pounds per square inch", smells: { uscu: true } },
@@ -1224,37 +1229,37 @@
             prefixSym: "A", prefixNames: ["ampere", "amperes"] },
         V: { type: 'num', dim: { M: 1, L: 2, T: -3, I: -1 }, val: [KG * M**2, SEC**3 * AMP ],
             alt: ["volt", "volts"],
-            prefixSym: "V", prefixNames: ["volt", "volts"] },
+            prefixSym: "V", prefixNames: "alts" },
         ohm: { type: 'num', dim: { M: 1, L: 2, T: -3, I: -2 }, val: [ KG * M**2, SEC**3 * AMP**2 ],
             display: OHMSYM, desc: "resistance", alt: ["ohms"],
             prefixSym: OHMSYM, prefixNames: ["ohm", "ohms"] },
         S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ],
-            desc: "conductance", alt: ["siemens", "mho"] },
+            desc: "conductance", alt: ["siemens", "mho"], prefixSym: "S", prefixNames: ["siemens"] },
         C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "electric charge", alt: ["coulomb", "coulombs"],
             prefixSym: "C", prefixNames: ["coulomb", "coulombs"] },
         F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ], desc: "capacitance",
             alt: ["farad", "farads"],
-            prefixSym: "F", prefixNames: ["farad", "farads"] },
+            prefixSym: "F", prefixNames: "alts" },
         Wb: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -1 }, val: [ KG * M**2, SEC**2 * AMP ],
-            desc: "magnetic flux", alt: ["weber"],
-            prefixSym: "Wb", prefixNames: ["weber", "webers"] },
+            desc: "magnetic flux", alt: ["weber", "webers"],
+            prefixSym: "Wb", prefixNames: "alts" },
         T: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, SEC**2 * AMP ],
-            desc: "magnetic flux density", alt: ["tesla"],
-            prefixSym: "T", prefixNames: ["tesla", "teslas"] },
-        gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "magnetic flux density", alt: ["Gs"], prefixSym: "Gs", prefixNames: ["gauss"],
+            desc: "magnetic flux density", alt: ["tesla", "teslas"],
+            prefixSym: "T", prefixNames: "alts" },
+        Gs: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
+            desc: "magnetic flux density", alt: ["gauss"], prefixSym: "Gs", prefixNames: "alts",
             smells: { cgs: true } },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
-            desc: "mutual inductance", alt: ["henry"], prefixSym: "H", prefixNames: ["henry"] },
+            desc: "mutual inductance", alt: ["henry"], prefixSym: "H", prefixNames: "alts" },
 
         // Photometry (J...)
         groupLuminosity: { group: "Lumosity Units" },
         cd: { type: 'num', dim: { J: 1 }, val: CANDELA, reserved: true, desc: "luminous intensity",
-            prefixSym: "cd", prefixNames: ["candela", "candelas"], alt: ["candela", "candelas"] },
+            alt: ["candela", "candelas"], prefixSym: "cd", prefixNames: "alts" },
         lx: { type: 'num', dim: { J: 1, RAD: 2, L: -2 }, val: [ CANDELA * RADIAN**2,  M**2 ],
-            desc: "luminous emittance", alt: ["lux"], prefixSym: "lx", prefixNames: ["lux"] },
+            desc: "luminous emittance", alt: ["lux"], prefixSym: "lx", prefixNames: "alts" },
         lm: { type: 'num', dim: { J: 1, RAD: 2 }, val: CANDELA * RADIAN**2,
-            desc: "luminous flux", alt: ["lumen", "lumens"], prefixSym: "lm", prefixNames: ["lumen", "lumens"] },
+            desc: "luminous flux", alt: ["lumen", "lumens"], prefixSym: "lm", prefixNames: "alts" },
 
         // Chemical units (N)
         // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
@@ -1264,31 +1269,34 @@
         NA: { type: 'num', dim: { N: -1 }, desc: "Avogadro constant", val: 1 }, // "mol" already contains the number
         N0: { type: 'num', dim: {}, val: BigInt(602214076) * BigInt(10)**15n,
             display: "N" + NAUGHTSYM, desc: "Avogadro number" },
-        Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton"],
-            prefixSym: "Da", prefixNames: ["dalton", "daltons"], smells: { cgs: true } },
+        Da: { type: 'num', dim: { M: 1, N: -1 }, val: 1.6605390666e-27 * KG, desc: "dalton", alt: ["dalton", "daltons" ],
+            prefixSym: "Da", prefixNames: "alts", smells: { cgs: true } },
         kat: { type: 'num', dim: { N: 1, T: -1 }, desc: "catalytic activity", alt: ["katal", "katals"],
-            prefixSym: "kat", prefixNames: ["katal", "katals"], val: [ BigInt(602214076) * BigInt(10)**15n, SEC ] },
+            prefixSym: "kat", prefixNames: "alts", val: [ BigInt(602214076) * BigInt(10)**15n, SEC ] },
 
         // Radiation units (L^2, T^-2)
         groupRadiation: { group: "Radiation & Radioactivity Units" },
         Gy: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, SEC**2 ], alt: ["gray", "grays"],
-            prefixSym: "Gy", prefixNames: ["gray", "grays"], smells: { mks: true }, reserved: true },
+            prefixSym: "Gy", prefixNames: "alts", smells: { mks: true }, reserved: true },
         rad: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, 100 * SEC**2 ], alt: ["rads"],
             prefixSym: "rad", prefixNames: ["rad", "rads"], smells: { cgs: true } },
         // (T^-1) -- Indistinguishable from Hz
         Bq: { type: 'num', dim: { T: -1 }, val: [1, SEC ], alt: ["becquerel", "becquerels"],
-            prefixSym: "Bq", prefixNames: ["becquerel", "becquerel"], smells: { mks: true } },
+            prefixSym: "Bq", prefixNames: "alts"  , smells: { mks: true } },
         Ci: { type: 'num', dim: { T: -1 }, val: [37 * 10**9, SEC ], alt: ["curie", "curies"],
-            prefixSym: "Ci", prefixNames: ["curie", "curies"] },
+            prefixSym: "Ci", prefixNames: "alts" },
         Rd: { type: 'num', dim: { T: -1 }, val: [10**6, SEC ], alt: ["rutherford", "rutherfords"],
-            prefixSym: "Rd", prefixNames: ["rutherford", "rutherfords"] },
+            prefixSym: "Rd", prefixNames: "alts" },
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: PI, display: PISYM, desc: PISYM },
+        tau: { type: 'num', dim: {}, val: PI, display: TAUSYM, desc: TAUSYM + " = 2" + PISYM,
+            alts: [TAUSYM], hidden: true },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
-        parsec:  { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
-            desc: "astronomy, parallax of one arcsecond", alt: ["parsecs"] },
+        pc: { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
+            desc: "astronomy, parallax of one arcsecond", alt: ["parsec", "parsecs"],
+            prefixSym: "pc", prefixNames: "alts" },
         // it's just too annoying for "b" by itself to be predefined and kb is confusable with
         // KB (kB), so the prefix symbol for is deliberately omitted.
         barn: { type: 'num', dim: { L: 2 }, val: [ M**2, 10n**28n ], alt: ["barns"], smells: { mks: true },
@@ -1347,14 +1355,16 @@
         nmi: { type: 'num', dim: { L: 1 }, val: NMI, smells: { uscu: true }, desc: "nautical mile" },
         knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], smells: { uscu: true }, alt: ["knots"], desc: "nautical mile per hour" },
         dozen: { type: 'num', dim: {}, val: 12 },
-        bakersdozen: { type: 'num', dim: {}, val: 13, display: null }, // :)
+        bakersdozen: { type: 'num', dim: {}, val: 13, hidden: true }, // :)
 
         // Special units
         groupSpecial: { group: "Special Units" },
         '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars"], reserved: true,
             desc: 'a dollar, no particular kind'},
+        benjamin: { type: 'num', dim: { CURRENCY: 1 }, val: 100, alt: ["banjamins"], hidden: true,
+            desc: "it's all about the benjamins" },
         cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
-            desc: 'a cent, no particular kind'},
+            desc: 'a cent, no particular kind' },
         // These are mostly for my amusement, but also useful as debugging aids
         mks: { type: 'num', dim: {}, val: 1, desc: "display result in MKS system",
             smells: { requestSystem: "mks" } },
@@ -1464,7 +1474,7 @@
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () =>  console.dir(systemSymbols) } },
-        version: { type: 'num', dim: {}, val: appVersionVal, display: null,
+        version: { type: 'num', dim: {}, val: appVersionVal, hidden: true,
             command: () => showResult("version " + appVersion) },
       };
 
@@ -1526,10 +1536,12 @@
           }
           if (sym.origin)
             sym.origin = Rat.normalize(sym.origin);
-          if (sym.type !== 'num' || sym.altOf || sym.display === null)
+          if (sym.type !== 'num' || sym.altOf || sym.hidden)
             continue;
+          if (sym.prefixNames === 'alts')
+            sym.prefixNames = sym.alt;
           // if there's only one alt, it's usualy a plural
-          let alts = sym.alt ?? [];
+          let alts = sym.alt && [...sym.alt] || [];  // copies if present
           let altName = alts.length > 1 && alts[0] || name;
           if (!sym.desc)
             sym.desc = altName;
@@ -3614,7 +3626,7 @@
           this.removeEventListener('animationstart', this._startClosure);
           this.removeEventListener('animationend', this._endClosure);
           this.removeEventListener('animationcancel', this._endClosure);
-          this.addEveremoveEventListenerntListener('animationiteration', this._endIter);
+          this.removeEventListener('animationiteration', this._endIter);
         }
 
         _transitionStart(event) {
