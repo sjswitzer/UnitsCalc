@@ -602,12 +602,10 @@
                  assuming electricity costs $0.20 per kilowatt hour
                  (<code>ecost = 0.20$ / kWh</code>)?
                  That would be, <code>ecost * 100 watts : year</code>, about $175. Use LEDs!
-            <li> Alternatively, it's about $1.75 per watt per year
-                 <code>ecost * watt : yr</code>
-                 <!-- Refrigerator wattage ratings are maximum draw, for rating the electrical service
-                      they require, but refrigerators cycle and use much less power on average.
-                      A modern Energy Star refrigerator averages about 50 watts, but it totally
-                      depends on usage and conditions. I'll pad it out to $65. -->
+            <!-- Refrigerator wattage ratings are for maximum draw, for rating the electrical service
+                they require, but refrigerators cycle and use much less power on average.
+                A modern Energy Star refrigerator averages about 50 watts, but it totally
+                depends on usage and conditions. I'll pad it out to $65. -->
             <li> How much does it cost to run a typical refrigerator per month?
                 <code>ecost * 65W : month</code>
             <li> How much does it cost to watch a large LED TV per hour?
@@ -617,6 +615,8 @@
             <li> An electric kettle per minute?
                  <code>ecost * 3000 watt : min</code>, just one cent.
             <li> What's 45 mpg as km/liter? <code>45 mi/gallon : km/liter</code>
+            <li> How many meals do you eat in a year if you eat 3 meals per day?
+                 <code>3 'meals'/day : yr</code>
             <li> How much does a gallon of water weigh in pounds? <code>kg/liter*gallon : lb</code>
             <li> What's a kilobyte per meter in kilometers? <code>kB/m : km</code>.
                  It seems rather silly, but it might be a length of magnetic tape
@@ -626,8 +626,7 @@
                  <code>220 ISK/liter : $/gallon</code>
             <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
           </ul>
-        <p> As an exercise (click the code that follows), suppose an elephant weighs
-            <code>elephantWeight = 8000lbf</code>
+        <p> As an exercise, suppose an elephant weighs <code>elephantWeight = 8000lbf</code>
             (I've used <i>pounds of force</i>) and an elephant's foot is about
             <code>elephantFoot = 45cm</code> across, and it's standing evenly on four legs,
             then the pressure under its feet, expressed in pounds per square inch, is
@@ -2067,9 +2066,12 @@
         // Interestingly, exactly-defined phsyical constants are sometimes not
         // exactly representablle in binary floating point for the simple reason
         // that .1 isn't either. For example, the electron-volt is
-        // defined to be 1.6021766341e-19 EEXACTLY, but as floating point that
+        // defined to be 1.6021766341e-19 EXACTLY, but as floating point that
         // results in 1.6021766340000001e-19 when displayed. How annoying, since
-        // it is represented exactly internally. Hence this business here.
+        // it is represented exactly internally. Similarly, a lightyear is
+        // EXACTLY 9460730472580.800 km. But this exceeds the precision of a
+        // double-precision float, where it becomes 9460730472580.80078125 km.
+        // Hence this business here.
         if (typeof val[0] === 'bigint' && decimalPrecision > 0) {
           let exp = 0, significantDigits = 0, val2 = val;
           while (val2[1] !== 1n && exp > -2000 && significantDigits < decimalPrecision) {
