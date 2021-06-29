@@ -52,7 +52,7 @@
       }
       @media all and (orientation:landscape) {
         /* iPhone crowds the screen in portrait but has lots of padding in landscape
-           because they don't give you the slot or curver corner areas. So kill the padding there. */
+           because they don't give you the slot or curved corner areas. So kill the padding there. */
         body[data-device="mobile"] {
           padding: 0px 0px;
         }
@@ -71,6 +71,9 @@
         font-size: 120%;
       }
       body:not([data-device="mobile"]) .mobile-only {
+        display: none;
+      }
+      body[data-device="mobile"] .desktop-only {
         display: none;
       }
 
@@ -187,7 +190,7 @@
       div.help table.example2 td:nth-child(2) {
         font-weight: bold;
         font-family: caption, sans-serif;
-        color: #444444;  /* subtle graying to offset the boldness */
+        color: #444;  /* subtle graying to offset the boldness */
       }
       div.help code.abstract {
         font-style: italic;
@@ -206,7 +209,7 @@
       div.help code:hover, div.help .stuff-text:hover,
       div.help table.stuff.example td:first-child:hover {
         cursor: pointer;
-        color: #0000dd;
+        color: #00d;
         text-decoration: underline;
         --click-action: stuff-text;
       }
@@ -218,7 +221,7 @@
         display: inline-block;
         cursor: pointer;
         padding: .2em .6em;
-        background: #4444ff;
+        background: #44f;
         border-radius: .4em;
         color: white;
       }
@@ -259,7 +262,7 @@
         bottom: .25em;
         border: .15em solid black;
         border-radius: .4em;
-        background-color: #aaaaaa;
+        background-color: #aaa;
       }
       body[data-numpad="show"] div#numpad {
         display: grid !important;
@@ -274,7 +277,7 @@
         border-radius: .4em;
         color: white;
         font-weight: bold;
-        background-color: #888888;
+        background-color: #888;
       }
       div#numpad > div.span2 {
         grid-column-end: span 2;
@@ -287,7 +290,7 @@
 
       /* Looks like a link but is actually a "button" */
       span.linklike {
-        color: #0000dd;
+        color: #00d;
         cursor: pointer;
         text-decoration: underline;
       }
@@ -309,7 +312,7 @@
         transition-property: --close-button-box-color;
       }
       p.user-def > close-button:hover {
-        --close-button-box-color: #f11;
+        --close-button-box-color: #f00;
       }
 
       /*
@@ -688,7 +691,11 @@
         <p> This program is unapologetically biased towards US conventional units since
             it was originally conceived as a tool to help with their absurdity. Nobody else
             has problems dealing with unit conversions.
-        <p class="remote-only"> You can download this app locally as
+            Still, I've tried to encompass the entire SI system and as much of the CGS system as possible.
+            Unfortunately, CGS has multiple extensions for electromagnetism, all different from each other and SI.
+            Worse still, CGS electromagnetic units use half-integer dimension exponents and that's just not something
+            this program is prepared to deal with.
+        <p class="remote-only desktop-only"> You can download this app locally as
             <a href="index.html" download="UnitsCalc.html">UnitsCalc</a> or
             <a href="index.html" download="FeetInchCalc.html">FeetInchCalc</a>.
         <p class="local-only"> You can also
@@ -944,7 +951,7 @@
           return Rat.normalize([ a[0]*b[0], a[1]*b[1] ]);
         }
         static div(a, b) {
-          if (typeof b[0] === 'bigint') // Invertable quotient? Invert it and multiply!
+          if (typeof b[0] === 'bigint') // Invertible quotient? Invert it and multiply!
             return this.mul(a, [b[1], b[0]]);
           if (typeof a[0] === 'number' || typeof b[0] === 'number')
             return Rat.normalize([ Number(a[0])*Number(b[1])/Number(b[0]), a[1] ]); // Normalize might make num a BigInt
@@ -988,7 +995,7 @@
       }
 
       // A curious thing worth noting: It turns out that fractions of the form
-      // "n / power-of-2" are precicely the values that can be represented exactly
+      // "n / power-of-2" are precisely the values that can be represented exactly
       // in floating point arithmetic and also the conventional way of expressing
       // fractional inches. So doing all arithmetic in units of inches means that
       // calculations can be exact when exact results are possible.
@@ -1005,8 +1012,8 @@
       //
       // That's how it used to work, but the point is moot now that we use rational
       // arithmetic whenever possible.
-      // For instance, 1.001 is representad as the ratio [ 1001, 1000 ]. This alows
-      // exact decimal representations whenever possibe.
+      // For instance, 1.001 is represented as the ratio [ 1001, 1000 ]. This allows
+      // exact decimal representations whenever possible.
       //
       // If an expression contains any US units, the results will be displayed in
       // those units. If an expression contains only metric units, the results
@@ -1107,7 +1114,7 @@
         min: { type: 'num', dim: { T: 1 }, val: MIN, alt: ["minute", "minutes", "mins"], smells: { unscientific: true } },
         hr: { type: 'num', dim: { T: 1 }, val: HR, alt: ["hour", "hours", "hrs"], smells: { unscientific: true } },
         day: { type: 'num', dim: { T: 1 }, val: DAY, alt: ["days"], smells: { unscientific: true } },
-        // So many ways to define a year. Sorry, I will not waste the aymbol "a" (annus) on year.
+        // So many ways to define a year. Sorry, I will not waste the symbol "a" (annus) on year.
         // Month is problematic but for most purposes you can use yr/12, so it's defined that way.
         // There are good arguments for the default year to be tropical, buy even astronomers
         // use julian years to define light year. Most people would be surprised by anything else
@@ -1139,7 +1146,7 @@
         //   Further, angles are properly considered dimensionless in dimensional analysis
         //   but are conventionally used in photometry. So for the purposes of this tool,
         //   angles are considered dimensions and this lets us do things like convert
-        //   degress to radians.
+        //   degrees to radians.
         groupAngle: { group: "Angle Units" },
         radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"],
             command: () => { angleSmell = 'radian'; } },
@@ -1236,7 +1243,7 @@
         S: { type: 'num', dim: { M: -1, L: -2, T: 3, I: 2 }, val: [ SEC**3 * AMP**2, KG * M**2 ],
             desc: "conductance", alt: ["siemens", "mho"], prefixSym: "S", prefixNames: ["siemens"] },
         C: { type: 'num', dim: { T: 1, I: 1 }, val: SEC * AMP, desc: "electric charge", alt: ["coulomb", "coulombs"],
-            prefixSym: "C", prefixNames: ["coulomb", "coulombs"] },
+            prefixSym: "C", prefixNames: "alts" },
         F: { type: 'num', dim: { M: -1, L: -2, T: 4, I: 2 }, val: [ SEC**4 * AMP**2, KG * M**2 ], desc: "capacitance",
             alt: ["farad", "farads"],
             prefixSym: "F", prefixNames: "alts" },
@@ -1262,7 +1269,7 @@
             desc: "luminous flux", alt: ["lumen", "lumens"], prefixSym: "lm", prefixNames: "alts" },
 
         // Chemical units (N)
-        // Since SI units were redefined in 2019, a dalton is almost but not precicely 1 gm/mol
+        // Since SI units were redefined in 2019, a dalton is almost but not precisely 1 gm/mol
         groupChemical: { group: "Chemical Units" },
         mol: { type: 'num', dim: { N: 1 }, desc: "mole", alt: ["mols"], reserved: true,
             val: BigInt(602214076) * BigInt(10)**15n },

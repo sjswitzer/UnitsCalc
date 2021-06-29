@@ -251,7 +251,7 @@
           this.removeEventListener('animationstart', this._startClosure);
           this.removeEventListener('animationend', this._endClosure);
           this.removeEventListener('animationcancel', this._endClosure);
-          this.addEveremoveEventListenerntListener('animationiteration', this._endIter);
+          this.removeEventListener('animationiteration', this._endIter);
         }
 
         _transitionStart(event) {
