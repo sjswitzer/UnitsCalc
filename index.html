@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.16">
+    <meta name="version" content="1.5.17">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -297,6 +297,7 @@
        */
       p.user-def {
         margin: .1em 0em;
+        --click-action: data-append;
       }
       p.user-def > close-button {
         --close-button-box-color: #f77;
@@ -3117,7 +3118,7 @@
         for (const sym of keys) {
           let symStr = symString(userSymbols[sym], { html: true });
           if (symStr)
-            str += `<p class="user-def">
+            str += `<p class="user-def" data-append="${sym}">
               <close-button onclick="deleteDef('${sym}')"></close-button> ${symStr} </p>`;
         }
         symdefsElement.innerHTML = str;
@@ -3314,21 +3315,26 @@
       }
 
       function addExampleStuffs() {
-        for (const help of document.querySelectorAll("div.help")) {
-          help.addEventListener("click", function(event) {
-            let element = event.target;
-            while (element) {
-              let styles = window.getComputedStyle(element);
-              let action = styles.getPropertyValue("--click-action");
-              if (action.trim() === "stuff-text") {
-                let text = event.target.textContent.trim();
-                stuffExpr(text.trim(), { doAssigns: true, showErrors: true });
-                return;
-              }
-              element = element.parentElement;
+        document.documentElement.addEventListener('click', function(event) {
+          let element = event.target;
+          while (element) {
+            let styles = window.getComputedStyle(element);
+            let action = styles.getPropertyValue("--click-action");
+            if (action.trim() === "stuff-text") {
+              let text = event.target.textContent.trim();
+              stuffExpr(text.trim(), { doAssigns: true, showErrors: true });
+              event.preventDefault();
+              return;
             }
-          });
-        }
+            if (action.trim() === "data-append") {
+              let text = event.target.getAttribute('data-append');
+              stuffExpr(text, { append: true });
+              event.preventDefault();
+              return;
+            }
+            element = element.parentElement;
+          }
+        });
       }
 
       function trimCaret(str) {
@@ -3338,7 +3344,7 @@
       }
 
       function addNumpadStuffs() {
-        document.documentElement.addEventListener("click", function(event) {
+        document.documentElement.addEventListener('click', function(event) {
           let element = event.target;
           while (element) {
             if (element === numpadElement)
@@ -3372,6 +3378,8 @@
       }
 
       function stuffExpr(text, opts) {
+        if (opts?.append)
+          text = exprElement.value + text;
         exprElement.value = text;
         // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
         updateParse(opts);
@@ -3431,18 +3439,18 @@
           toggleDeviceMode(val);
       }
 
-      document.addEventListener("keydown", function(evt) {
-        if (evt.key === "Escape")
+      document.addEventListener('keydown', function(evt) {
+        if (evt.key === 'Escape')
           showHelp();
       });
 
       // onchange event isn't suitable because if the value doesn't change, nothing is reported
-      exprElement.addEventListener("keydown", function(evt) {
-        if (evt.key === "Enter")
+      exprElement.addEventListener('keydown', function(evt) {
+        if (evt.key === 'Enter')
           updateParse({ doAssigns: true, userHitEnter: true });
       });
 
-      exprElement.addEventListener("input", function(evt) {
+      exprElement.addEventListener('input', function(evt) {
         updateParse();
       });
 
