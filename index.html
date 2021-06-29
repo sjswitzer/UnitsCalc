@@ -2086,29 +2086,27 @@
             val2[1] = 1n;
             ellipsis = '\u2026';
           }
-          if (val2[1] === 1n) { // yay!
-            let str = String(val2[0]), trailingZeros = 0;
-            exp += str.length-1;
-            for (let n = str.length-1; n > 0 && str.charAt(n) === '0'; --n)
-              ++trailingZeros;
-            str = str.substr(0, str.length-trailingZeros);
-            if (exp > 20 || exp < -6) {
-              if (str.length > 1)
-                str = str.charAt(0) + '.' + str.substr(1);
-              str = str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
-              return minus + str + unitsStr + invUnitsStr + descStr;
-            }
-            if (exp >= 0) {
-              let pos = exp + 1;
-              if (pos < str.length)
-                str = str.substr(0, pos) + '.' + str.substr(pos);
-              else
-                str = str + '0'.repeat(pos-str.length);
-            } else if (exp < 0) {
-              str = '0.' + '0'.repeat(-exp-1) + str;
-            }
-            return minus + str + ellipsis + unitsStr + invUnitsStr + descStr;
+          let str = String(val2[0]), trailingZeros = 0;
+          exp += str.length-1;
+          for (let n = str.length-1; n > 0 && str.charAt(n) === '0'; --n)
+            ++trailingZeros;
+          str = str.substr(0, str.length-trailingZeros);
+          if (exp > 20 || exp < -6) {
+            if (str.length > 1)
+              str = str.charAt(0) + '.' + str.substr(1);
+            str = str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
+            return minus + str + unitsStr + invUnitsStr + descStr;
           }
+          if (exp >= 0) {
+            let pos = exp + 1;
+            if (pos < str.length)
+              str = str.substr(0, pos) + '.' + str.substr(pos);
+            else
+              str = str + '0'.repeat(pos-str.length);
+          } else if (exp < 0) {
+            str = '0.' + '0'.repeat(-exp-1) + str;
+          }
+          return minus + str + ellipsis + unitsStr + invUnitsStr + descStr;
         }
 
         val = Rat.number(val);   // Finally, smash it into a JS number
