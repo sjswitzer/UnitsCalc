@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.17">
+    <meta name="version" content="1.5.18">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -2156,15 +2156,11 @@
           const div = getField(divElement, 1);
           if (denom === 0 || div === 0)
             throw new MessageError("Divide by zero");
-
           let totalInches = (ft*12 + inch + num/denom) * times / div;
           if (isNaN(totalInches)) throw new MessageError("Bad input");
           if (!isFinite(totalInches))
-            throw new MessageError("Divide by zero")
-
+            throw new MessageError("Divide by zero");
           showFeetInchesResult([ totalInches*IN5K, N5K ], { updateExpr: true });
-          if (element)  // stuffing the expr element changes the focus, but we want to keep it here
-            element.focus();
         }
         catch (e) {
           showError(e);
@@ -2980,7 +2976,7 @@
         clearFields();
         try {
           let exprStr = exprElement.value, val = null;
-          let hasCaret = exprStr.charAt(exprStr.length-1) === CARETSYM;
+          let hasCaret = exprStr.endsWith(CARETSYM);
           exprStr = trimCaret(exprStr);
           if (exprStr.trim() === "") {
             showAssignResult("&nbsp;");  // clear the input field
@@ -3013,7 +3009,7 @@
                   }
                 }
                 if (nl === nr-1) {
-                  exprStr = exprStr.substring(0, fixPos) + '(' + exprStr.substring(fixPos );
+                  exprStr = exprStr.substring(0, fixPos) + '(' + exprStr.substring(fixPos);
                   let saveParseStr = parseStr, saveParesPos = parsePos, saveParseFurthest = parseFurthest;
                   try {
                     val = parseInputStatement(exprStr);
@@ -3338,7 +3334,7 @@
       }
 
       function trimCaret(str) {
-        if (str.charAt(str.length-1) === CARETSYM)
+        if (str.endsWith(CARETSYM))
           str = str.substr(0, str.length-1);
         return str;
       }
@@ -3356,14 +3352,14 @@
               let stuff = element.getAttribute('data-stuff');
               if (stuff === 'del') { // hack
                 exprText = exprText.substr(0, exprText.length-1);
-                stuffExpr(exprText + CARETSYM);
+                stuffExpr(exprText);
               } else if (stuff === 'abc') {
                 exprElement.focus();
                 toggleNumpad(false);
               } else {
                 if (stuff)
                   text = stuff;
-                stuffExpr(exprText + text + CARETSYM);
+                stuffExpr(text, { append: true });
               }
               // It seems like this is a good idea, but it brings up the keyboard on iOS.
               //   exprElement.focus();  /* no! */
@@ -3378,8 +3374,13 @@
       }
 
       function stuffExpr(text, opts) {
+        let exprText = exprElement.value, hasCaret = exprText.endsWith(CARETSYM);
+        if (hasCaret)
+          exprText = exprText.substr(0, exprText.length-1);
         if (opts?.append)
-          text = exprElement.value + text;
+          text = exprText + text;
+        if (hasCaret)
+          text += CARETSYM;
         exprElement.value = text;
         // exprElement.focus() -- seems like a good idea, but brings up a keyboard in mobile
         updateParse(opts);
