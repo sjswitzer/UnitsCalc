@@ -205,13 +205,14 @@
           let root = this.attachShadow({ mode: 'open' });
           this._canvas = document.createElement('canvas');
           this._canvas.width = this._canvas.height = 1;
+          root.appendChild(this._canvas);
           this._signature = undefined;
           this._renderCount = 0;
-          root.appendChild(this._canvas);
-          // share the closures among events
-          this._startClosure = event => this._transitionStart(event);
-          this._endClosure = event => this._transitionEnd(event);
-          this._endIter = event => this._iterationEnd(event);
+          this._animating = false;
+          this._startClosure = event => this._startAnimation(event);
+          this._endClosure = event => this._stopAnimation(event);
+          this._iterationClosure = event => this._iteration(event);
+          this._animateClosure = timestamp => this._render(CloseButtonElement.cacheAnimation);
         }
 
         // User can set to null or install a cache of a different size.
@@ -219,64 +220,79 @@
         // the signatures do not often repeat. Its more helpful when rendering
         // lots of identical buttons.
         static cache = new MRUCache(10);
+        static cacheAnimation = false;
+        static cacheStatic = true;
+        static logging = false;  // Can turn this on in the debugger
 
         // Handle ordinary, non-transition non-animation, resizes
         static _resizeObserver = new ResizeObserver((entries, observer) => {
-          for (let entry of entries)
-            entry.target._render(true /* useCache */);
+          for (let entry of entries) {
+            if (CloseButtonElement.logging)
+              console.info(`CloseButtonElement resized`);
+            entry.target._render(CloseButtonElement.cacheStatic);
+          }
         });
 
         connectedCallback() {
-          // Seems you have to register all of these.
-          // It would be better if there were just one event called
-          // when you should update. If there is, I haven't seen it.
+          if (CloseButtonElement.logging)
+            console.info(`CloseButtonElement connected`);
+          // We may never be animated, so just register these to start with
+          // then add the end and cancel listeners if or when an animation starts
           this.addEventListener('transitionstart', this._startClosure);
-          this.addEventListener('transitionend', this._endClosure);
-          this.addEventListener('transitioncancel', this._endClosure);
           this.addEventListener('animationstart', this._startClosure);
-          this.addEventListener('animationend', this._endClosure);
-          this.addEventListener('animationcancel', this._endClosure);
-          this.addEventListener('animationiteration', this._endIter);
           CloseButtonElement._resizeObserver.observe(this);
-          this._render(true /* useCache */);
+          this._render(CloseButtonElement.cacheStatic);
         }
 
         disconnectedCallback() {
-          clearInterval(this._intervalTimer);
+          if (CloseButtonElement.logging)
+            console.info(`CloseButtonElement disconnected`);
           CloseButtonElement._resizeObserver.unobserve(this);
-          // GC will probably remove these, but why make it work harder?
+          this._stopAnimation();
           this.removeEventListener('transitionstart', this._startClosure);
+          this.removeEventListener('animationstart', this._startClosure);
+        }
+
+        _startAnimation(event) {
+          if (this.animating)
+            return;
+          if (CloseButtonElement.logging)
+            console.info(`CloseButtonElement ${event.type}`);
+          this._animating = true;
+          this.addEventListener('transitionend', this._endClosure);
+          this.addEventListener('transitioncancel', this._endClosure);
+          this.addEventListener('animationend', this._endClosure);
+          this.addEventListener('animationcancel', this._endClosure);
+          this.addEventListener('animationiteration', this._iterationClosure);
+          this._renderCount = 0;
+          this._render(CloseButtonElement.cacheAnimation);
+        }
+
+        _stopAnimation(event) {
+          if (!this._animating)
+            return;
+          if (CloseButtonElement.logging)
+            console.info(`CloseButtonElement ${event.type} ${this._renderCount}`);
+          this._animating = false;
           this.removeEventListener('transitionend', this._endClosure);
           this.removeEventListener('transitioncancel', this._endClosure);
-          this.removeEventListener('animationstart', this._startClosure);
           this.removeEventListener('animationend', this._endClosure);
           this.removeEventListener('animationcancel', this._endClosure);
-          this.removeEventListener('animationiteration', this._endIter);
+          this.removeEventListener('animationiteration', this._iterationClosure);
+          this._renderCount = 0;
+          this._render(CloseButtonElement.cacheAnimation);
         }
 
-        _transitionStart(event) {
-          // console.info(`"${event.type} ${event.propertyName}"`);
-          this._renderCount = 0;
-          this._intervalTimer = setInterval(() => {
-            this._render();
-          }, 1000/20);  // 20 times per second
-        }
-
-        _transitionEnd(event) {
-          clearInterval(this._intervalTimer);
-          // There's a transition start/end for each property in the transition
-          // console.info(`"${event.type} ${event.propertyName}" ${this._renderCount} $(event.propertyName}`);
-          // if (this._renderCount !== 0) console.info(`transition renders ${this._renderCount}`);
-          this._renderCount = 0;
-          this._render();
-        }
-
-        _iterationEnd(event) {
-          // console.info(`animation renders "${event.type}" ${this._renderCount}`);
-          this._renderCount = 0;
+        _iteration(event) { // Purely for instrumentation
+          if (CloseButtonElement.logging) {
+            console.info(`CloseButtonElement ${event.type} ${event.animationName} ${this._renderCount}`);
+            this._renderCount = 0;
+          }
         }
 
         _render(useCache) {
+          if (this._animating)
+            requestAnimationFrame(this._animateClosure);
           let style = getComputedStyle(this);
           let size = 1.2 * parseFloat(style.fontSize);
           let color = style.getPropertyValue('color'.trim());
@@ -309,6 +325,7 @@
           }
         }
       };
+
       customElements.define('close-button', CloseButtonElement);
       if (CSS.registerProperty) {
         // "namespace" the properties with the custom element name
@@ -323,6 +340,7 @@
         CSS.registerProperty({ name: '--close-button-x-cap',
             syntax: '<percentage>', inherits: false, initialValue: '10%' });
       }
+      // Emulate a UA stylesheet for the element
       let stylesheet = document.createElement("style");
       stylesheet.textContent = `close-button { cursor: pointer; }`;
       document.head.prepend(stylesheet);
