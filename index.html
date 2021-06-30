@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.19">
+    <meta name="version" content="1.5.20">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -538,10 +538,6 @@
             <li> What about absolute zero? <code>0K : degf</code>
             <li> What <i>is</i> 20000 leagues anyway? <code>20000 league : mi</code>.
                   That's deep! <!-- SNL skit reference -->
-            <li> How far away is the Sun in miles? <code>au : mi</code>
-            <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
-            <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
-                  <code>5V / 2000 ohm</code>
             <li> What's <code>pi/4</code> radians in degrees? <code>pi/4 radians : degrees</code>
             <li> How much does it cost to run a 100 watt lightbulb for a year,
                   assuming electricity costs $0.20 per kilowatt hour
@@ -566,9 +562,14 @@
             <li> What's a kilobyte per meter in kilometers? <code>kB/m : km</code>.
                   It seems rather silly, but it might be a length of magnetic tape
             <li> Remember old modems? <code>9600 baud * 1 bit/symbol</code>
+            <li> How far away is the Sun in miles? <code>au : mi</code>
+            <li> How long does it take sunlight to reach the Earth? <code>au/c : min</code>
+            <li> What's a femtolightyear in yards? <code>femtolightyear : yards</code>
+            <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
+                 <code>5V / 2000 ohm</code>
             <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
-                  and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
-                  <code>220 ISK/liter : $/gallon</code>
+                 and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
+                 <code>220 ISK/liter : $/gallon</code>
             <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
           </ul>
         <p> As an exercise, suppose an elephant weighs <code>elephantWeight = 8000lbf</code>
@@ -1314,8 +1315,9 @@
         G: { type: 'num', dim: { L: 3, M: -1, T:-2 }, val: [ 6.6743e-11 * M**3, KG * SEC**2 ],
             desc: "universal gravitational constant", smells: { mks: true } },
         c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light", smells: { mks: true } },
-        lightyear: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100 ],
-            desc: "distance light travels in a year", alt: ["lightyears", "ly"] },
+        ly: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100 ],
+            desc: "distance light travels in a year", alt: ["lightyear", "lightyear"],
+            prefixSym: "ly", prefixNames: "alts" },
 
         // SI defining constants & related
         definingGroup: { group: "SI Defining Constants & Related" },
@@ -1368,7 +1370,7 @@
         groupSpecial: { group: "Special Units" },
         '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars"], reserved: true,
             desc: 'a dollar, no particular kind'},
-        benjamin: { type: 'num', dim: { CURRENCY: 1 }, val: 100, alt: ["banjamins"], hidden: true,
+        benjamin: { type: 'num', dim: { CURRENCY: 1 }, val: 100, alt: ["benjamins"], hidden: true,
             desc: "it's all about the benjamins" },
         cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
             desc: 'a cent, no particular kind' },
@@ -1543,7 +1545,7 @@
           }
           if (sym.origin)
             sym.origin = Rat.normalize(sym.origin);
-          if (sym.type !== 'num' || sym.altOf || sym.hidden)
+          if (sym.type !== 'num' || sym.altOf)
             continue;
           if (sym.prefixNames === 'alts')
             sym.prefixNames = sym.alt;
@@ -1630,7 +1632,8 @@
           let row = `<tr><td><span class="stuff-text">${name}<span>
                        <td><span class="stuff-text">/${name}</span><td>`;
           backRefs[name] = { row, helpDesc };
-          html += row + helpDesc;
+          if (!sym.hidden)
+            html += row + helpDesc;
         }
         builtinSymbolsElement.innerHTML = html;
 
