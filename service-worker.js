@@ -2,7 +2,7 @@
 
 onfetch = event => {
   console.info("onfetch", event);
-  event.respondWith(caches.match(event.request).then(response => {
+  event.respondWith(caches.match(event.request).then(cacheResponse => {
     // Issue a fetch regardless
     let fetchRequest = fetch(event.request).then(fetchResponse => {
       if (fetchResponse.ok) {
@@ -11,16 +11,15 @@ onfetch = event => {
           cache.put(event.request, clonedResponse);
           console.info("cached", event, clonedResponse);
         });
+        return fetchResponse;  // succeed with the response
       }
-      return fetchResponse;
+      return Promise.reject(fetchResponse);
     });
-    // If the cache had a response, use it immediately
-    if (response) {
-      console.info("cached response", event, response)
-      return response;
-    }
-    // Otherwise use the result of the fetch
-    console.info("fetched response", event, fetchRequest)
-    return fetchRequest;
+    // Wait for a moment and return the cached value and failing that response, whether it succeeds or not
+    let timer = new Promise(resolve => {
+      setTimeout(resolve(cacheResponse ?? fetchResponse), 500);
+    });
+    // Whichever first succeeds is the result
+    return Promise.any(timer, fetchRequest);
   }));
 };
