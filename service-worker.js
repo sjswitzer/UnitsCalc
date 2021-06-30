@@ -18,7 +18,9 @@ onfetch = event => {
           return fetchResponse;  // succeed with the response
         }
         // if request failed, return the cache if present, otherwise the failed request
-        return cacheResponse ?? fetchResponse;
+        let resolution = cacheResponse ?? fetchResponse;
+        console.info("response failed, resolved with", resolution);
+        return resolution;
       });
       if (!cacheResponse)
         return fetchRequest;
@@ -32,7 +34,11 @@ onfetch = event => {
         }, 500);
       });
       // Whichever first succeeds is the result
-      return Promise.any([timer, fetchRequest]);
+      // return Promise.any([timer, fetchRequest]);
+      return Promise.any([timer, fetchRequest]).then(resp => {
+        console.info("resolved with", resp);
+        return resp;
+      });
     });
   }));
 };
