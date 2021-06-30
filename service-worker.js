@@ -33,6 +33,6 @@ onfetch = event => {
       });
       // Whichever first succeeds is the result
       return Promise.any([timer, fetchRequest]);
-    }));
+    });
   });
 };
