@@ -3,42 +3,35 @@
 let cacheName = location.pathname;  // Segregate caching by worker location
 
 onfetch = event => {
-  console.info("onfetch", event);
-  event.respondWith(caches.open(cacheName).then(cache => {
-    cache.match(event.request).then(cacheResponse => {
-      // Issue a fetch regardless
-      let fetchRequest = fetch(event.request).then(fetchResponse => {
-        if (fetchResponse.ok) {
-          console.info("successful response", fetchResponse);
-          let clonedResponse = fetchResponse.clone();
-          cache.put(event.request, clonedResponse);
-          console.info("cached", event, clonedResponse);
-          return fetchResponse;  // succeed with the response
-        }
-        // if request failed, return the cache if present, otherwise the failed request
-        let resolution = cacheResponse ?? fetchResponse;
-        console.info("response failed, resolved with", resolution);
-        return resolution;
-      });
-      if (!cacheResponse) {
-        console.info("uncached", fetchRequest);
-        return fetchRequest;
+  console.info("onfetch", event); 
+  event.respondWith(async () => {
+    let cache = await caches.open(cacheName);
+    let cacheResponse = await cache.match(event.request);
+    // Issue a fetch request regardless
+    let fetchResult = fetch(event.request).then(fetchResponse => {
+      if (fetchResponse.ok) {
+        console.info("successful response", fetchResponse);
+        let clonedResponse = fetchResponse.clone();
+        cache.put(event.request, clonedResponse);
+        console.info("cached", event, clonedResponse);
+        return fetchResponse;  // succeed with the response
       }
-      let timer = new Promise(resolve => {
-        // Wait for a moment and return the cached value if present,
-        // otherwise the response, whether it succeeded or not
-        setTimeout(() => {
-          let resolution = cacheResponse ?? fetchRequest;
-          console.info("timeout", resolution);
-          resolve(resolution);
-        }, 500);
-      });
-      // Whichever first succeeds is the result
-      // return Promise.any([timer, fetchRequest]);
-      return Promise.any([timer, fetchRequest]).then(resp => {
-        console.info("resolved with", resp);
-        return resp;
-      });
+      console.info("failed response", fetchResponse);
+      // failed, return the cached response or the failure if none.
+      return cacheResponse ?? fetchResponse;
     });
-  }));
+    if (!cacheResponse) {
+      console.info("uncached", fetchResult);
+      return fetchRequest;
+    }
+    // Wait for a moment and return the cached value
+    let timer = new Promise(resolve => {
+      setTimeout(() => {
+        console.info("timeout", cacheResponse);
+        resolve(cacheResponse);
+      }, 500);
+    });
+    let res = await Promise.any([timer, fetchResult]);
+    console.info("resolved with", res);
+  });
 };
