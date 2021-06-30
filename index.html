@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.27">
+    <meta name="appVersion" content="1.5.28">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -770,6 +770,8 @@
     </div>
     <script type="text/javascript">
       "use strict";
+
+      var appVersion = "0.0.0"; // updated later from meta tag
       const exprElement = document.getElementById('expr');
       const errorElement = document.getElementById('error');
       const resultsElement = document.getElementById('results');
@@ -1635,8 +1637,8 @@
 
         // Stuff in a "version" symbol
         for (let meta of document.getElementsByTagName('meta')) {
-          if (meta.name === 'version') {
-            let appVersion = meta.content;
+          if (meta.name === 'appVersion') {
+            appVersion = meta.content;
             let parts = appVersion.split('.');
             let val = Number((parts[0]??'0') + '.' + (parts[1]??'0'));
             systemSymbols.version = { sym: 'version', type: 'num', dim: {}, val, desc: `version ${appVersion}` };
