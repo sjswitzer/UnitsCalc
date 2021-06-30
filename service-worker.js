@@ -20,6 +20,6 @@ onfetch = event => {
       setTimeout(resolve(cacheResponse ?? fetchResponse), 500);
     });
     // Whichever first succeeds is the result
-    return Promise.any(timer, fetchRequest);
+    return Promise.any([timer, fetchRequest]);
   }));
 };
