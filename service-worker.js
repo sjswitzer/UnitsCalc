@@ -1,5 +1,7 @@
 // I have no particular need for a service worker, but it's necessary for a PWA.
 
+let cacheName = location.pathname;  // segregate caching by worker location
+
 onfetch = event => {
   console.info("onfetch", event);
   event.respondWith(caches.match(event.request).then(cacheResponse => {
@@ -9,7 +11,7 @@ onfetch = event => {
       fetchResponse = resp;
       if (fetchResponse.ok) {
         let clonedResponse = fetchResponse.clone();
-        caches.open("UnitsCalc-v1").then(cache => {
+        caches.open(cacheName).then(cache => {
           cache.put(event.request, clonedResponse);
           console.info("cached", event, clonedResponse);
         });
