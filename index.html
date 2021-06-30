@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.26">
+    <meta name="version" content="1.5.27">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1050,14 +1050,6 @@
         PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$";
       const ALPHANUM = ALPHA + DIGITS;
 
-      let appVersion, appVersionVal;
-      for (let meta of document.getElementsByTagName('meta'))
-        if (meta.name === 'version') {
-          appVersion = meta.content;
-          let parts = appVersion.split('.');
-          appVersionVal = Number((parts[0]??'0') + '.' + (parts[1]??'0'));
-        }
-
       let angleSmell = "radian";
 
       const systemSymbols = {
@@ -1483,8 +1475,6 @@
             command: () => toggleLegacyMode() } },
         SYSTEMSYMS: function LogSystemSymbols() { ; return { type: 'num', dim: {}, val: Rat.ZERO,
             command: () =>  console.dir(systemSymbols) } },
-        version: { type: 'num', dim: {}, val: appVersionVal, hidden: true,
-            command: () => showResult("version " + appVersion) },
       };
 
       const metricPrefixes = [
@@ -1642,6 +1632,16 @@
         systemSymbols.cm.reserved = true; 
         systemSymbols.gm.reserved = true;
         systemSymbols.kg.reserved = true;
+
+        // Stuff in a "version" symbol
+        for (let meta of document.getElementsByTagName('meta')) {
+          if (meta.name === 'version') {
+            let appVersion = meta.content;
+            let parts = appVersion.split('.');
+            let val = Number((parts[0]??'0') + '.' + (parts[1]??'0'));
+            systemSymbols.version = { sym: 'version', type: 'num', dim: {}, val, desc: `version ${appVersion}` };
+          }
+        }
       }
 
       groomSystemSymbols();
