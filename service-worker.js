@@ -20,8 +20,10 @@ onfetch = event => {
         console.info("response failed, resolved with", resolution);
         return resolution;
       });
-      if (!cacheResponse)
+      if (!cacheResponse) {
+        console.info("uncached", fetchRequest);
         return fetchRequest;
+      }
       let timer = new Promise(resolve => {
         // Wait for a moment and return the cached value if present,
         // otherwise the response, whether it succeeded or not
