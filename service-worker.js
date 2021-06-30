@@ -16,11 +16,14 @@ onfetch = event => {
         console.info("successful response", fetchResponse);
         return fetchResponse;  // succeed with the response
       }
-      return Promise.reject(fetchResponse);
+      // if request failed, return the cache if present, otherwise the failed request
+      return cacheResponse ?? fetchResponse;
     });
+    if (!cacheResponse)
+      return fetchRequest;
     let timer = new Promise(resolve => {
-      // Wait for a moment and return the cached value and,
-      // if none, the response, whether it succeeds or not
+      // Wait for a moment and return the cached value if present,
+      // otherwise the response, whether it succeeded or not
       setTimeout(() => {
         let resolution = cacheResponse ?? fetchResponse;
         console.info("timeout", resolution)
