@@ -3,7 +3,11 @@
 let cacheName = location.pathname;  // Segregate caching by worker location
 
 onfetch = event => {
-  console.info("onfetch", event.request); 
+  console.info("onfetch", event.request);
+  // There should be async blocks:
+  //     async { ... }
+  // Instead, I'll use
+  //     (async () => { ... })()
   event.respondWith((async () => {
     let cache = await caches.open(cacheName);
     console.info("cache", cache);
@@ -24,7 +28,7 @@ onfetch = event => {
     });
     if (!cacheResponse) {
       console.info("uncached", fetchResult);
-      return fetchRequest;
+      return fetchResult;
     }
     // Wait for a moment and return the cached value
     let timer = new Promise(resolve => {
