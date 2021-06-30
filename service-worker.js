@@ -4,8 +4,8 @@ let cacheName = location.pathname;  // segregate caching by worker location
 
 onfetch = event => {
   console.info("onfetch", event);
-  caches.open(cacheName).then(cache => {
-    event.respondWith(cache.match(event.request).then(cacheResponse => {
+  event.respondWith(caches.open(cacheName).then(cache => {
+    cache.match(event.request).then(cacheResponse => {
       // Issue a fetch regardless
       let fetchResponse;
       let fetchRequest = fetch(event.request).then(resp => {
