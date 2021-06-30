@@ -4,9 +4,8 @@ let cacheName = location.pathname;  // Segregate caching by worker location
 
 onfetch = event => {
   console.info("onfetch", event.request); 
-  let cachePromise = caches.open(cacheName);
-  event.respondWith(async () => {
-    let cache = await cachePromise;
+  event.respondWith((async () => {
+    let cache = await caches.open(cacheName);
     console.info("cache", cache);
     let cacheResponse = await cache.match(event.request);
     console.info("cacheResponse", cacheResponse);
@@ -36,5 +35,5 @@ onfetch = event => {
     });
     let res = await Promise.any([timer, fetchResult]);
     console.info("resolved with", res);
-  });
+  })());
 };
