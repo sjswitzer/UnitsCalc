@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="version" content="1.5.20">
+    <meta name="version" content="1.5.21">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1299,7 +1299,7 @@
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
         pi: { type: 'num', dim: {}, val: PI, display: PISYM, desc: PISYM },
-        tau: { type: 'num', dim: {}, val: PI, display: TAUSYM, desc: TAUSYM + " = 2" + PISYM,
+        tau: { type: 'num', dim: {}, val: 2*PI, display: TAUSYM, desc: TAUSYM + " = 2" + PISYM,
             alts: [TAUSYM], hidden: true },
         au:  { type: 'num', dim: { L: 1 }, val: 149597870700 * M, desc: "astronomical unit" },
         pc: { type: 'num', dim: { L: 1 }, val: [ BigInt(149597870700) * BigInt(M) * BigInt(648000), PI ],
