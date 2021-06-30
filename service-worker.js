@@ -4,7 +4,9 @@ onfetch = event => {
   console.info("onfetch", event);
   event.respondWith(caches.match(event.request).then(cacheResponse => {
     // Issue a fetch regardless
-    let fetchRequest = fetch(event.request).then(fetchResponse => {
+    let fetchResponse;
+    let fetchRequest = fetch(event.request).then(resp => {
+      fetchResponse = resp;
       if (fetchResponse.ok) {
         let clonedResponse = fetchResponse.clone();
         caches.open("UnitsCalc-v1").then(cache => {
@@ -20,7 +22,7 @@ onfetch = event => {
       // Wait for a moment and return the cached value and,
       // if none, the response, whether it succeeds or not
       setTimeout(() => {
-        let resolution = cacheResponse ?? fetchResponse
+        let resolution = cacheResponse ?? fetchResponse;
         console.info("timeout", resolution)
         resolve(resolution);
       }, 500);
