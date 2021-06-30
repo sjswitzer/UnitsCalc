@@ -1,6 +1,6 @@
 // I have no particular need for a service worker, but it's necessary for a PWA.
 
-let cacheName = location.pathname;  // segregate caching by worker location
+let cacheName = location.pathname;  // Segregate caching by worker location
 
 onfetch = event => {
   console.info("onfetch", event);
