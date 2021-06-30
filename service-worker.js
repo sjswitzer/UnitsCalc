@@ -11,13 +11,19 @@ onfetch = event => {
           cache.put(event.request, clonedResponse);
           console.info("cached", event, clonedResponse);
         });
+        console.info("successful response", fetchResponse);
         return fetchResponse;  // succeed with the response
       }
       return Promise.reject(fetchResponse);
     });
-    // Wait for a moment and return the cached value and failing that response, whether it succeeds or not
     let timer = new Promise(resolve => {
-      setTimeout(resolve(cacheResponse ?? fetchResponse), 500);
+      // Wait for a moment and return the cached value and,
+      // if none, the response, whether it succeeds or not
+      setTimeout(() => {
+        let resolution = cacheResponse ?? fetchResponse
+        console.info("timeout", resolution)
+        resolve(resolution);
+      }, 500);
     });
     // Whichever first succeeds is the result
     return Promise.any([timer, fetchRequest]);
