@@ -7,9 +7,7 @@ onfetch = event => {
   event.respondWith(caches.open(cacheName).then(cache => {
     cache.match(event.request).then(cacheResponse => {
       // Issue a fetch regardless
-      let fetchResponse;
-      let fetchRequest = fetch(event.request).then(resp => {
-        fetchResponse = resp;
+      let fetchRequest = fetch(event.request).then(fetchResponse => {
         if (fetchResponse.ok) {
           console.info("successful response", fetchResponse);
           let clonedResponse = fetchResponse.clone();
@@ -28,8 +26,8 @@ onfetch = event => {
         // Wait for a moment and return the cached value if present,
         // otherwise the response, whether it succeeded or not
         setTimeout(() => {
-          let resolution = cacheResponse ?? fetchResponse;
-          console.info("timeout", resolution)
+          let resolution = cacheResponse ?? fetchRequest;
+          console.info("timeout", resolution);
           resolve(resolution);
         }, 500);
       });
