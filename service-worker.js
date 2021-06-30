@@ -39,5 +39,6 @@ onfetch = event => {
     });
     let res = await Promise.any([timer, fetchResult]);
     console.info("resolved with", res);
+    return res;
   })());
 };
