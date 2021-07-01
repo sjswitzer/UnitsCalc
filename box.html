@@ -309,6 +309,7 @@
             this._canvas.setAttribute('width', size);
             this._canvas.setAttribute('height', size);
             const ctx = this._canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
             if (useCache && CloseButtonElement.cache) {
               let canvas = CloseButtonElement.cache.get(signature, () => {
                 let canvas = document.createElement('canvas');
