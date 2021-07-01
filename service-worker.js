@@ -5,6 +5,10 @@
 let logging = false; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
 
+// There SHOULD be a Promise.delay like this.
+// Note that this can be used with .then() and val is optional
+const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
+
 onfetch = event => {
   if (logging) console.info("onfetch", event.request);
   // There SHOULD be async blocks like this:
@@ -40,19 +44,8 @@ onfetch = event => {
       if (logging) console.log("offline cache response", cacheResponse);
       return cacheResponse;
     }
-    // Wait for a moment and return the cached value
-    //   The hope is that mobile devices will fail requests immediately
-    //   when fully offline, but a second is not so long to wait.
-    //   The "online" state might help too.
-    let waitMs = 1000;
-    let timer = new Promise(resolve => {
-      setTimeout(() => {
-        if (logging) console.info("timeout", cacheResponse);
-        resolve(cacheResponse);
-      }, waitMs);
-    });
-    // Whichever happens first is our result
-    let resp = await Promise.any([timer, fetchResult]);
+    // Resolve with the fetch result or the cache response delayed by a second, whichever is first
+    let resp = await Promise.any([fetchResult, delay(1000, cacheResponse)]);
     if (logging) console.info("resolved with", resp);
     return resp;
   })());
