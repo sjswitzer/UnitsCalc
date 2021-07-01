@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.5.49">
+    <meta name="appVersion" content="1.5.50">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1641,7 +1641,8 @@
             appVersion = meta.content;
             let parts = appVersion.split('.');
             let val = Rat.normalize([ 1000*Number((parts[0]??'0') + '.' + (parts[1]??'0')), 1000n ]);
-            systemSymbols.version = { sym: 'version', type: 'num', dim: {}, val, desc: `version ${appVersion}` };
+            systemSymbols.version = { sym: 'version', type: 'num', dim: {}, val,
+                desc: `version ${appVersion} ${location.href}` };
           }
         }
       }
