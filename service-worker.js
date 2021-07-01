@@ -34,7 +34,7 @@ onfetch = event => {
       if (logging) console.info("failed response", fetchResponse);
       // Failed; return the cached response or the failure if none.
       return cacheResponse ?? fetchResponse;
-    }).catch(() => new Response(null, { status: 404 }));
+    });
     if (!cacheResponse) {
       if (logging) console.info("uncached", fetchResult);
       return fetchResult;
