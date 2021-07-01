@@ -1,6 +1,6 @@
 // I have no particular need for a service worker, but it's necessary for a PWA.
 
-let logging = false;
+let logging = false; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
 
 onfetch = event => {
