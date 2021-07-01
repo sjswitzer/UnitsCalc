@@ -39,13 +39,14 @@ onfetch = event => {
       if (logging) console.info("uncached", fetchResult);
       return fetchResult;
     }
-    // ServiceWorkerGlobalScope's self.navigator does not appear to be standard, but use it if it's there
-    if (self.navigator && self.navigator.onLine === false) {
+    if (navigator.onLine === false) {
       if (logging) console.log("offline cache response", cacheResponse);
       return cacheResponse;
     }
-    // Resolve with the fetch result or the cache response delayed by a second, whichever is first
-    let resp = await Promise.any([fetchResult, delay(1000, cacheResponse)]);
+    // Resolve with the fetch result or the cache response delayed moment, whichever is first.
+    // If navigator.onLine is false, we will have already returned the cached response, so this
+    // is not likely to happen often.
+    let resp = await Promise.any([fetchResult, delay(2000 /* ms */, cacheResponse)]);
     if (logging) console.info("resolved with", resp);
     return resp;
   })());
