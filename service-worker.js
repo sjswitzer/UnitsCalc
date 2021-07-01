@@ -37,7 +37,8 @@ onfetch = event => {
     });
     if (!cacheResponse) {
       if (logging) console.info("uncached", fetchResult);
-      return fetchResult;
+      // Catch handler here deals with gratuitous fetch of favicon.ico or whatever
+      return fetchResult.catch(e => new Response(null, {status: 404, statusText: 'Not found'}));
     }
     if (navigator.onLine === false) {
       if (logging) console.log("offline cache response", cacheResponse);
