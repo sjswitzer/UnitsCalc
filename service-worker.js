@@ -1,5 +1,6 @@
 // I have no particular need for a service worker, but it's necessary for a PWA.
-// So let's have some fun...
+// There's nothing to pre-fetch because the page references all of its resources when
+// loaded. But we can still have some fun optimizing the upgrade process.
 
 let logging = false; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
@@ -12,7 +13,7 @@ onfetch = event => {
   //     (async () => { ... })()
   // just like we used to create scopes with (function() { ... })()
   event.respondWith((async () => {
-    // Use just ony our cache
+    // Use only our cache
     let cache = await caches.open(cacheName);
     if (logging) console.info("cache", cache);
     let cacheResponse = await cache.match(event.request);
