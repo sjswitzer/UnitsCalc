@@ -3,17 +3,6 @@
 
 let logging = false; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
-let online = true;
-
-ononline = event => {
-  if (logging) console.info("online", event);
-  online = true;
-};
-
-onoffline = event => {
-  if (logging) console.info("offline", event);
-  online = false;
-};
 
 onfetch = event => {
   if (logging) console.info("onfetch", event.request);
@@ -23,6 +12,7 @@ onfetch = event => {
   //     (async () => { ... })()
   // just like we used to create scopes with (function() { ... })()
   event.respondWith((async () => {
+    // Use just ony our cache
     let cache = await caches.open(cacheName);
     if (logging) console.info("cache", cache);
     let cacheResponse = await cache.match(event.request);
@@ -44,20 +34,23 @@ onfetch = event => {
       if (logging) console.info("uncached", fetchResult);
       return fetchResult;
     }
-    if (!online) {
-      if (logging) console.log("ofline cache response", cacheResponse);
+    // ServiceWorkerGlobalScope's self.navigator does not appear to be standard, but use it if it's there
+    if (self.navigator && self.navigator.onLine === false) {
+      if (logging) console.log("offline cache response", cacheResponse);
       return cacheResponse;
     }
     // Wait for a moment and return the cached value
     //   The hope is that mobile devices will fail requests immediately
     //   when fully offline, but a second is not so long to wait.
     //   The "online" state might help too.
+    let waitMs = 1000;
     let timer = new Promise(resolve => {
       setTimeout(() => {
         if (logging) console.info("timeout", cacheResponse);
         resolve(cacheResponse);
-      }, 1000);
+      }, waitMs);
     });
+    // Whichever happens first is our result
     let resp = await Promise.any([timer, fetchResult]);
     if (logging) console.info("resolved with", resp);
     return resp;
