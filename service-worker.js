@@ -14,8 +14,8 @@ onfetch = event => {
     if (logging) console.info("cache", cache);
     let cacheResponse = await cache.match(event.request);
     if (logging) console.info("cacheResponse", cacheResponse);
-    // Issue a fetch request regardless
-    let fetchResult = fetch(event.request).then(fetchResponse => {
+    // Issue a fetch request regardless, disregarding "freshness"
+    let fetchResult = fetch(event.request, { cache: "no-cache" }).then(fetchResponse => {
       if (fetchResponse.ok) {
         if (logging) console.info("successful response", fetchResponse);
         let clonedResponse = fetchResponse.clone();
