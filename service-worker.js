@@ -112,7 +112,7 @@ let deferredRequests = [];
 
 // Start up the background task after a delay to keep
 // from compating with app iniytiation
-let _backgroundWork = delay(5000); 
+let _backgroundWork = delay(10000);  // XXX
 
 onactivate = event => {
   // This is a good place to schedule some prefetches:
@@ -141,12 +141,12 @@ onactivate = event => {
           if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
         }
         // Pause a bit between requests
-        await delay(2000);
+        await delay(5000);  // XXX
       }
 
       // Wait for a posted event or until a timer expires
       let delayMinutes = 5/60;   // XXX: change back to 30
-      let event = await Promise.any([nextWorkerEvent(), delay(delayMinutes * 60000, "timer")]);
+      let event = await Promise.any([nextWorkerEvent(), delay(delayMinutes * 60000, new Event("timer"))]);
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
       }
