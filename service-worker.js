@@ -32,12 +32,18 @@ onfetch = event => {
         return fetchResponse;  // succeed with the response
       }
       if (logging) console.info("failed response", fetchResponse);
-      // Failed; return the cached response or the failure if none.
-      return cacheResponse ?? fetchResponse;
+      // Failed; return the cached response if there is one and otherwise throw the failure
+      if (cacheResponse)
+        return cacheResponse;
+      // A failure won't fulfill the Promise.any() below unless every promise has failed,
+      // but at that point the timer will always succeed since there is a cache result already.       s
+      throw fetchResponse;
     });
     if (!cacheResponse) {
       if (logging) console.info("uncached", fetchResult);
-      return fetchResult;
+      // Return the fetch result, even if it failed.
+      // We don't generally expect failures, but some platforms request favico.ico, which doesn't exist.
+      return fetchResult.catch(errorResponse => errorResponse);
     }
     if (navigator.onLine === false) {
       if (logging) console.log("offline cache response", cacheResponse);
