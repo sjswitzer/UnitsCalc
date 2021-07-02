@@ -2863,9 +2863,9 @@
               throw new ChattyError("Can't add functions");
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '+', expr1: val, expr2: val2 };
-            } else if (numVal(val2).num === 0) {
+            } else if (numVal(val2).num === 0n) {
               // special case for adding 0; keep first val
-            } else if (numVal(val).num === 0) {
+            } else if (numVal(val).num === 0n) {
               val = val2;  // special case for adding 0; take second val
             } else if (val.type === 'num' && val2.type === 'num') {
               if (Dim.equal(val.dim, val2.dim))
@@ -2887,13 +2887,18 @@
               throw new MessageError("Can't subtract functions");
             if (val.type === 'parse' || val2.type === 'parse') {
               val = { type: 'parse', op: '-', expr1: val, expr2: val2 };
-            } else if (numVal(val2).num === 0) {
+            } else if (numVal(val2).num === 0n) {
               // special case for subtracting 0; take first val
+            } else if (numVal(val).num === 0n) {
+              // special case for subtracting from 0; negate second value
+              val = { type: 'num', dim: val2.dim,
+                    val: Rational.negate(numVal(val2)),
+                    smells: { ...val2.smells, BonusAffine: undefined } };
             } else if (val.type === 'num' && val2.type === 'num') {
               if (Dim.equal(val.dim, val2.dim)) {
                 // Ignore origin in second argument so that 50 degc - 1 degf makes sense;
                 // It this usage, degf is a relative degree not an absolute degree.
-                // Henve, we don't call numVal for it
+                // Hence, we don't call numVal for it
                 val = { type: 'num', dim: val.dim,
                     val: Rational.sub(numVal(val), val2.val),
                     smells: { ...val2.smells, ...val.smells } };
