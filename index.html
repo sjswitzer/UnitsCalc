@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.6">
+    <meta name="appVersion" content="1.6.7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1810,14 +1810,10 @@
         if (opts?.describe && val.desc && displayUnits.length === 0)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
-        let minus = '', dim = {};
+        let dim = {};
         if (val.val !== undefined) {
           dim = val.dim;
           val = numVal(val);
-        }
-        if (val.num < 0) {
-          val = Rational.negate(val);
-          minus = '-';
         }
         // Figure out which units system makes the most sense
         let uscu = false;
@@ -1909,34 +1905,22 @@
             const reducedNormSquared = Dim.normSquared(reducedDim);
             if (normSquared <= reducedNormSquared && !opts?.forceUnit)
               return null;
-            let newVal = val;
-            if (unit.origin) {
-              // We're hoist on our own petard for taking the absolute value earlier.
-              // There's nothing to do now but deal with it. Sigh...
-              if (minus)
-                newVal = Rational.negate(newVal);
-              newVal = Rational.sub(newVal, unit.origin);
-              minus = '';
-              if (newVal.num < 0) {
-                newVal = Rational.negate(newVal);
-                minus = '-';
-              }
-            }
-            newVal = Rational.div(newVal, Rational.pow(unit.val, exp));
+            let origin = unit.origin ?? Rational.ZERO;
+            let newVal = Rational.div(Rational.sub(val, origin), Rational.pow(unit.val, exp));
             let expSum = 0, nDims = 0;
             for (const measure in reducedDim) {
               expSum += Math.abs(reducedDim[measure]);
               if (reducedDim[measure])
                 nDims += 1;
             }
-            let newNum = Rational.toNumber(newVal);
+            let newNumAbs = Math.abs(Rational.toNumber(newVal));
             // Basically the number of digits left of the decimal or zeros to the right
             // It's a measure of "how far from one" the valus is.
-            let digits = Math.abs(Math.log10(Math.abs(newNum)));
+            let digits = Math.abs(Math.log10(newNumAbs));
             let favored = unit.favored ?? 0;
             let smells = unit.smells ?? {};
             // A bunch of stuff that can be used in the sort function.
-            return { sym: unit.sym, uscu, favored, nDims, exp, expSum, digits, newNum,
+            return { sym: unit.sym, uscu, favored, nDims, exp, expSum, digits, newNumAbs,
                 reducedDim, unit, newVal, reducedNormSquared, dotProduct, smells };
           }
           catch (e) {
@@ -2035,7 +2019,7 @@
               // be 1/128 /ft3. So being over 1 should give a bonus over the "distance
               // from 1", but should not be absolute. The factor should be tuned so that
               // /cord is in expressed terms of /ft3 and a dalton is expressed in gm/mol.
-              const aa = Math.abs(a.newNum), ab = Math.abs(b.newNum);
+              const aa = a.newNumAbs, ab = b.newNumAbs;
 
               // Values closer to 1 win, generally.
               let va = a.digits - 2*(aa >= 1);
@@ -2062,6 +2046,12 @@
           if (unitDescs.length < 1)
             throw new InternalError("Insufficient basis units");
           applyDesc(unitDescs[0]);
+        }
+
+        let minus = '';
+        if (val.num < 0) {
+          val = Rational.negate(val);
+          minus = '-';
         }
 
         if (opts?.saveMode) { // special path for saving; preserve rationality whenever possible
@@ -2837,7 +2827,7 @@
             } else if (val.type === 'num' && val2.type === 'num') {
               // Ratios with an affine unit should just be a ratio of its rate of change.
               // Ratios between affine units should be the ratios of their rates of change
-              // so that degf / degc = 5/9. But an afine unit divided by anything else
+              // so that degf / degc = 5/9. But an affine unit divided by anything else
               // should denature to its base unit so that dividing 32 degf by 2 should
               // show the result as half the corresponding kelvin degrees.
               let smells = { ...val2.smells, ...val.smells, BonusAffine: undefined };
