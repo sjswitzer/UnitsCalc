@@ -111,33 +111,31 @@ onfetch = event => {
 // Doodling some machinery here that I don't really need for this app...
 //
 
-const postWorkerEvent = (() => {
+const postBackgroundEvent = (() => {
   // Encapsulate the worker and its state
-  let  _workerEvents = [], _workerEventResolvers = [];
+  let  _backgroundEvents = [], _backgroundEventResolvers = [];
 
-  function nextWorkerEvent() {  // Promise for the next online event
+  function nextBackgroundEvent() {  // Promise for the next online event
     return new Promise(resolve => {
-      if (_workerEvents.length > 0) {
-        let event = _workerEvents.shift();
+      if (_backgroundEvents.length > 0) {
+        let event = _backgroundEvents.shift();
         resolve(event);
         return;
       }
-      _workerEventResolvers.push(resolve)
+      _backgroundEventResolvers.push(resolve)
     });
   }
 
-  function postWorkerEvent(event) {
-    if (_workerEventResolvers.length > 0) {
-      let resolver = _workerEventResolvers.shift();
+  function postBackgroundEvent(event) {
+    if (_backgroundEventResolvers.length > 0) {
+      let resolver = _backgroundEventResolvers.shift();
       resolver(event);
       return;
     }
-    _workerEvents.push(event);
+    _backgroundEvents.push(event);
   }
 
-  // let _backgroundWork = null; // The promise for the completion of the worker
-
-  self.onactivate = event => {
+  onactivate = event => {
     let deferredRequests = [];
   
     /*_backgroundWork = */ (async () => {
@@ -173,8 +171,8 @@ const postWorkerEvent = (() => {
   
         // Wait for a posted event or timeout
         let event = await Promise.any([
-          nextWorkerEvent(),
-          delay(5 * seconds).then(() => postWorkerEvent(new Event("timeout"))), // change to 30 minutes
+          nextBackgroundEvent(),
+          delay(5 * seconds).then(() => postBackgroundEvent(new Event("timeout"))), // XXX change to 30 minutes
         ]);
   
         if (event) {
@@ -185,22 +183,22 @@ const postWorkerEvent = (() => {
       }
     })();
   };
+
+  // MDN says workers have an "online" event:
+  //    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
+  // But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
+  // and registering this event does nothing. On the other hand it does no harm. 
+  self.addEventListener('online', event => postBackgroundEvent(event));
+  self.addEventListener('offline', event => postBackgroundEvent(event));
   
-  return postWorkerEvent;
+  return postBackgroundEvent;
 })();
 
 function deferRequest(...requests) {  // or requests
   let event = new Event('deferred-requests');
   event._requests = requests;
-  postWorkerEvent(event);
+  postBackgroundEvent(event);
 }
-
-// MDN says workers have the "online" event:
-//    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
-// But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
-// and registering this event does nothing. On the other hand it does no harm. 
-self.addEventListener('online', event => postWorkerEvent(event));
-self.addEventListener('offline', event => postWorkerEvent(event));
 
 // This is a fine place to schedule some prefetches:
 deferRequest(
