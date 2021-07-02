@@ -111,8 +111,8 @@ onfetch = event => {
 // Doodling some machinery here that I don't really need for this app...
 //
 
-const { nextWorkerEvent, postWorkerEvent } = (() => {
-  // Encapsulate this state
+const postWorkerEvent = (() => {
+  // Encapsulate the worker and its state
   let  _workerEvents = [], _workerEventResolvers = [];
 
   function nextWorkerEvent() {  // Promise for the next online event
@@ -135,7 +135,58 @@ const { nextWorkerEvent, postWorkerEvent } = (() => {
     _workerEvents.push(event);
   }
 
-  return { nextWorkerEvent,postWorkerEvent };
+  // let _backgroundWork = null; // The promise for the completion of the worker
+
+  self.onactivate = event => {
+    let deferredRequests = [];
+  
+    /*_backgroundWork = */ (async () => {
+      // Delay a bit to stay out of the app's way while it's starting up.
+      await delay(5 * seconds);
+      if (logging) console.info("background work started")
+  
+      let cache = await caches.open(cacheName);
+  
+      // The idea here is to issue deferred requests one at a time at a leisurely pace
+      // to keep from competing for network and other resources.
+      while (true) {
+        while (deferredRequests.length > 0) {
+          let request = deferredRequests.shift();
+          if (typeof request === 'string')
+            request = new Request(request);
+          let fetchResponse;
+          try {
+            if (logging) console.info("background request", request.url, request);
+            fetchResponse = await fetch(request, { cache: "no-cache" });
+          } catch (error) {
+            if (logging) console.info("background request failed", request.url, error);
+          }
+          if (fetchResponse.ok) {
+            if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
+            cache.put(request, fetchResponse.clone());
+          } else {
+            if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
+          }
+          // Pause a bit between requests
+          await delay(2 * seconds);
+        }
+  
+        // Wait for a posted event or timeout
+        let event = await Promise.any([
+          nextWorkerEvent(),
+          delay(5 * seconds).then(() => postWorkerEvent(new Event("timeout"))), // change to 30 minutes
+        ]);
+  
+        if (event) {
+          if (logging) console.info("event recieved", event.type, event);
+          if (event.type === 'deferred-requests')
+            deferredRequests.push(...event._requests);
+        }
+      }
+    })();
+  };
+  
+  return postWorkerEvent;
 })();
 
 function deferRequest(...requests) {  // or requests
@@ -144,57 +195,6 @@ function deferRequest(...requests) {  // or requests
   postWorkerEvent(event);
 }
 
-let _backgroundWork = null;
-
-self.onactivate = event => {
-  let deferredRequests = [];
-
-  _backgroundWork = (async () => {
-    // Delay a bit stay out of the app's way while it's starting up.
-    await delay(5 * seconds);
-    if (logging) console.info("background work started")
-
-    let cache = await caches.open(cacheName);
-
-    // The idea here is to issue deferred requests one at a time at a leisurely pace
-    // to keep from competing for network and other resources.
-    while (true) {
-      while (deferredRequests.length > 0) {
-        let request = deferredRequests.shift();
-        if (typeof request === 'string')
-          request = new Request(request);
-        let fetchResponse;
-        try {
-          if (logging) console.info("background request", request.url, request);
-          fetchResponse = await fetch(request, { cache: "no-cache" });
-        } catch (error) {
-          if (logging) console.info("background request failed", request.url, error);
-        }
-        if (fetchResponse.ok) {
-          if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
-          cache.put(request, fetchResponse.clone());
-        } else {
-          if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
-        }
-        // Pause a bit between requests
-        await delay(2 * seconds);
-      }
-
-      // Wait for a posted event or timeout
-      let event = await Promise.any([
-        nextWorkerEvent(),
-        delay(5 * seconds).then(() => postWorkerEvent(new Event("timeout"))), // change to 30 minutes
-      ]);
-
-      if (event) {
-        if (logging) console.info("event recieved", event.type, event);
-        if (event.type === 'deferred-requests')
-          deferredRequests.push(...event._requests);
-      }
-    }
-  })();
-};
-
 // MDN says workers have the "online" event:
 //    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
 // But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
@@ -202,7 +202,7 @@ self.onactivate = event => {
 self.addEventListener('online', event => postWorkerEvent(event));
 self.addEventListener('offline', event => postWorkerEvent(event));
 
-// This is a good place to schedule some prefetches:
+// This is a fine place to schedule some prefetches:
 deferRequest(
   "foo.html",
   "bar.png",
