@@ -26,15 +26,20 @@ onfetch = event => {
   //     async { ... }
   // Instead, I'll use
   //     (async () => { ... })()
-  // just like we once created scopes with (function() { ... })(), hmm...
+  // just like we once created scopes using (function() { ... })(), hmm...
   event.respondWith((async () => {
     // Use only our specific cache. Most service worker samples match from the domain-wide
     // cache, "caches.match(...)", which seems like a bad idea to me.
     // Surely it's better to have each app manage its own cache in peace?
+    // This is particularly useful when you serve test and production versions of
+    // the app from the same origin.
     let cache = await caches.open(cacheName);
     let cacheResponse = await cache.match(request);
 
     // If we're offline just return the cached value immediately.
+    // Due to "lie-fi" and related causes, "navigator.onLine" is unreliable,
+    // but the way it's unreliable is that it can report online even if your network is
+    // useless. If it returns false, you've (almost?) definitely got no network.
     if (cacheResponse && navigator.onLine === false) {
       if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
       return cacheResponse;
@@ -195,6 +200,7 @@ self.onactivate = event => {
 // But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
 // and registering this event does nothing. On the other hand it does no harm. 
 self.addEventListener('online', event => postWorkerEvent(event));
+self.addEventListener('offline', event => postWorkerEvent(event));
 
 // This is a good place to schedule some prefetches:
 deferRequest(
