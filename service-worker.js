@@ -40,7 +40,7 @@ onfetch = event => {
         if (logging) console.info("no response", request.url, failureReason);
 
         // Add request to the deferred queue
-        deferredRequests.push(clonedRequest);
+        deferRequests(clonedRequest);
 
         // Return the cached response if there is one; otherwise fake a 404 as the failure response
         // (A failure response won't fulfill the Promise.any below)
@@ -60,7 +60,7 @@ onfetch = event => {
       // Requeue certain failures after a delay
       let status = fetchResponse.status, delaySeconds = 30;
       if (status === 503 || status === 504 || status === 509)
-        delay(delaySeconds * 1000).then(() => { deferredRequests.push(clonedRequest) });
+        delay(delaySeconds * 1000).then(() => { deferRequests(clonedRequest) });
 
       if (cacheResponse)
         return cacheResponse;
@@ -113,13 +113,16 @@ function postWorkerEvent(event) {
 // and registering this event does nothing. On the other hand it does no harm. 
 self.addEventListener('online', event => postWorkerEvent(event));
 
-let deferredRequests = [];
+let _backgroundWork = null, _deferredRequests = [];;
 
-let _backgroundWork = null;
+function deferRequests(...requests) {
+  _deferredRequests.push(...requests);
+  postWorkerEvent(new Event("deferred-requests"));
+}
 
 onactivate = event => {
   // This is a good place to schedule some prefetches:
-  deferredRequests.push(
+  deferRequests(
     "foo.html",
     "bar.png",
   );
@@ -131,8 +134,8 @@ onactivate = event => {
     // The idea here is to issue deferred requests one at a time at a leisurely pace
     // to keep from competing for network and other resources.
     while (true) {
-      while (deferredRequests.length > 0) {
-        let request = deferredRequests.shift();
+      while (_deferredRequests.length > 0) {
+        let request = _deferredRequests.shift();
         if (typeof request === 'string')
           request = new Request(request);
         let fetchResponse;
@@ -152,10 +155,13 @@ onactivate = event => {
         await delay(2000);
       }
 
-      // Wait for a posted event and post a timeout while we're at it
+      // Wait for a posted event or timeout
       let delayMinutes = 5/60;  // XXX change back to 30
-      delay(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timer")));
-      let event = await nextWorkerEvent();
+      let event = await Promise.any([
+        nextWorkerEvent(),
+        defer(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timeout"))),
+      ]);
+      
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
       }
