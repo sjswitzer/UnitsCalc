@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.3">
+    <meta name="appVersion" content="1.6.4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -771,7 +771,7 @@
     <script type="text/javascript">
       "use strict";
 
-      var appVersion = "0.0.0"; // updated later from meta tag
+      let appVersion = "0.0.0"; // updated later from meta tag
       const exprElement = document.getElementById('expr');
       const errorElement = document.getElementById('error');
       const resultsElement = document.getElementById('results');
@@ -939,7 +939,7 @@
               if (num === Math.trunc(num))
                 num = BigInt(num);
             }
-            if (typeof num === 'bigint' && num !== 1n && denom != 1) {
+            if (typeof num === 'bigint' && num !== 1n && denom !== 1n) {
               let gcd = BigGCD(num, denom);
               num = num/gcd;
               denom = denom/gcd;
@@ -985,24 +985,27 @@
 
         static div(a, b) {
           if (typeof b.num === 'number')
-            return new Rational(Number(a.num) * Number(b.denom) / b.num, a.denom); // Normalize might make num a BigInt
+            return new Rational(Number(a.num) * Number(b.denom) / b.num, a.denom);
           if (typeof a.num === 'number')
-            return new Rational(a.num * Number(b.denom), a.denom * b.num); // Normalize might make num a BigInt
+            return new Rational(a.num * Number(b.denom), a.denom * b.num);
           return new Rational(a.num * b.denom, a.denom * b.num);
         }
 
         static pow(a, b) {  // b can be a number, a BigInt or a Rational
-          if (b.num !== undefined)       // If it's a Rational, smash it to a Number
+          if (b.denom === 1n)
+            b = b.num;
+          else if (b.denom !== undefined)
             b = Rational.toNumber(b);
           if (b < 0)
             return this.pow(Rational.reciprocal(a), -b);
-          if (typeof b === 'number' && b === Math.trunc(b)) {
-            let bigB = BigInt(b);
+          if (typeof b === 'number' && b === Math.trunc(b))
+            b = BigInt(b);
+          if (typeof b === 'bigint') {
             if (typeof a.num === 'bigint')
-              return new Rational(a.num**bigB, a.denom**bigB, true );
-            return new Rational(Number(a.num)**b, a.denom**bigB, true);
+              return new Rational(a.num**b, a.denom**b, true);
+            return new Rational(a.num**Number(b), a.denom**b);
           }
-          return new Rational((Number(a.num)/Number(a.denom))**b, 1n, true);
+          return new Rational(Rational.toNumber(a)**b);
         }
 
         static add(a, b, factor = 1) {
@@ -1847,14 +1850,14 @@
           if ((smell.startsWith('bonus') || smell.startsWith('Bonus')) && bonusSet[smell]) {
             let bonusUnit = getSymbol(bonusSet[smell]);
             if (!bonusUnit) throw InternalError(`Unknown unit ${bonusSet[smell]})`);
-            if (smell.startsWith('Bonus'))  // Favor capital Bonus
+            if (smell.startsWith('Bonus'))  // Favor capital "Bonus"
               bonusUnit = { ...bonusUnit, favored: 1 };
             candidateUnits = [ bonusUnit, ...candidateUnits ];
           }
         }
         // If both L and M are present or any of the scientific or technical
         // units, we don't want to use unscientific units like hr and min...
-        let excludeUnscientific = smells.system === 'mks' || smells.system === 'cgs'
+        let excludeUnscientific = smells.mks || smells.cgs
           || dim.L && dim.M || dim.I || dim.J || dim.THETA || dim.BIT || dim.N;
         // UNLESS those units were in the original value
         if (valSmells.unscientific)
@@ -2655,7 +2658,7 @@
             if (val.type === 'parse')
               return { type: 'parse', op: 'neg', expr: val };
             if (val.type !== 'num') throw new ChattyError("Must be numeric");
-            let resVal = Rational.neg(val.val);
+            let resVal = Rational.negate(val.val);
             if (val.origin)   // special negation of affine values: don't negate the origin value
               resVal = Rational.add(resVal, val.origin);
             return { type: val.type, dim: val.dim, val: resVal, smells: val.smells };
