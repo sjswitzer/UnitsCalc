@@ -1909,8 +1909,20 @@
             const reducedNormSquared = Dim.normSquared(reducedDim);
             if (normSquared <= reducedNormSquared && !opts?.forceUnit)
               return null;
-            let origin = unit.origin ?? Rational.ZERO;
-            let newVal = Rational.div(Rational.sub(val, origin), Rational.pow(unit.val, exp));
+            let newVal = val;
+            if (unit.origin) {
+              // We're hoist on our own petard for taking the absolute value earlier.
+              // There's nothing to do now but deal with it. Sigh...
+              if (minus)
+                newVal = Rational.negate(newVal);
+              newVal = Rational.sub(newVal, unit.origin);
+              minus = '';
+              if (newVal.num < 0) {
+                newVal = Rational.negate(newVal);
+                minus = '-';
+              }
+            }
+            newVal = Rational.div(newVal, Rational.pow(unit.val, exp));
             let expSum = 0, nDims = 0;
             for (const measure in reducedDim) {
               expSum += Math.abs(reducedDim[measure]);
