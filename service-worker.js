@@ -10,7 +10,8 @@ let cacheName = location.pathname;  // Segregate caching by worker location
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
 onfetch = event => {
-  if (logging) console.info("onfetch", event.request);
+  let request = event.request;
+  if (logging) console.info("onfetch", request.url, request);
   // There SHOULD be async blocks like this:
   //     async { ... }
   // Instead, I'll use
@@ -19,36 +20,35 @@ onfetch = event => {
   event.respondWith((async () => {
     // Use only our cache
     let cache = await caches.open(cacheName);
-    if (logging) console.info("cache", cache);
-    let cacheResponse = await cache.match(event.request);
-    if (logging) console.info("cacheResponse", cacheResponse);
+    if (logging) console.info("cache", request.url, cache);
+    let cacheResponse = await cache.match(request);
+    if (logging) console.info("cacheResponse", request.url, cacheResponse);
     // Issue a fetch request regardless, disregarding "freshness"
     let fetchResult = (async () => {
       let fetchResponse;
       try {
-        fetchResponse = await fetch(event.request, { cache: "no-cache" });;
+        fetchResponse = await fetch(request, { cache: "no-cache" });
         if (fetchResponse.ok) {
-          if (logging) console.info("successful response", fetchResponse);
+          if (logging) console.info("successful response", request.url, fetchResponse.status, fetchResponse);
           let clonedResponse = fetchResponse.clone();
-          cache.put(event.request, clonedResponse);
-          if (logging) console.info("cached", event, clonedResponse);
+          cache.put(request, clonedResponse);
+          if (logging) console.info("cached", request.url, clonedResponse);
           return fetchResponse;  // succeed with the response
         }
-        if (logging) console.info("failed response", fetchResponse);
+        if (logging) console.info("failed response", request.url, fetchResponse.status, fetchResponse);
         // Failed; return the cached response if there is one
         if (cacheResponse)
           return cacheResponse;
       } catch (fetchError) {
-        if (logging) console.info("fetch error", fetchError);
+        if (logging) console.info("fetch error", request.url, fetchError);
         throw new Response(null, { status: 404 , statusText: "Not Found" });
       }
       // A failure won't fulfill the Promise.any() below unless every promise has failed,
       // but at that point the timer will always succeed since there's a cache result already.       s
-      if (logging) console.info("fetch failed", fetchResponse);
       throw fetchResponse;
     })();
     if (!cacheResponse) {
-      if (logging) console.info("uncached", fetchResult);
+      if (logging) console.info("uncached", request.url);
       // Return the fetch result, even if it failed.
       // We don't generally expect failures, but some platforms request favico.ico, which doesn't exist.
       return fetchResult.catch(errorResponse => errorResponse);
@@ -56,17 +56,17 @@ onfetch = event => {
     // We won't be using a fetch failure result now, so eat it so the Promise machinery
     // doesn't complain.
     fetchResult.catch(fetchFailure => {
-      if (logging) console.info("eat fetch failure", fetchFailure);
+      if (logging) console.info("eat fetch failure", request.url, fetchFailure.status, fetchFailure);
     });
     if (navigator.onLine === false) {
-      if (logging) console.log("offline cache response", cacheResponse);
+      if (logging) console.log("offline cache response", request.url, cacheResponse.status, cacheResponse);
       return cacheResponse;
     }
     // Resolve with the fetch result or the cache response delayed moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
     // is not likely to happen often.
     let resp = await Promise.any([fetchResult, delay(2000 /* ms */, cacheResponse)]);
-    if (logging) console.info("resolved with", resp);
+    if (logging) console.info("resolved with", request.url, resp.status, resp);
     return resp;
   })());
 };
