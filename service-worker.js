@@ -95,10 +95,11 @@ onfetch = event => {
 //
 // Just doodling some machinery here that I don't really need for this app.
 //
+
 let  _workerEventResolvers = [];
 
 function nextWorkerEvent() {  // Promise for the next online event
-  return new Promise(resolve => { _workerEventResolvers = resolve  });
+  return new Promise(resolve => { _workerEventResolvers.push(resolve)  });
 }
 
 function postWorkerEvent(event) {
