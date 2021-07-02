@@ -145,8 +145,8 @@ onactivate = event => {
       }
 
       // Wait for a posted event or until a timer expires
-      let delayMinutes = 30;
-      let event = await(Promise.any(nextWorkerEvent(), delay(delayMinutes * 60000)));
+      let delayMinutes = 5/60;   // XXX: change back to 30
+      let event = await(Promise.any(nextWorkerEvent(), delay(delayMinutes * 60000, "timer")));
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
       }
