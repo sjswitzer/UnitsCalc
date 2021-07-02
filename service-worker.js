@@ -53,6 +53,11 @@ onfetch = event => {
       // We don't generally expect failures, but some platforms request favico.ico, which doesn't exist.
       return fetchResult.catch(errorResponse => errorResponse);
     }
+    // We won't be using a fetch failure result now, so eat it so the Promise machinery
+    // doesn't complain.
+    fetchResult.catch(fetchFailure => {
+      if (logging) console.info("eat fetch failure", fetchFailure);
+    });
     if (navigator.onLine === false) {
       if (logging) console.log("offline cache response", cacheResponse);
       return cacheResponse;
