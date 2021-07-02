@@ -1,8 +1,17 @@
+//
 // I have no particular need for a service worker, but it's necessary for a PWA to work at all.
 // There's nothing to pre-fetch because the page references all of its resources when
 // loaded. But we can still have some fun optimizing the upgrade process.
+//
+// It's also an experiment to see whether async functions simplify writing service workers.
+// Guess what? They do!
+//
+// Copyright 2021 Stan Switzer
+//   This work is licensed under a Creative Commons Attribution-ShareAlike
+//   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
+//
 
-let logging = true; // Can change in the debugger
+let logging = true; // You can change this in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds, hours = 60 * minutes;
 
@@ -19,9 +28,9 @@ onfetch = event => {
   //     (async () => { ... })()
   // just like we once created scopes with (function() { ... })(), hmm...
   event.respondWith((async () => {
-    // Use only our specific cache. Most code samples match from the domain-wide
-    // cache "caches.match(...)", which seems like a bad idea to me.
-    // It's generally better to have each app manage its own cache in peace.
+    // Use only our specific cache. Most service worker samples match from the domain-wide
+    // cache, "caches.match(...)", which seems like a bad idea to me.
+    // Surely it's better to have each app manage its own cache in peace?
     let cache = await caches.open(cacheName);
     let cacheResponse = await cache.match(request);
 
@@ -58,7 +67,7 @@ onfetch = event => {
 
       if (logging) console.info("request rejected", request.url, fetchResponse.status, fetchResponse);
 
-      // Requeue certain failures after a delay
+      // Requeue certain rejections after a delay
       let status = fetchResponse.status;
       if (status === 503 || status === 504 || status === 509)
         delay(30 * seconds).then(() => { deferRequest(clonedRequest) });
@@ -79,7 +88,7 @@ onfetch = event => {
     }
 
     // We won't be using any fetch failure result now since we have a cached value,
-    // so eat it. Otherwise the Promise machinery will complain that it wasn't handled.
+    // so eat it. Otherwise the Promise machinery complains that it wasn't handled.
     fetchResult.catch(fetchFailure => {
       if (logging) console.info("eat fetch failure", request.url, fetchFailure.status, fetchFailure);
     });
@@ -94,34 +103,39 @@ onfetch = event => {
 };
 
 //
-// Just doodling some machinery here that I don't really need for this app.
+// Doodling some machinery here that I don't really need for this app...
 //
 
-let  _workerEvents = [], _workerEventResolvers = [];
+const { nextWorkerEvent, postWorkerEvent } = (() => {
+  // Encapsulate this state
+  let  _workerEvents = [], _workerEventResolvers = [];
 
-function nextWorkerEvent() {  // Promise for the next online event
-  return new Promise(resolve => {
-    if (_workerEvents.length > 0) {
-      let event = _workerEvents.shift();
-      resolve(event);
+  function nextWorkerEvent() {  // Promise for the next online event
+    return new Promise(resolve => {
+      if (_workerEvents.length > 0) {
+        let event = _workerEvents.shift();
+        resolve(event);
+        return;
+      }
+      _workerEventResolvers.push(resolve)
+    });
+  }
+
+  function postWorkerEvent(event) {
+    if (_workerEventResolvers.length > 0) {
+      let resolver = _workerEventResolvers.shift();
+      resolver(event);
       return;
     }
-    _workerEventResolvers.push(resolve)
-  });
-}
-
-function postWorkerEvent(event) {
-  if (_workerEventResolvers.length > 0) {
-    let resolver = _workerEventResolvers.shift();
-    resolver(event);
-    return;
+    _workerEvents.push(event);
   }
-  _workerEvents.push(event);
-}
 
-function deferRequest(...requests) {
+  return { nextWorkerEvent,postWorkerEvent };
+})();
+
+function deferRequest(...requests) {  // or requests
   let event = new Event('deferred-requests');
-  event.requests = requests;
+  event._requests = requests;
   postWorkerEvent(event);
 }
 
@@ -170,7 +184,7 @@ self.onactivate = event => {
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
         if (event.type === 'deferred-requests')
-          deferredRequests.push(...event.requests);
+          deferredRequests.push(...event._requests);
       }
     }
   })();
