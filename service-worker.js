@@ -102,7 +102,7 @@ function nextWorkerEvent() {  // Promise for the next online event
 }
 
 function postWorkerEvent(event) {
-  while (_workerEventResolvers.size > 0)
+  while (_workerEventResolvers.length > 0)
     _workerEventResolvers.pop()(event);
 }
 
@@ -123,7 +123,7 @@ onactivate = event => {
   _backgroundWork.then((async () => {
     let cache = await caches.open(cacheName);
     while (true) {
-      while (deferredRequests.size > 0) {
+      while (deferredRequests.length > 0) {
         let request = deferredRequests.shift();
         if (typeof request === 'string')
           request = new Request(request);
