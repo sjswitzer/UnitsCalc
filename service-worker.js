@@ -34,6 +34,7 @@ onfetch = event => {
     let fetchResult = (async () => {
       let fetchResponse, clonedRequest = request.clone();
       try {
+        if (logging) console.info("request", request.url, request);
         fetchResponse = await fetch(request, { cache: "no-cache" });
       } catch (failureReason) {
         if (logging) console.info("no response", request.url, failureReason);
@@ -128,6 +129,7 @@ onactivate = event => {
           request = new Request(request);
         let fetchResponse;
         try {
+          if (logging) console.info("background request", request.url, request);
           fetchResponse = await fetch(request, { cache: "no-cache" });
         } catch (error) {
           if (logging) console.info("background request failed", request.url, error);
