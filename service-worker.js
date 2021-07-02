@@ -159,9 +159,9 @@ onactivate = event => {
       let delayMinutes = 5/60;  // XXX change back to 30
       let event = await Promise.any([
         nextWorkerEvent(),
-        defer(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timeout"))),
+        delay(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timeout"))),
       ]);
-      
+
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
       }
