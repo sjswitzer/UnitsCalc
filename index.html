@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.4">
+    <meta name="appVersion" content="1.6.5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1439,14 +1439,14 @@
           if (params.length !== 1) throw new MessageError(`${this.sym}(): Requires one parameter`);
           let val = params[0];
           if (val.type !== 'num') throw new MessageError(`${this.sym}(): Requires numeric parameter`);
-          return { ...val, val: Rational.abs(val.val) };
+          return { type: 'num' , val: Rational.abs(val.val), dim: val.dim };
         },
 
         sign: function(...params) {
           if (params.length !== 1) throw new MessageError(`${this.sym}(): Requires one parameter`);
           let val = params[0];
           if (val.type !== 'num') throw new MessageError(`${this.sym}(): Requires numeric parameter`);
-          return { ...val, val: Rational.sign(val.val), dim:{} };
+          return { type: 'num', val: Rational.sign(val.val), dim: {} };
         },
 
         sqrt: function SquareRoot(...params) {
@@ -2176,7 +2176,7 @@
           val = val.substr(0, val.length-1);
         if (val.endsWith("."))
           val = val.substr(0, val.length-1);
-        return val + unitsStr + invUnitsStr + descStr;
+        return minus + val + unitsStr + invUnitsStr + descStr;
       }
 
       //
