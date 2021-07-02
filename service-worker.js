@@ -23,24 +23,30 @@ onfetch = event => {
     let cacheResponse = await cache.match(event.request);
     if (logging) console.info("cacheResponse", cacheResponse);
     // Issue a fetch request regardless, disregarding "freshness"
-    let fetchResult = fetch(event.request, { cache: "no-cache" }).then(fetchResponse => {
-      if (fetchResponse.ok) {
-        if (logging) console.info("successful response", fetchResponse);
-        let clonedResponse = fetchResponse.clone();
-        cache.put(event.request, clonedResponse);
-        if (logging) console.info("cached", event, clonedResponse);
-        return fetchResponse;  // succeed with the response
+    let fetchResult = (async () => {
+      let fetchResponse;
+      try {
+        fetchResponse = await fetch(event.request, { cache: "no-cache" });;
+        if (fetchResponse.ok) {
+          if (logging) console.info("successful response", fetchResponse);
+          let clonedResponse = fetchResponse.clone();
+          cache.put(event.request, clonedResponse);
+          if (logging) console.info("cached", event, clonedResponse);
+          return fetchResponse;  // succeed with the response
+        }
+        if (logging) console.info("failed response", fetchResponse);
+        // Failed; return the cached response if there is one
+        if (cacheResponse)
+          return cacheResponse;
+      } catch (fetchError) {
+        if (logging) console.info("fetch error", fetchError);
+        throw new Response(null, { status: 404 , statusText: "Not Found" });
       }
-      if (logging) console.info("failed response", fetchResponse);
-      // Failed; return the cached response if there is one and otherwise throw the failure
-      if (cacheResponse)
-        return cacheResponse;
       // A failure won't fulfill the Promise.any() below unless every promise has failed,
-      // but at that point the timer will always succeed since there is a cache result already.       s
+      // but at that point the timer will always succeed since there's a cache result already.       s
+      if (logging) console.info("fetch failed", fetchResponse);
       throw fetchResponse;
-    }).catch(fetchFailed => {
-      if (logging) console.info("fetch failed", fetchFailed);
-    });
+    })();
     if (!cacheResponse) {
       if (logging) console.info("uncached", fetchResult);
       // Return the fetch result, even if it failed.
