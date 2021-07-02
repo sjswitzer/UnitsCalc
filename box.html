@@ -254,7 +254,7 @@
         }
 
         _startAnimation(event) {
-          if (this.animating)
+          if (this._animating)
             return;
           if (CloseButtonElement.logging)
             console.info(`CloseButtonElement ${event.type}`);
