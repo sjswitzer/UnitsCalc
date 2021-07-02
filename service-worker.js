@@ -40,7 +40,7 @@ onfetch = event => {
         if (logging) console.info("no response", request.url, failureReason);
 
         // Add request to the deferred queue
-        deferRequests(clonedRequest);
+        deferRequest(clonedRequest);
 
         // Return the cached response if there is one; otherwise fake a 404 as the failure response
         // (A failure response won't fulfill the Promise.any below)
@@ -60,7 +60,7 @@ onfetch = event => {
       // Requeue certain failures after a delay
       let status = fetchResponse.status, delaySeconds = 30;
       if (status === 503 || status === 504 || status === 509)
-        delay(delaySeconds * 1000).then(() => { deferRequests(clonedRequest) });
+        delay(delaySeconds * 1000).then(() => { deferRequest(clonedRequest) });
 
       if (cacheResponse)
         return cacheResponse;
@@ -96,39 +96,41 @@ onfetch = event => {
 // Just doodling some machinery here that I don't really need for this app.
 //
 
-let  _workerEventResolvers = [];
+let  _workerEvents = [], _workerEventResolvers = [], _deferredRequests = [];
 
 function nextWorkerEvent() {  // Promise for the next online event
-  return new Promise(resolve => { _workerEventResolvers.push(resolve)  });
+  return new Promise(resolve => {
+    if (_workerEvents.length > 0) {
+      let event = _workerEvents.shift();
+      resolve(event);
+      return;
+    }
+    _workerEventResolvers.push(resolve)
+  });
 }
 
 function postWorkerEvent(event) {
-  while (_workerEventResolvers.length > 0)
-    _workerEventResolvers.pop()(event);
+  if (_workerEventResolvers.length > 0) {
+    let resolver = _workerEventResolvers.shift();
+    resolver(event);
+    return;
+  }
+  _workerEvents.push(event);
 }
 
-// MDN says workers have the "online" event:
-//    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
-// But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
-// and registering this event does nothing. On the other hand it does no harm. 
-self.addEventListener('online', event => postWorkerEvent(event));
-
-let _backgroundWork = null, _deferredRequests = [];;
-
-function deferRequests(...requests) {
+function deferRequest(...requests) {
   _deferredRequests.push(...requests);
   postWorkerEvent(new Event("deferred-requests"));
 }
 
-onactivate = event => {
-  // This is a good place to schedule some prefetches:
-  deferRequests(
-    "foo.html",
-    "bar.png",
-  );
+let _backgroundWork = null;
+
+self.onactivate = event => {
   _backgroundWork = (async () => {
     // Delay a bit stay out of the app's way while it's starting up.
     await delay(5000);
+    if (logging) console.info("background work started")
+
     let cache = await caches.open(cacheName);
 
     // The idea here is to issue deferred requests one at a time at a leisurely pace
@@ -167,5 +169,18 @@ onactivate = event => {
       }
     }
   })();
-}
+};
+
+// MDN says workers have the "online" event:
+//    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
+// But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
+// and registering this event does nothing. On the other hand it does no harm. 
+self.addEventListener('online', event => postWorkerEvent(event));
+
+// This is a good place to schedule some prefetches:
+deferRequest(
+  "foo.html",
+  "bar.png",
+);
+
 
