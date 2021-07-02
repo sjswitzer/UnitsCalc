@@ -62,10 +62,10 @@ onfetch = event => {
       if (logging) console.log("offline cache response", request.url, cacheResponse.status, cacheResponse);
       return cacheResponse;
     }
-    // Resolve with the fetch result or the cache response delayed moment, whichever is first.
+    // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
     // is not likely to happen often.
-    let resp = await Promise.any([fetchResult, delay(2000 /* ms */, cacheResponse)]);
+    let resp = await Promise.any([fetchResult, delay(1000 /* ms */, cacheResponse)]);
     if (logging) console.info("resolved with", request.url, resp.status, resp);
     return resp;
   })());
