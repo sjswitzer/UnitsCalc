@@ -93,7 +93,7 @@ onfetch = event => {
 };
 
 //
-// Just doodling some machinery here that I don't really need.
+// Just doodling some machinery here that I don't really need for this app.
 //
 let  _workerEventResolvers = [];
 
@@ -110,9 +110,7 @@ addEventListener('online', event => postWorkerEvent(event));
 
 let deferredRequests = [];
 
-// Start up the background task after a delay to keep
-// from compating with app iniytiation
-let _backgroundWork = delay(10000);  // XXX
+let _backgroundWork = Promise.resolve();
 
 onactivate = event => {
   // This is a good place to schedule some prefetches:
@@ -121,6 +119,8 @@ onactivate = event => {
     "bar.png",
   );
   _backgroundWork.then((async () => {
+    // Delay a bit stay out of the app's way while it's startig up
+    delay(10000);  // XXX
     let cache = await caches.open(cacheName);
     while (true) {
       while (deferredRequests.length > 0) {
