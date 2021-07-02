@@ -110,7 +110,7 @@ addEventListener('online', event => postWorkerEvent(event));
 
 let deferredRequests = [];
 
-let _backgroundWork = Promise.resolve();
+let _backgroundWork = null;
 
 onactivate = event => {
   // This is a good place to schedule some prefetches:
@@ -118,9 +118,9 @@ onactivate = event => {
     "foo.html",
     "bar.png",
   );
-  _backgroundWork.then((async () => {
+  _backgroundWork = (async () => {
     // Delay a bit stay out of the app's way while it's startig up
-    delay(10000);  // XXX
+    await delay(10000);  // XXX
     let cache = await caches.open(cacheName);
     while (true) {
       while (deferredRequests.length > 0) {
@@ -151,6 +151,6 @@ onactivate = event => {
         if (logging) console.info("event recieved", event.type, event);
       }
     }
-  })());
+  })();
 }
 
