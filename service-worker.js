@@ -1,12 +1,11 @@
-// I have no particular need for a service worker, but it's necessary for a PWA.
+// I have no particular need for a service worker, but it's necessary for a PWA to work at all.
 // There's nothing to pre-fetch because the page references all of its resources when
 // loaded. But we can still have some fun optimizing the upgrade process.
 
-let logging = false; // Can change in the debugger
+let logging = true; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
 
 // There SHOULD be a Promise.delay like this.
-// Note that this can be used with .then() and val is optional
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
 onfetch = event => {
@@ -27,17 +26,21 @@ onfetch = event => {
 
     // If we're offline just return the cached value immediately.
     if (cacheResponse && navigator.onLine === false) {
-      if (logging) console.log("offline cache response", request.url, cacheResponse.status, cacheResponse);
+      if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
       return cacheResponse;
     }
 
     // Issue a fetch request even if we have a cached response
     let fetchResult = (async () => {
-      let fetchResponse;
+      let fetchResponse, clonedRequest = request.clone();
       try {
         fetchResponse = await fetch(request, { cache: "no-cache" });
       } catch (failureReason) {
         if (logging) console.info("no response", request.url, failureReason);
+
+        // Add request to the deferred queue
+        deferredRequests.push(clonedRequest);
+
         // Return the cached response if there is one; otherwise fake a 404 as the failure response
         // (A failure response won't fulfill the Promise.any below)
         if (cacheResponse)
@@ -46,13 +49,18 @@ onfetch = event => {
       }
 
       if (fetchResponse.ok) {
-        if (logging) console.info("successful response cached", request.url, fetchResponse.status, fetchResponse);
-        let clonedResponse = fetchResponse.clone();
-        cache.put(request, clonedResponse);
+        if (logging) console.info("response cached", request.url, fetchResponse.status, fetchResponse);
+        cache.put(request, fetchResponse.clone());
         return fetchResponse;  // succeed with the response
       }
 
-      if (logging) console.info("failure response", request.url, fetchResponse.status, fetchResponse);
+      if (logging) console.info("request rejected", request.url, fetchResponse.status, fetchResponse);
+
+      // Requeue certain failures after a delay
+      let status = fetchResponse.status, delaySeconds = 30;
+      if (status === 503 || status === 504 || status === 509)
+        delay(delaySeconds * 1000).then(() => { deferredRequests.push(clonedRequest) });
+
       if (cacheResponse)
         return cacheResponse;
 
@@ -82,3 +90,65 @@ onfetch = event => {
     return resp;
   })());
 };
+
+//
+// Just doodling some machinery here that I don't really need.
+//
+let  _workerEventResolvers = [];
+
+function nextWorkerEvent() {  // Promise for the next online event
+  return new Promise(resolve => { _workerEventResolvers = resolve  });
+}
+
+function postWorkerEvent(event) {
+  while (_workerEventResolvers.size > 0)
+    _workerEventResolvers.pop()(event);
+}
+
+addEventListener('online', event => postWorkerEvent(event));
+
+let deferredRequests = [];
+
+// Start up the background task after a delay to keep
+// from compating with app iniytiation
+let _backgroundWork = delay(5000); 
+
+onactivate = event => {
+  // This is a good place to schedule some prefetches:
+  deferredRequests.push(
+    "foo.html",
+    "bar.png",
+  );
+  _backgroundWork.then((async () => {
+    let cache = await caches.open(cacheName);
+    while (true) {
+      while (deferredRequests.size > 0) {
+        let request = deferredRequests.shift();
+        if (typeof request === 'string')
+          request = new Request(request);
+        let fetchResponse;
+        try {
+          fetchResponse = await fetch(request, { cache: "no-cache" });
+        } catch (error) {
+          if (logging) console.info("background request failed", request.url, error);
+        }
+        if (fetchResponse.ok) {
+          if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
+          cache.put(request, fetchResponse.clone());
+        } else {
+          if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
+        }
+        // Pause a bit between requests
+        await delay(2000);
+      }
+
+      // Wait for a posted event or until a timer expires
+      let delayMinutes = 30;
+      let event = await(Promise.any(nextWorkerEvent(), delay(delayMinutes * 60000)));
+      if (event) {
+        if (logging) console.info("event recieved", event.type, event);
+      }
+    }
+  })());
+}
+
