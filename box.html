@@ -203,9 +203,10 @@
         constructor() {
           super();
           let root = this.attachShadow({ mode: 'open' });
-          this._canvas = document.createElement('canvas');
-          this._canvas.width = this._canvas.height = 1;
-          root.appendChild(this._canvas);
+          let canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          root.appendChild(canvas);
+          this._canvas = canvas;
           this._signature = undefined;
           this._renderCount = 0;
           this._animating = false;

@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.12">
+    <meta name="appVersion" content="1.6.14">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -3620,9 +3620,10 @@
         constructor() {
           super();
           let root = this.attachShadow({ mode: 'open' });
-          this._canvas = document.createElement('canvas');
-          this._canvas.width = this._canvas.height = 1;
-          root.appendChild(this._canvas);
+          let canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          root.appendChild(canvas);
+          this._canvas = canvas;
           this._signature = undefined;
           this._renderCount = 0;
           this._animating = false;
