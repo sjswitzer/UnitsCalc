@@ -38,6 +38,8 @@ onfetch = event => {
       // A failure won't fulfill the Promise.any() below unless every promise has failed,
       // but at that point the timer will always succeed since there is a cache result already.       s
       throw fetchResponse;
+    }).catch(fetchFailed => {
+      if (logging) console.info("fetch failed", fetchFailed);
     });
     if (!cacheResponse) {
       if (logging) console.info("uncached", fetchResult);
