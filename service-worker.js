@@ -4,6 +4,7 @@
 
 let logging = true; // Can change in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
+const seconds = 1000 /*ms*/, minutes = 60 * seconds, hours = 60 * minutes;
 
 // There SHOULD be a Promise.delay like this.
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
@@ -58,9 +59,9 @@ onfetch = event => {
       if (logging) console.info("request rejected", request.url, fetchResponse.status, fetchResponse);
 
       // Requeue certain failures after a delay
-      let status = fetchResponse.status, delaySeconds = 30;
+      let status = fetchResponse.status;
       if (status === 503 || status === 504 || status === 509)
-        delay(delaySeconds * 1000).then(() => { deferRequest(clonedRequest) });
+        delay(30 * seconds).then(() => { deferRequest(clonedRequest) });
 
       if (cacheResponse)
         return cacheResponse;
@@ -86,7 +87,7 @@ onfetch = event => {
     // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
     // is not likely to happen often.
-    let resp = await Promise.any([fetchResult, delay(2000 /* ms */, cacheResponse)]);
+    let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
     if (logging) console.info("resolved with", request.url, resp.status, resp);
     return resp;
   })());
@@ -96,7 +97,7 @@ onfetch = event => {
 // Just doodling some machinery here that I don't really need for this app.
 //
 
-let  _workerEvents = [], _workerEventResolvers = [], _deferredRequests = [];
+let  _workerEvents = [], _workerEventResolvers = [];
 
 function nextWorkerEvent() {  // Promise for the next online event
   return new Promise(resolve => {
@@ -119,16 +120,19 @@ function postWorkerEvent(event) {
 }
 
 function deferRequest(...requests) {
-  _deferredRequests.push(...requests);
-  postWorkerEvent(new Event("deferred-requests"));
+  let event = new Event('deferred-requests');
+  event.requests = requests;
+  postWorkerEvent(event);
 }
 
 let _backgroundWork = null;
 
 self.onactivate = event => {
+  let deferredRequests = [];
+
   _backgroundWork = (async () => {
     // Delay a bit stay out of the app's way while it's starting up.
-    await delay(5000);
+    await delay(5 * seconds);
     if (logging) console.info("background work started")
 
     let cache = await caches.open(cacheName);
@@ -136,8 +140,8 @@ self.onactivate = event => {
     // The idea here is to issue deferred requests one at a time at a leisurely pace
     // to keep from competing for network and other resources.
     while (true) {
-      while (_deferredRequests.length > 0) {
-        let request = _deferredRequests.shift();
+      while (deferredRequests.length > 0) {
+        let request = deferredRequests.shift();
         if (typeof request === 'string')
           request = new Request(request);
         let fetchResponse;
@@ -154,18 +158,19 @@ self.onactivate = event => {
           if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
         }
         // Pause a bit between requests
-        await delay(2000);
+        await delay(2 * seconds);
       }
 
       // Wait for a posted event or timeout
-      let delayMinutes = 5/60;  // XXX change back to 30
       let event = await Promise.any([
         nextWorkerEvent(),
-        delay(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timeout"))),
+        delay(5 * seconds).then(() => postWorkerEvent(new Event("timeout"))), // change to 30 minutes
       ]);
 
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
+        if (event.type === 'deferred-requests')
+          deferredRequests.push(...event.requests);
       }
     }
   })();
@@ -182,5 +187,3 @@ deferRequest(
   "foo.html",
   "bar.png",
 );
-
-
