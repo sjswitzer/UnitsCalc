@@ -106,7 +106,11 @@ function postWorkerEvent(event) {
     _workerEventResolvers.pop()(event);
 }
 
-addEventListener('online', event => postWorkerEvent(event));
+// MDN says workers have the "online" event:
+//    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
+// But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
+// and registering this event does nothing. On the other hand it does no harm. 
+self.addEventListener('online', event => postWorkerEvent(event));
 
 let deferredRequests = [];
 
@@ -119,9 +123,12 @@ onactivate = event => {
     "bar.png",
   );
   _backgroundWork = (async () => {
-    // Delay a bit stay out of the app's way while it's startig up
-    await delay(10000);  // XXX
+    // Delay a bit stay out of the app's way while it's starting up.
+    await delay(5000);
     let cache = await caches.open(cacheName);
+
+    // The idea here is to issue deferred requests one at a time at a leisurely pace
+    // to keep from competing for network and other resources.
     while (true) {
       while (deferredRequests.length > 0) {
         let request = deferredRequests.shift();
@@ -141,12 +148,13 @@ onactivate = event => {
           if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
         }
         // Pause a bit between requests
-        await delay(5000);  // XXX
+        await delay(2000);
       }
 
-      // Wait for a posted event or until a timer expires
-      let delayMinutes = 5/60;   // XXX: change back to 30
-      let event = await Promise.any([nextWorkerEvent(), delay(delayMinutes * 60000, new Event("timer"))]);
+      // Wait for a posted event and post a timeout while we're at it
+      let delayMinutes = 5/60;  // XXX change back to 30
+      delay(delayMinutes * 60000).then(() => postWorkerEvent(new Event("timer")));
+      let event = await nextWorkerEvent();
       if (event) {
         if (logging) console.info("event recieved", event.type, event);
       }
