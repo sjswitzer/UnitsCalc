@@ -11,7 +11,7 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = true; // You can change this in the debugger
+let logging = false; // You can change this in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds, hours = 60 * minutes;
 
@@ -172,7 +172,7 @@ const postBackgroundEvent = (() => {
         // Wait for a posted event or timeout
         let event = await Promise.any([
           nextBackgroundEvent(),
-          delay(5 * seconds).then(() => postBackgroundEvent(new Event("timeout"))), // XXX change to 30 minutes
+          delay(30 * minutes).then(() => postBackgroundEvent(new Event("timeout"))),
         ]);
   
         if (event) {
