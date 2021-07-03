@@ -13,12 +13,12 @@
 
 let logging = false; // You can change this in the debugger
 let cacheName = location.pathname;  // Segregate caching by worker location
-const seconds = 1000 /*ms*/, minutes = 60 * seconds, hours = 60 * minutes;
+const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
 // There SHOULD be a Promise.delay like this.
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
-onfetch = event => {
+self.onfetch = event => {
   let request = event.request;
   if (logging) console.info("onfetch", request.url, request);
 
@@ -135,19 +135,19 @@ const postBackgroundEvent = (() => {
     _backgroundEvents.push(event);
   }
 
-  onactivate = event => {
+  self.onactivate = event => {
     let deferredRequests = [];
   
     /*_backgroundWork = */ (async () => {
       // Delay a bit to stay out of the app's way while it's starting up.
       await delay(5 * seconds);
-      if (logging) console.info("background work started")
+      if (logging) console.info("background work started", event)
   
       let cache = await caches.open(cacheName);
   
       // The idea here is to issue deferred requests one at a time at a leisurely pace
       // to keep from competing for network and other resources.
-      while (true) {
+      for (;;) {
         while (deferredRequests.length > 0) {
           let request = deferredRequests.shift();
           if (typeof request === 'string')
