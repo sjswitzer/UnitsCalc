@@ -71,28 +71,28 @@
         }
       }
     </style>
-    <p> Drawn close-boxes: </p>
-    <canvas id="canvas1" width="200" height="200">What?</canvas>
-    <canvas id="canvas2" width="200" height="200">What?</canvas>
-    <canvas id="canvas3" width="200" height="200">What?</canvas>
-    <canvas id="canvas4" width="200" height="200">What?</canvas>
+    <p> Drawn close-boxes:
+    <p> <canvas id="canvas1" width="200" height="200">What?</canvas>
+        <canvas id="canvas2" width="200" height="200">What?</canvas>
+        <canvas id="canvas3" width="200" height="200">What?</canvas>
+        <canvas id="canvas4" width="200" height="200">What?</canvas>
     <p> Close-button elements:
-    <p>
-      <close-button></close-button> Text
-      <close-button></close-button> Text
-      <close-button></close-button> Text
+    <p> <close-button></close-button> Text
+        <close-button></close-button> Text
+        <close-button></close-button> Text
+    <p> Close-box size and X color are based on the font-size and color properties:
     <p style="font-size: 2em">
-      <close-button class="bluebox"></close-button> Text
-      <close-button class="bluebox"></close-button> Text
-      <close-button class="bluebox"></close-button> Text
-    <p>
-      <close-button class="delete-text"></close-button> Text
-      <close-button class="delete-text"></close-button> Text
-      <close-button class="delete-text"></close-button> Text
-    <p>
-      <close-button class="transition"></close-button> Transition (hover over the button)
-    <p>
-      <close-button class="animation"></close-button> Animation
+        <close-button class="bluebox"></close-button> Text
+        <close-button class="bluebox"></close-button> Text
+        <close-button class="bluebox"></close-button> Text
+    <p> <close-button class="delete-text"></close-button> Text
+        <close-button class="delete-text"></close-button> Text
+        <close-button class="delete-text"></close-button> Text
+    <p> Transitions and Animations only work for custom properties in up-to-date Blink-based
+        browsers. So in Chrome, you'll see every parameter of the box transition or animate
+        but in other browsers you'll only see the size and X color animate.
+    <p> <close-button class="transition"></close-button> Transition (hover over the button)
+    <p> <close-button class="animation"></close-button> Animation
     <script>
       function drawCloseButtonOnCanvas(canvasName, opts) {
         const canvas = document.getElementById(canvasName);
