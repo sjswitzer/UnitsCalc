@@ -56,8 +56,8 @@ self.onfetch = event => {
       } catch (failureReason) {
         if (logging) console.info("request failed", request.url, failureReason);
 
-        // Add request to the deferred queue
-        deferRequest(clonedRequest);
+        // Add request to the deferred queue after a delay
+        delay(30 * seconds).then(() => { deferRequest(clonedRequest) });
 
         // Fake a 404
         fetchResponse = new Response(null, { status: 404 , statusText: "Not Found" });
@@ -89,6 +89,7 @@ self.onfetch = event => {
     // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
     // is not likely to happen often.
+    if (logging) console.info("awaiting response", request.url, resp.status, resp)
     let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
     if (logging) console.info("resolved with", request.url, resp.status, resp);
     return resp;
