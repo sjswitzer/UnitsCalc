@@ -12,8 +12,8 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = true;  // You can change this in the debugger XXX
-let useNavigatorOnline = false;  // For testing; it should work either way XXX
+let logging = false;  // You can change this in the debugger
+let useNavigatorOnline = true;  // For testing; it should work either way
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
@@ -89,7 +89,7 @@ self.onfetch = event => {
     if (logging) console.info("awaiting response", request.url)
     let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
     if (logging) console.info("resolved with", request.url, resp.status,
-        resp === cacheResponse ? "cached" : "uncached", resp);
+        resp === cacheResponse ? "cached" : "network", resp);
     return resp;
   })());
 };
@@ -179,8 +179,7 @@ const postBackgroundMessage = (() => {
         // Wait for a posted event or timeout
         let message = await Promise.any([
           nextBackgroundMessage(),
-          // delay(30 * minutes).then(() => "timer"),
-          delay(5 * seconds).then(() => "timer"),   // XXX
+          delay(30 * minutes).then(() => "timer"),
         ]);
   
         if (logging) console.info("background message recieved", message);
@@ -207,6 +206,6 @@ function deferRequest(...requests) {  // ... or requests
 // This is a fine place to schedule some prefetches
 // (which I don't actually need right now)
 deferRequest(
-  "foo.html",  // XXX comment these out
-  "bar.png",
+  // "foo.html",
+  // "bar.png",
 );
