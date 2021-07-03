@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.16">
+    <meta name="appVersion" content="1.6.17">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -689,21 +689,21 @@
             typically used with feet and inches. But, <i>sigh</i>,
             <a href="https://www.google.com/search?q=5%27+6+3%2F8%22+%2F+3">
             Google will do that for you too</a>.
-        <p> This program is unapologetically biased toward US conventional units since
+        <p> Contra the NIST, and more in accordance to conventional usage, this program treats acres,
+            chains, furlongs, townships, etc. as if the were defined in terms of modern feet. But in fact,
+            they are defined in terms of the anachronistic survey foot and there is a suite of "survey units"
+            prefixed with "s" to refer to their (arguably proper) definitions:
+            <code>sacre</code>, <code>schain</code>, <code>srod</code>,
+            <span class="linklike" onclick="showHelp('help-builtin#survey')">etc</span>.
+            In practice, usage varies by state and has recently undergone changes.
+            Call your congressmember or something; it's a mess.
+          <p> This program is unapologetically biased toward US conventional units since
             it was originally conceived as a tool to deal with their difficulty; nobody else
             has problems with units calculations.
             Still, I've tried to encompass the entire SI system and as much of the CGS system as possible.
             Unfortunately, CGS has multiple extensions for electromagnetism, all different from each other
             and from SI. Worse still, certain CGS electromagnetic units use half-integer dimension exponents
             and that's a thornier kind of dimensional analysis than this program can handle.
-        <p> Contra the NIST, and more in accordance to conventional usage, this program treats acres,
-            chains, furlongs, townships, etc. as if the were defined in terms of modern feet. In fact,
-            they are defined in terms of the survey foot, and there is a suite of survey units prefixed
-            with "s" to refer to their, arguably proper, definitions:
-            <code>sacre</code>, <code>schain</code>, <code>srod</code>,
-            <span class="linklike" onclick="showHelp('help-builtin#survey')">etc</span>.
-            In practice, usage varies by state and has recently undergone changes.
-            Call your congressmember or something; it's a mess.
         <p class="remote-only desktop-only"> You can download this app locally as
             <a href="index.html" download="UnitsCalc.html">UnitsCalc</a> or
             <a href="index.html" download="FeetInchCalc.html">FeetInchCalc</a>.
@@ -1332,7 +1332,7 @@
         // Radiation units (L^2, T^-2)
         groupRadiation: { group: "Radiation & Radioactivity Units" },
         Gy: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, SEC**2 ], alt: ["gray", "grays"],
-            prefixSym: "Gy", prefixNames: "alts", smells: { mks: true }, reserved: true },
+            prefixSym: "Gy", prefixNames: "alts", smells: { mks: true } },
         rad: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, 100 * SEC**2 ], alt: ["rads"],
             prefixSym: "rad", prefixNames: ["rad", "rads"], smells: { cgs: true } },
         // (T^-1) -- Indistinguishable from Hz
@@ -1393,10 +1393,12 @@
         week: { type: 'num', dim: { T: 1 }, val: 7 * DAY, desc: "7 days", alt: ["weeks"], smells: { unscientific: true } },
         fortnight: { type: 'num', dim: { T: 1 }, val: 14 * DAY, desc: "2 weeks", alt: ["fortnights"], smells: { unscientific: true } },
         link: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 100 * N5K ],  // you'd think 2/3 foot, but no its really .66 ft!
-            desc: "surveyor's link", smells: { uscu: true }, alt: ["links"] },
-        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { uscu: true }, alt: ["rods"] },
-        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { uscu: true }, alt: ["chains"] },
+            desc: "surveyor's link", smells: { uscu: true }, alt: ["links", "li"] },
+        rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { uscu: true }, alt: ["rods", "rd"] },
+        chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { uscu: true }, alt: ["chains", "ch"] },
         furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], smells: { uscu: true }, alt: ["furlongs"] },
+        point: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 360 * 1000 ], smells: { uscu: true }, alt: ["furlongs"] },
+        pica: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 30 * 1000 ], smells: { uscu: true }, alt: ["furlongs"] },
         section: { type: 'num', dim: { L: 2 }, val: [ 640 * 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["section"],
             desc: "square mile" },
         township: { type: 'num', dim: { L: 2 }, val: [ BigInt(6 * MI5K)**2n, N5K**2 ], smells: { uscu: true }, alt: ["townships"] },
@@ -1410,22 +1412,22 @@
         tonne: { type: 'num', dim: { M: 1 }, val: 1000 * KG, alt: ["tonnes"], desc: "metric ton" },
         carat: { type: 'num', dim: { M: 1 }, val: [ 200 * KG, 1000**2 ], alt: ["carats"] },
         league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, smells: { uscu: true }, alt: ["leagues"], desc: "3 nautical miles" },
-        nmi: { type: 'num', dim: { L: 1 }, val: NMI, smells: { uscu: true }, desc: "nautical mile" },
+        nmi: { type: 'num', dim: { L: 1 }, val: NMI, smells: { uscu: true }, desc: "nautical mile", alt: ["NM"] },
         knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], smells: { uscu: true }, alt: ["knots"], desc: "nautical mile per hour" },
-        fathom: { type: 'num', dim: { L: 1 }, val: [ 1143 * M, 625 ], smells: { uscu: true } },
-        cable: { type: 'num', dim: { L: 1 }, val: [ 3429 * 1000 * M, 15625 ], smells: { uscu: true } },
+        fathom: { type: 'num', dim: { L: 1 }, val: [ 1143 * M, 625 ], smells: { uscu: true }, alt: ["ftm"] },
+        cable: { type: 'num', dim: { L: 1 }, val: [ 3429 * 1000 * M, 15625 ], smells: { uscu: true }, alt: ["cb"] },
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, hidden: true }, // :)
 
         // Survey or "statute" units, increasingly anachronistic
-        groupSyrvey: { group: 'Survey or "statute" Units', id: "survey" },
+        groupSurvey: { group: 'Survey or "statute" Units', id: "survey" },
         sft: { type: 'num', dim: { L: 1 }, val: [ 1200 * M, 3937 ],smells: { uscu: true },
             desc: "survey foot" },
         slink: { type: 'num', dim: { L: 1 }, val: [ 792 * M, 3937 ], smells: { uscu: true },
             desc: "survey link" },
         srod: { type: 'num', dim: { L: 1 }, val: [ 19800 * M, 3937 ], smells: { uscu: true },
             desc: "survey rod" },
-        schain: { type: 'num', dim: { L: 1 }, val: [ 79,200 * M, 3937 ], smells: { uscu: true },
+        schain: { type: 'num', dim: { L: 1 }, val: [ 79200 * M, 3937 ], smells: { uscu: true },
             desc: "survey chain" },
         sfurlong: { type: 'num', dim: { L: 1 }, val: [ 792 * 1000 * M, 3937 ], smells: { uscu: true },
             desc: "survey furlong" },
@@ -3338,27 +3340,34 @@
         return [ftStr, inStr, delta];
       }
 
+      let helpStack = [];
+
       function showHelp(id) {
         // hide all help
         let elts = document.querySelectorAll('div.help');
         for (let e of elts)
           e.style.display = ''; // back to inherited 'none'
-        if (!id) return;
+        if (!id) {
+          helpStack.pop();
+          if (helpStack.length > 0)
+            helpStack[helpStack.length-1].style.display = 'block';
+          return;
+        }
         id = id.split("#");
         let frag = id[1];
         id = id[0];
         let helpElement = document.getElementById(id);
         if (helpElement) {
-          helpElement.style.display = "block"; // inherits 'none' from "help" class
+          helpStack.push(helpElement);
+          helpElement.style.display = 'block'; // inherits 'none' from "help" class
           let contentElement = helpElement.querySelector('div');
           if (contentElement) {
-            let offset = 0;
+            contentElement.scrollTop = 0;
             if (frag) {
               let elt = contentElement.querySelector(`#${frag}`);
               if (elt)
-                offset = elt.getBoundingClientRect().top - helpElement.getBoundingClientRect().top;
+                elt.scrollIntoView(true);
             }
-            contentElement.scrollTop = offset;
           }
         }
       }
