@@ -12,8 +12,8 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = true;  // You can change this in the debugger
-let useNavigatorOnline = false;  // For testing; it should work either way
+let logging = true;  // You can change this in the debugger XXX
+let useNavigatorOnline = false;  // For testing; it should work either way XXX
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
@@ -30,7 +30,7 @@ self.onfetch = event => {
   //     (async () => { ... })()
   // just like we once created scopes using (function() { ... })(), hmm...
   event.respondWith((async () => {
-    // Use only our specific cache. Most service worker samples match from the domain-wide
+    // Use only our specific cache. Most service worker examples match from the domain-wide
     // cache, "caches.match(...)", which seems like a bad idea to me.
     // Surely it's better to have each app manage its own cache in peace?
     // This is particularly useful when you serve test and production versions of
@@ -57,7 +57,7 @@ self.onfetch = event => {
         if (logging) console.info("request failed", request.url, failureReason);
 
         // Add request to the deferred queue after a delay
-        delay(30 * seconds).then(() => { deferRequest(clonedRequest) });
+        deferRequest({ request: clonedRequest, delay: 2 * seconds });
 
         // Fake a 404
         fetchResponse = new Response(null, { status: 404 , statusText: "Not Found" });
@@ -72,8 +72,8 @@ self.onfetch = event => {
 
       // Requeue certain rejections after a delay
       let status = fetchResponse.status;
-      if (status === 503 || status === 504 || status === 509)
-        delay(30 * seconds).then(() => { deferRequest(clonedRequest) });
+      if ((status === 503 || status === 504 || status === 509))
+        deferRequest({ request: clonedRequest, delay: 2 * seconds });
 
       if (cacheResponse)
         return cacheResponse;
@@ -98,21 +98,22 @@ self.onfetch = event => {
 
 //
 // Doodling some machinery here that I don't really need for this app...
+// It's all kindof a lark but why not?
 //
 
-const postBackgroundEvent = (() => {
+const postBackgroundMessage = (() => {
   // Encapsulate the background worker and its state
-  let _backgroundEvents = [], _backgroundEventResolvers = [];
+  let _backgroundEvents = [], _backgroundMessageResolvers = [];
 
-  function nextBackgroundEvent() {
+  function nextBackgroundMessage() {
     if (_backgroundEvents.length > 0)
       return Promise.resolve(_backgroundEvents.shift());
-    return new Promise(resolve => _backgroundEventResolvers.push(resolve));
+    return new Promise(resolve => _backgroundMessageResolvers.push(resolve));
   }
 
-  function postBackgroundEvent(event) {
-    if (_backgroundEventResolvers.length > 0)
-      return void _backgroundEventResolvers.shift()(event);
+  function postBackgroundMessage(event) {
+    if (_backgroundMessageResolvers.length > 0)
+      return void _backgroundMessageResolvers.shift()(event);
     _backgroundEvents.push(event);
   }
 
@@ -129,36 +130,63 @@ const postBackgroundEvent = (() => {
       // to keep from competing for network and other resources.
       for (;;) {
         while (deferredRequests.length > 0) {
-          let request = deferredRequests.shift();
+          // request is either Request or string or { request: request, ...opts }
+          let request = deferredRequests.shift(), opts = {};
+          if (typeof request === 'object' && !(request instanceof Request))
+            opts = request, request = opts.request;
           if (typeof request === 'string')
             request = new Request(request);
-          let fetchResponse;
+          if (!(request instanceof Request)) {
+            if (logging) console.info("request options contains no request", request, opts);
+            continue;
+          }
+          if (opts.delay) {
+            delay(opts.delay).then(() => deferredRequests.push({...opts, request, delay: 0 }));
+            continue;
+          }
+          let fetchResponse, clonedRequest = request.clone();
           try {
             if (logging) console.info("background request", request.url, request);
             fetchResponse = await fetch(request, { cache: "no-cache" });
           } catch (error) {
             if (logging) console.info("background request failed", request.url, error);
           }
-          if (fetchResponse.ok) {
+          if (fetchResponse?.ok) {  // ?. because we might have come from the catch block
             if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
             cache.put(request, fetchResponse.clone());
           } else {
-            if (logging) console.info("background response rejected", request.url, fetchResponse.status, fetchResponse);
+            if (fetchResponse && opts.retry !== 0) {
+              let status = fetchResponse.status;
+              if (status === 503 || status === 504 || status === 509) {
+                opts.retry ||= 10;
+                opts.retryDelay ||= 2 * seconds;
+              }
+            }
+            if (opts?.retry > 0) {
+              opts.request = clonedRequest;
+              opts.retryDelay ||= 1 * seconds;  // ??= still spottily-supported
+              opts.retryDelayFactor ||= 2;
+              opts.delay = opts.retryDelay;
+              opts.retryDelay = retryDelayFactor * opts.retryDelay;
+              opts.retry = opts.retry ? opts.retry - 1 : 0;
+              if (logging) console.info("background request failed", request.url, opts);
+              deferredRequests.push(opts);
+            }
           }
           // Pause a bit between requests
           await delay(2 * seconds);
         }
   
         // Wait for a posted event or timeout
-        let event = await Promise.any([
-          nextBackgroundEvent(),
-          // delay(30 * minutes).then(() => new Event("timeout")),
-          delay(5 * seconds).then(() => new Event("timeout")),   // XXX
+        let message = await Promise.any([
+          nextBackgroundMessage(),
+          // delay(30 * minutes).then(() => "timer"),
+          delay(5 * seconds).then(() => "timer"),   // XXX
         ]);
   
-        if (logging) console.info("event recieved", event.type, event);
-        if (event.type === 'deferred-requests')
-          deferredRequests.push(...event._requests);
+        if (logging) console.info("background message recieved", message);
+        if (message._deferredRequests)
+          deferredRequests.push(...message._deferredRequests);
       }
     })();
   };
@@ -167,21 +195,19 @@ const postBackgroundEvent = (() => {
   //    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
   // But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
   // and registering this event does nothing. On the other hand it does no harm. 
-  self.addEventListener('online', event => postBackgroundEvent(event));
-  self.addEventListener('offline', event => postBackgroundEvent(event));
+  self.addEventListener('online', event => postBackgroundMessage(event));
+  self.addEventListener('offline', event => postBackgroundMessage(event));
   
-  return postBackgroundEvent;
+  return postBackgroundMessage;
 })();
 
-function deferRequest(...requests) {  // or requests
-  let event = new Event('deferred-requests');
-  event._requests = requests;
-  postBackgroundEvent(event);
+function deferRequest(...requests) {  // ... or requests
+  postBackgroundMessage({ _deferredRequests: requests });
 }
 
 // This is a fine place to schedule some prefetches
 // (which I don't actually need right now)
 deferRequest(
-  // "foo.html",
-  // "bar.png",
+  "foo.html",  // XXX comment these out
+  "bar.png",
 );
