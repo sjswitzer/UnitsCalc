@@ -37,6 +37,7 @@ self.onfetch = event => {
     // the app from the same origin.
     let cache = await caches.open(cacheName);
     let cacheResponse = await cache.match(request);
+    if (logging) console.info("cache response", cacheResponse);
 
     // If we're offline just return the cached value immediately.
     // Due to "lie-fi" and related causes, "navigator.onLine" is unreliable,
@@ -81,8 +82,7 @@ self.onfetch = event => {
     })();
 
     if (!cacheResponse) {
-      if (logging) console.info("uncached", request.url);
-      // Since there's no cache, return the fetch result
+      if (logging) console.info("uncached response", request.url);
       return fetchResult;
     }
 
@@ -91,7 +91,8 @@ self.onfetch = event => {
     // is not likely to happen often.
     if (logging) console.info("awaiting response", request.url)
     let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
-    if (logging) console.info("resolved with", request.url, resp.status, resp);
+    if (logging) console.info("resolved with", request.url, resp.status,
+        resp === cacheResponse ? "cached" : "uncached", resp);
     return resp;
   })());
 };
@@ -137,7 +138,7 @@ const postBackgroundMessage = (() => {
           if (typeof request === 'string')
             request = new Request(request);
           if (!(request instanceof Request)) {
-            if (logging) console.info("request options contains no request", request, opts);
+            if (logging) console.error("request options contains no request", request, opts);
             continue;
           }
           if (opts.delay) {
