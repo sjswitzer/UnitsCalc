@@ -1,9 +1,10 @@
 //
 // I have no particular need for a service worker, but it's necessary for a PWA to work at all.
+// There are a few referenced images, but the app is fine without them.
 // There's nothing to pre-fetch because the page references all of its resources when
 // loaded. But we can still have some fun optimizing the upgrade process.
 //
-// It's also an experiment to see whether async functions simplify writing service workers.
+// This is also an experiment to see whether async functions simplify writing service workers.
 // Guess what? They do!
 //
 // Copyright 2021 Stan Switzer
@@ -11,7 +12,8 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = false; // You can change this in the debugger
+let logging = true;  // You can change this in the debugger
+let useNavigatorOnline = false;  // For testing; it should work either way
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
@@ -40,7 +42,7 @@ self.onfetch = event => {
     // Due to "lie-fi" and related causes, "navigator.onLine" is unreliable,
     // but the way it's unreliable is that it can report online even if your network is
     // useless. If it returns false, you've (almost?) definitely got no network.
-    if (cacheResponse && navigator.onLine === false) {
+    if (cacheResponse && useNavigatorOnline && navigator.onLine === false) {
       if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
       return cacheResponse;
     }
@@ -52,16 +54,13 @@ self.onfetch = event => {
         if (logging) console.info("request", request.url, request);
         fetchResponse = await fetch(request, { cache: "no-cache" });
       } catch (failureReason) {
-        if (logging) console.info("no response", request.url, failureReason);
+        if (logging) console.info("request failed", request.url, failureReason);
 
         // Add request to the deferred queue
         deferRequest(clonedRequest);
 
-        // Return the cached response if there is one; otherwise fake a 404 as the failure response
-        // (A failure response won't fulfill the Promise.any below)
-        if (cacheResponse)
-          return cacheResponse;
-        throw new Response(null, { status: 404 , statusText: "Not Found" });
+        // Fake a 404
+        fetchResponse = new Response(null, { status: 404 , statusText: "Not Found" });
       }
 
       if (fetchResponse.ok) {
@@ -69,7 +68,6 @@ self.onfetch = event => {
         cache.put(request, fetchResponse.clone());
         return fetchResponse;  // succeed with the response
       }
-
       if (logging) console.info("request rejected", request.url, fetchResponse.status, fetchResponse);
 
       // Requeue certain rejections after a delay
@@ -79,24 +77,14 @@ self.onfetch = event => {
 
       if (cacheResponse)
         return cacheResponse;
-
-      // Again, a failure won't fulfill the Promise.any below unless every promise has failed,
-      // but by that point the timer will always succeed since there's a cached result already.       s
-      throw fetchResponse;
+      return fetchResponse;
     })();
 
     if (!cacheResponse) {
       if (logging) console.info("uncached", request.url);
-      // Since there's no cache, return the fetch result, even if it failed.
-      // We don't generally expect failures, but some platforms request favico.ico, which doesn't exist here.
-      return fetchResult.catch(errorResponse => errorResponse);
+      // Since there's no cache, return the fetch result
+      return fetchResult;
     }
-
-    // We won't be using any fetch failure result now since we have a cached value,
-    // so eat it. Otherwise the Promise machinery complains that it wasn't handled.
-    fetchResult.catch(fetchFailure => {
-      if (logging) console.info("eat fetch failure", request.url, fetchFailure.status, fetchFailure);
-    });
 
     // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
@@ -112,37 +100,29 @@ self.onfetch = event => {
 //
 
 const postBackgroundEvent = (() => {
-  // Encapsulate the worker and its state
-  let  _backgroundEvents = [], _backgroundEventResolvers = [];
+  // Encapsulate the background worker and its state
+  let _backgroundEvents = [], _backgroundEventResolvers = [];
 
   function nextBackgroundEvent() {
-    return new Promise(resolve => {
-      if (_backgroundEvents.length > 0) {
-        let event = _backgroundEvents.shift();
-        resolve(event);
-        return;
-      }
-      _backgroundEventResolvers.push(resolve)
-    });
+    if (_backgroundEvents.length > 0)
+      return Promise.resolve(_backgroundEvents.shift());
+    return new Promise(resolve => _backgroundEventResolvers.push(resolve));
   }
 
   function postBackgroundEvent(event) {
-    if (_backgroundEventResolvers.length > 0) {
-      let resolver = _backgroundEventResolvers.shift();
-      resolver(event);
-      return;
-    }
+    if (_backgroundEventResolvers.length > 0)
+      return void _backgroundEventResolvers.shift()(event);
     _backgroundEvents.push(event);
   }
 
   self.onactivate = event => {
-    let deferredRequests = [];
     (async () => {
       // Delay a bit to stay out of the app's way while it's starting up.
       await delay(5 * seconds);
       if (logging) console.info("background work started", event)
   
       let cache = await caches.open(cacheName);
+      let deferredRequests = [];
   
       // The idea here is to issue deferred requests one at a time at a leisurely pace
       // to keep from competing for network and other resources.
@@ -171,14 +151,13 @@ const postBackgroundEvent = (() => {
         // Wait for a posted event or timeout
         let event = await Promise.any([
           nextBackgroundEvent(),
-          delay(30 * minutes).then(() => new Event("timeout")),
+          // delay(30 * minutes).then(() => new Event("timeout")),
+          delay(5 * seconds).then(() => new Event("timeout")),   // XXX
         ]);
   
-        if (event) {
-          if (logging) console.info("event recieved", event.type, event);
-          if (event.type === 'deferred-requests')
-            deferredRequests.push(...event._requests);
-        }
+        if (logging) console.info("event recieved", event.type, event);
+        if (event.type === 'deferred-requests')
+          deferredRequests.push(...event._requests);
       }
     })();
   };
