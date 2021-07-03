@@ -44,7 +44,7 @@ self.onfetch = event => {
     // but the way it's unreliable is that it can report online even if your network is
     // useless. If it returns false, you've (almost?) definitely got no network.
     // BUT, in that case the request is very likely to fail immediately and you have
-    // to handle that anyway. HOWEVER, testing "navigator.onLine" before calling fetch can
+    // to handle that anyway. HOWEVER, testing "navigator.onLine" before calling fetch MIGHT
     // prevent annoying browser popups asking to enable the network. So there's that.
     if (useNavigatorOnline && navigator.onLine === false) {
       if (cacheResponse) {
