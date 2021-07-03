@@ -89,7 +89,7 @@ self.onfetch = event => {
     // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
     // If navigator.onLine is false, we will have already returned the cached response, so this
     // is not likely to happen often.
-    if (logging) console.info("awaiting response", request.url, resp.status, resp)
+    if (logging) console.info("awaiting response", request.url)
     let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
     if (logging) console.info("resolved with", request.url, resp.status, resp);
     return resp;
