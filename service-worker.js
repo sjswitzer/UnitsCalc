@@ -115,7 +115,7 @@ const postBackgroundEvent = (() => {
   // Encapsulate the worker and its state
   let  _backgroundEvents = [], _backgroundEventResolvers = [];
 
-  function nextBackgroundEvent() {  // Promise for the next online event
+  function nextBackgroundEvent() {
     return new Promise(resolve => {
       if (_backgroundEvents.length > 0) {
         let event = _backgroundEvents.shift();
@@ -137,8 +137,7 @@ const postBackgroundEvent = (() => {
 
   self.onactivate = event => {
     let deferredRequests = [];
-  
-    /*_backgroundWork = */ (async () => {
+    (async () => {
       // Delay a bit to stay out of the app's way while it's starting up.
       await delay(5 * seconds);
       if (logging) console.info("background work started", event)
