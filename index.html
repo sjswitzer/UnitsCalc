@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.15">
+    <meta name="appVersion" content="1.6.16">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -696,6 +696,14 @@
             Unfortunately, CGS has multiple extensions for electromagnetism, all different from each other
             and from SI. Worse still, certain CGS electromagnetic units use half-integer dimension exponents
             and that's a thornier kind of dimensional analysis than this program can handle.
+        <p> Contra the NIST, and more in accordance to conventional usage, this program treats acres,
+            chains, furlongs, townships, etc. as if the were defined in terms of modern feet. In fact,
+            they are defined in terms of the survey foot, and there is a suite of survey units prefixed
+            with "s" to refer to their, arguably proper, definitions:
+            <code>sacre</code>, <code>schain</code>, <code>srod</code>,
+            <span class="linklike" onclick="showHelp('help-builtin#survey')">etc</span>.
+            In practice, usage varies by state and has recently undergone changes.
+            Call your congressmember or something; it's a mess.
         <p class="remote-only desktop-only"> You can download this app locally as
             <a href="index.html" download="UnitsCalc.html">UnitsCalc</a> or
             <a href="index.html" download="FeetInchCalc.html">FeetInchCalc</a>.
@@ -1091,10 +1099,10 @@
         groupLength: { group: "Length Units" },
         m:  { type: 'num', dim: { L: 1 }, val: M, reserved: true, alt: ["meter", "meters"],
             prefixSym: 'm',  prefixNames: "alts" },
-        in: { type: 'num', dim: { L: 1 }, val: [ IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
-        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
-        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
-        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K, N5K ], alt: ["mile", "miles"],
+        in: { type: 'num', dim: { L: 1 }, val: [ IN5K * M, N5K ], reserved: true, smells: { uscu: true }, alt: ["inch", "inches"] },
+        ft: { type: 'num', dim: { L: 1 }, val: [ 12 * IN5K * M, N5K ], reserved: true, smells: { uscu: true }, alt: ["foot", "feet"] },
+        yd: { type: 'num', dim: { L: 1 }, val: [ 3 * FT5K * M, N5K ], smells: { uscu: true }, alt: ["yard", "yards"] },
+        mi: { type: 'num', dim: { L: 1 }, val: [ MI5K * M, N5K ], alt: ["mile", "miles"],
             reserved: true, smells: { uscu: true } },
 
         // Area (L^2)
@@ -1227,8 +1235,21 @@
             prefixNames: ["erg", "ergs"], smells: { cgs: true } },
         cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 4184 * KG * M**2, 1000 * SEC**2 ], alt: ["calorie", "calories" ],
             prefixSym: "cal", prefixNames: "alts" },
+        Cal: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1000 * 4184 * KG * M**2, 1000 * SEC**2 ],
+            desc: "food calorie; same as <code>kilocalorie</code>" },
         kWh: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1000 * KG * M**2 * HR, SEC**3 ],
             desc: "kilowatt-hour", smells: { unscientific: true } },
+        // BTU is highly problematic: https://en.wikipedia.org/wiki/British_thermal_unit#Definitions
+        BTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
+            desc: "ISO BTU", prefixSym: "Btu" },
+        MBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**6 * 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
+            desc: "million BTU", alt: ["MMBTU"] },
+        therm: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**5 * 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
+            desc: "100,000 ISO BTU, differs in US and UK", alt: ["therms"], prefixNames: ["therm", "therms"] },
+        cdBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1054615 * KG * M**2, 1000 * SEC**2 ],
+            desc: "Canadian BTU, natural gas pricing" },
+        usBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 105480 * KG * M**2, 100 * SEC**2 ],
+            desc: "US BTU, natural gas pricing" },
         eV: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1602176634 * KG * M**2, 10n**28n * BigInt(SEC**2) ], alt: ["electronvolt", "electronvolts"],
             prefixSym: "eV", prefixNames: "alts" },
 
@@ -1376,6 +1397,8 @@
         rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { uscu: true }, alt: ["rods"] },
         chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { uscu: true }, alt: ["chains"] },
         furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], smells: { uscu: true }, alt: ["furlongs"] },
+        section: { type: 'num', dim: { L: 2 }, val: [ 640 * 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["section"],
+            desc: "square mile" },
         township: { type: 'num', dim: { L: 2 }, val: [ BigInt(6 * MI5K)**2n, N5K**2 ], smells: { uscu: true }, alt: ["townships"] },
         are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
         grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], smells: { uscu: true } },
@@ -1389,8 +1412,33 @@
         league: { type: 'num', dim: { L: 1 }, val: 3 * NMI, smells: { uscu: true }, alt: ["leagues"], desc: "3 nautical miles" },
         nmi: { type: 'num', dim: { L: 1 }, val: NMI, smells: { uscu: true }, desc: "nautical mile" },
         knot: { type: 'num', dim: { L: 1, T: -1 }, val: [ NMI, HR ], smells: { uscu: true }, alt: ["knots"], desc: "nautical mile per hour" },
+        fathom: { type: 'num', dim: { L: 1 }, val: [ 1143 * M, 625 ], smells: { uscu: true } },
+        cable: { type: 'num', dim: { L: 1 }, val: [ 3429 * 1000 * M, 15625 ], smells: { uscu: true } },
         dozen: { type: 'num', dim: {}, val: 12 },
         bakersdozen: { type: 'num', dim: {}, val: 13, hidden: true }, // :)
+
+        // Survey or "statute" units, increasingly anachronistic
+        groupSyrvey: { group: 'Survey or "statute" Units', id: "survey" },
+        sft: { type: 'num', dim: { L: 1 }, val: [ 1200 * M, 3937 ],smells: { uscu: true },
+            desc: "survey foot" },
+        slink: { type: 'num', dim: { L: 1 }, val: [ 792 * M, 3937 ], smells: { uscu: true },
+            desc: "survey link" },
+        srod: { type: 'num', dim: { L: 1 }, val: [ 19800 * M, 3937 ], smells: { uscu: true },
+            desc: "survey rod" },
+        schain: { type: 'num', dim: { L: 1 }, val: [ 79,200 * M, 3937 ], smells: { uscu: true },
+            desc: "survey chain" },
+        sfurlong: { type: 'num', dim: { L: 1 }, val: [ 792 * 1000 * M, 3937 ], smells: { uscu: true },
+            desc: "survey furlong" },
+        sleague: { type: 'num', dim: { L: 1 }, val: [ 19008 * 1000 * M, 3937 ], smells: { uscu: true },
+            desc: "survey league" },
+        smi: { type: 'num', dim: { L: 1 }, val: [ 6336 * 1000 * M, 3937 ], smells: { uscu: true },
+            desc: "survey or statute mi" },
+        sacre: { type: 'num', dim: { L: 2 }, val: [ 43560 * 1200**2 * M**2, 3937**2 ],smells: { uscu: true },
+            desc: "survey acre" },
+        ssection: { type: 'num', dim: { L: 2 }, val: [ (6336 * 1000 * M)**2, 3937**2 ], smells: { uscu: true },
+            desc: "survey square mile" },
+        stownship: { type: 'num', dim: { L: 2 }, val: [ 36n * BigInt(6336 * 1000 * M)**2n, 3937**2 ], smells: { uscu: true },
+            desc: "survey township" },
 
         // Special units
         groupSpecial: { group: "Special Units" },
@@ -1406,7 +1454,7 @@
         cgs: { type: 'num', dim: {}, val: 1, desc: "display result in CGS system",
             smells: { requestSystem: "cgs" } },
         uscu: { type: 'num', dim: {}, val: 1, desc: "display result in US Conventional units",
-            smells: { requestSystem: "uscu" } },
+            alts: ["uscs"], smells: { requestSystem: "uscu" } },
         unit: { type: 'num', dim: {}, val: 1, alt: ["units"],
             desc: 'simply one, to allow "1 1/2 unit"; mixed fractions are only allowed before units'},
         ratio: { type: 'num', dim: {}, val: 1, smells: { ratio: 'rat' }, alt: ["rat"],
@@ -1541,7 +1589,7 @@
         let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
           if (sym.group) {
-            html += `<tr><td colspan="3" class="group">${sym.group}`;
+            html += `<tr ${sym.id ? `id="${sym.id}"` : ''}><td colspan="3" class="group">${sym.group}`;
             delete systemSymbols[name];
             continue;
           }
@@ -3295,12 +3343,23 @@
         let elts = document.querySelectorAll('div.help');
         for (let e of elts)
           e.style.display = ''; // back to inherited 'none'
+        if (!id) return;
+        id = id.split("#");
+        let frag = id[1];
+        id = id[0];
         let helpElement = document.getElementById(id);
         if (helpElement) {
           helpElement.style.display = "block"; // inherits 'none' from "help" class
-          for (let child of helpElement.children)
-            if (child.tagName === 'DIV')
-              child.scroll(0, 0);
+          let contentElement = helpElement.querySelector('div');
+          if (contentElement) {
+            let offset = 0;
+            if (frag) {
+              let elt = contentElement.querySelector(`#${frag}`);
+              if (elt)
+                offset = elt.getBoundingClientRect().top - helpElement.getBoundingClientRect().top;
+            }
+            contentElement.scrollTop = offset;
+          }
         }
       }
 
