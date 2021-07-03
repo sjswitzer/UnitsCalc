@@ -149,6 +149,7 @@ const postBackgroundMessage = (() => {
           try {
             if (logging) console.info("background request", request.url, request);
             fetchResponse = await fetch(request, { cache: "no-cache" });
+            if (logging) console.info("background response", request.url, fetchResponse.status, fetchResponse);
           } catch (error) {
             if (logging) console.info("background request failed", request.url, error);
           }
