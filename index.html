@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.19">
+    <meta name="appVersion" content="1.6.20">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -957,6 +957,8 @@
               if (num === Math.trunc(num))
                 num = BigInt(num);
             }
+            if (num === 0n)
+              denom = 1n;
             if (typeof num === 'bigint' && num !== 1n && denom !== 1n) {
               let gcd = BigGCD(num, denom);
               num = num/gcd;
