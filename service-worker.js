@@ -52,8 +52,8 @@ self.onfetch = event => {
         return cacheResponse;
       }
       if (logging) console.log("offline no-cache response", request.url);
-      // Add request to the deferred queue after a delay and fake a 502 Bad Gateway response
-      deferRequest({ request: request, delay: 5 * minutes });
+      // Add request to the deferred queue with a delay and fake a 502 Bad Gateway response
+      deferFetchAndCache({ request: request, delay: 5 * minutes });
       return new Response(null, { status: 502, statusText: "Offline" });
     }
 
@@ -66,8 +66,8 @@ self.onfetch = event => {
         if (logging) console.info("response", request.url, fetchResponse.status, fetchResponse);
       } catch (failureReason) {
         if (logging) console.info("request failed", request.url, failureReason);
-        // Add request to the deferred queue after a delay and fake a 502 Bad Gateway response
-        deferRequest({ request: clonedRequest, delay: 5 * minutes });
+        // Add request to the deferred queue with a delay and fake a 502 Bad Gateway response
+        deferFetchAndCache({ request: clonedRequest, delay: 5 * minutes });
         fetchResponse = new Response(null, { status: 502, statusText: "Network Failed" });
       }
 
@@ -80,7 +80,7 @@ self.onfetch = event => {
       // Requeue certain rejections after a delay
       let status = fetchResponse.status;
       if ((status === 503 || status === 504 || status === 509))
-        deferRequest({ request: clonedRequest, delay: 2 * seconds });
+        deferFetchAndCache({ request: clonedRequest, delay: 5 * seconds });
 
       if (cacheResponse)
         return cacheResponse;
@@ -148,7 +148,7 @@ const postBackgroundMessage = (() => {
             continue;
           }
           if (opts.delay) {
-            delay(opts.delay).then(() => deferredRequests.push({...opts, request, delay: 0 }));
+            delay(opts.delay).then(() => deferFetchAndCache({...opts, request, delay: 0 }));
             continue;
           }
           let fetchResponse, clonedRequest = request.clone();
@@ -163,21 +163,22 @@ const postBackgroundMessage = (() => {
             if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
             cache.put(request, fetchResponse.clone());
           } else {
-            if (fetchResponse && opts.retry !== 0) {
+            opts = { ... opts };  // Just to be safe, copy opts; there might be aliasing)
+            if (fetchResponse && (opts.retry === undefined || opts.retry > 0)) {
               let status = fetchResponse.status;
               if (status === 503 || status === 504 || status === 509) {
-                opts.retry ||= 10;
-                opts.retryDelay ||= 2 * seconds;
+                opts.retry ??= 10;
+                opts.retryDelay ??= 5 * seconds;
               }
             }
-            if (opts?.retry > 0) {
+            if (opts.retry > 0) {
               opts.request = clonedRequest;
-              opts.retryDelay ||= 1 * seconds;  // ??= still spottily-supported
-              opts.retryDelayFactor ||= 2;
+              opts.retryDelay ??= 1 * seconds;
+              opts.retryDelayFactor ??= 2;
               opts.delay = opts.retryDelay;
               opts.retryDelay = retryDelayFactor * opts.retryDelay;
-              opts.retry = opts.retry ? opts.retry - 1 : 0;
-              if (logging) console.info("background request failed", request.url, opts);
+              opts.retry = opts.retry - 1;
+              if (logging) console.info("retry background request", request.url, opts);
               deferredRequests.push(opts);
             }
           }
@@ -214,13 +215,13 @@ const postBackgroundMessage = (() => {
   return postBackgroundMessage;
 })();
 
-function deferRequest(...requests) {  // ... or requests
+function deferFetchAndCache(...requests) {  // ... or requests
   postBackgroundMessage({ deferredRequests: requests });
 }
 
 // This is a fine place to schedule some prefetches
 // (which I don't actually need right now)
-deferRequest(
+deferFetchAndCache(
   // "foo.html",
   // "bar.png",
 );
