@@ -43,9 +43,18 @@ self.onfetch = event => {
     // Due to "lie-fi" and related causes, "navigator.onLine" is unreliable,
     // but the way it's unreliable is that it can report online even if your network is
     // useless. If it returns false, you've (almost?) definitely got no network.
-    if (cacheResponse && useNavigatorOnline && navigator.onLine === false) {
-      if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
-      return cacheResponse;
+    // BUT, in that case the request is very likely to fail immediately and you have
+    // to handle that anyway. HOWEVER, testing "navigator.onLine" before calling fetch can
+    // prevent annoying browser popups asking to enable the network. So there's that.
+    if (useNavigatorOnline && navigator.onLine === false) {
+      if (cacheResponse) {
+        if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
+        return cacheResponse;
+      }
+      if (logging) console.log("offline no-cache response", request.url);
+      // Add request to the deferred queue after a delay and fake a 502 Bad Gateway response
+      deferRequest({ request: request, delay: 5 * minutes });
+      return new Response(null, { status: 502, statusText: "Offline" });
     }
 
     // Issue a fetch request even if we have a cached response
@@ -57,9 +66,9 @@ self.onfetch = event => {
         if (logging) console.info("response", request.url, fetchResponse.status, fetchResponse);
       } catch (failureReason) {
         if (logging) console.info("request failed", request.url, failureReason);
-        // Add request to the deferred queue after a delay and fake a 404
-        deferRequest({ request: clonedRequest, delay: 2 * seconds });
-        fetchResponse = new Response(null, { status: 404 , statusText: "Not Found" });
+        // Add request to the deferred queue after a delay and fake a 502 Bad Gateway response
+        deferRequest({ request: clonedRequest, delay: 5 * minutes });
+        fetchResponse = new Response(null, { status: 502, statusText: "Network Failed" });
       }
 
       if (fetchResponse.ok) {
@@ -127,7 +136,7 @@ const postBackgroundMessage = (() => {
       // The idea here is to issue deferred requests one at a time at a leisurely pace
       // to keep from competing for network and other resources.
       for (;;) {
-        while (deferredRequests.length > 0) {
+        while (deferredRequests.length > 0 && !(useNavigatorOnline && navigator.onLine === false)) {
           // request is either Request or string or { request: request, ...opts }
           let request = deferredRequests.shift(), opts = {};
           if (typeof request === 'object' && !(request instanceof Request))
@@ -176,15 +185,21 @@ const postBackgroundMessage = (() => {
           await delay(2 * seconds);
         }
   
-        // Wait for a posted event or timeout
-        let message = await Promise.any([
-          nextBackgroundMessage(),
-          delay(30 * minutes).then(() => "timer"),
-        ]);
+        let message;
+        if (deferredRequests.length === 0) {
+         // If there's no work to do, just wait for a posted message
+          message = await nextBackgroundMessage();
+        } else {
+          // Otherwise, wait for a message or a timeout
+          message = await Promise.any([
+            nextBackgroundMessage(),
+            delay(5 * minutes).then(() => "timer"),
+          ]);
+        }
   
         if (logging) console.info("background message recieved", message);
-        if (message._deferredRequests)
-          deferredRequests.push(...message._deferredRequests);
+        if (message.deferredRequests)
+          deferredRequests.push(...message.deferredRequests);
       }
     })();
   };
@@ -200,7 +215,7 @@ const postBackgroundMessage = (() => {
 })();
 
 function deferRequest(...requests) {  // ... or requests
-  postBackgroundMessage({ _deferredRequests: requests });
+  postBackgroundMessage({ deferredRequests: requests });
 }
 
 // This is a fine place to schedule some prefetches
