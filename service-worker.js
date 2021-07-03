@@ -54,22 +54,19 @@ self.onfetch = event => {
       try {
         if (logging) console.info("request", request.url, request);
         fetchResponse = await fetch(request, { cache: "no-cache" });
+        if (logging) console.info("response", request.url, fetchResponse.status, fetchResponse);
       } catch (failureReason) {
         if (logging) console.info("request failed", request.url, failureReason);
-
-        // Add request to the deferred queue after a delay
+        // Add request to the deferred queue after a delay and fake a 404
         deferRequest({ request: clonedRequest, delay: 2 * seconds });
-
-        // Fake a 404
         fetchResponse = new Response(null, { status: 404 , statusText: "Not Found" });
       }
 
       if (fetchResponse.ok) {
         if (logging) console.info("response cached", request.url, fetchResponse.status, fetchResponse);
         cache.put(request, fetchResponse.clone());
-        return fetchResponse;  // succeed with the response
+        return fetchResponse;
       }
-      if (logging) console.info("request rejected", request.url, fetchResponse.status, fetchResponse);
 
       // Requeue certain rejections after a delay
       let status = fetchResponse.status;
