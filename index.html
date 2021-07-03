@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.21">
+    <meta name="appVersion" content="1.6.22">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -679,7 +679,7 @@
             general dimensional units calculator.
         <p> Various interesting problems came up along the way, including issues of
             special-purpose language design, grammar ambiguity, and maintaining full
-            decimal precision in different units while using floating-point arithmetic
+            decimal precision in calculations
             (remember that 0.1 can't be represented exactly in binary floating point).
         <p> As an example of using ambiguity for profit, there seemed to be no principled
             reason to forbid using a dimensionless number as a unit and allowing it
@@ -691,7 +691,7 @@
             Google will do that for you too</a>.
         <p> Contra the NIST, and in accordance with conventional usage, this program treats
             <code>acres</code>, <code>chains</code>, <code>furlongs</code>, <code>townships</code>, etc.
-            as if the were defined in terms of modern feet. But in fact
+            as if they were defined in terms of modern feet. But in fact
             they're defined in terms of the anachronistic
             "<a href="https://en.wikipedia.org/wiki/Foot_(unit)#Survey_foot">survey foot</a>"
             and there's a suite of
@@ -1100,7 +1100,7 @@
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
         MICROSYM + OHMSYM + PISYM + TAUSYM + PLANCKHSYM +
-        PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$";
+        PLANCKHBARSYM + EPSILONSYM + NAUGHTSYM + "$" + "_";
       const ALPHANUM = ALPHA + DIGITS;
 
       let angleSmell = "radian";
@@ -1132,17 +1132,25 @@
         liter: { type: 'num', dim: { L: 3 }, val: [ M**3, 10**3 ], desc: "liter", alt: ["liters", "litre", "litres"],
             prefixSym: "l", prefixNames: [ "liter", "liters", "litre", "litres" ] },
         cc: { type: 'num', dim: { L: 3 }, val: [ M**3, 100**3 ], desc: "cubic centimeter" },
-        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], smells: { uscu: true }, alt: ["gallons"] },
-        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], smells: { uscu: true }, alt: ["quarts"] },
-        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], smells: { uscu: true }, alt:["pints"] },
+        gallon: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, N5K**3 ], smells: { uscu: true }, alt: ["gallons", "gal"] },
+        pottle: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 2 * N5K**3 ], smells: { uscu: true }, alt: ["pottles", "pot"] },
+        quart: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 4 * N5K**3 ], smells: { uscu: true }, alt: ["quarts", "qt"] },
+        pint: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 8 * N5K**3 ], smells: { uscu: true }, alt:["pints", "pt"] },
         cup: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 16 * N5K**3 ], smells: { uscu: true }, alt: ["cups"] },
         tbsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 256 * N5K**3 ], smells: { uscu: true }, alt: ["tablespoon", "tablespoons", "tbsps"] },
         tsp: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 768 * N5K**3 ], smells: { uscu: true }, alt: ["teaspoon", "teaspoons", "tsps"] },
         floz: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 128 * N5K**3 ], desc: "fluid ounce", smells: { uscu: true } },
+        jig: { type: 'num', dim: { L: 3 }, val: [ 3 * GAL5K3, 256 * N5K**3 ], smells: { uscu: true }, desc: "shot", alt:["jigs", "shot", "shots"] },
         gi: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, 32 * N5K**3 ], smells: { uscu: true }, desc: "gill", alt:["gill", "gills"] },
         dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8) * BigInt(N5K)**3n ], smells: { uscu: true }, alt: ["drams"] },
         minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8 * 60) * BigInt(N5K)**3n  ], smells: { uscu: true }, alt: ["minims"] },
         cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", smells: { uscu: true }, alt: ["cords"] },
+        bdft: { type: 'num', dim: { L: 3 }, val: [ FT5K**2 * IN5K, N5K**3 ], desc: `1' \u00D7 1' \u00D7 1"`, smells: { uscu: true }, alt: ["boardfoot", "boardfeet"] },
+        hogshead: { type: 'num', dim: { L: 3 }, val: [ 63 * GAL5K3, N5K**3 ], smells: { uscu: true }, alt: ["hogsheads"] },
+        barrel: { type: 'num', dim: { L: 3 }, val: [ 63 * GAL5K3, 2 * N5K**3 ], smells: { uscu: true }, alt: ["barrels", "bbl"],
+            desc: "liquid barrel, not oil" },
+        oilbarrel: { type: 'num', dim: { L: 3 }, val: [ 42 * GAL5K3, N5K**3 ], smells: { uscu: true },
+            desc: "oil barrel" },
 
         // Mass (M)
         groupMass: { group: "Mass Units" },
@@ -1150,6 +1158,7 @@
             prefixSym: 'g',  prefixNames: ["gram", "grams"], },
         lb: { type: 'num', dim: { M: 1 }, val: [ LBM100M, N100M ], desc: "pound mass", smells: { uscu: true }, alt: ["lbs", "pound", "pounds", "lbm"] },
         oz: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 16 * N100M ], desc: "ounce mass", smells: { uscu: true }, alt: ["ounce", "ounces"]},
+        slug: { type: 'num', dim: { M: 1 }, val: [ BigInt(LBFSS10T) * BigInt(N5K), BigInt(N10T) * BigInt(FT5K) ], smells: { uscu: true }, alt: ["slugs"] },
 
         // Time (T)
         groupTime: { group: "Time Units" },
@@ -1172,7 +1181,7 @@
         yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], smells: { unscientific: true },
             desc: "mean tropical year", alt: ["at"] },
         yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], smells: { unscientific: true },
-            desc: "mean Gregorian year", alt: ["ag"] },
+            desc: "mean Gregorian year", /* alt: ["ag"] -- nope, collides with attogram */ },
         mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], smells: { unscientific: true },
             desc: "mean julian month", alt: ["month", "months"] },
 
@@ -1238,6 +1247,7 @@
         dyne: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ KG * M, 10**5 * SEC**2 ],
             prefixSym: "dyn", prefixNames: ["dyne", "dynes"], alt: ["dynes"], smells: { cgs: true } },
         lbf: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ LBFSS10T, N10T * SEC**2 ], desc: "pound force", smells: { uscu: true } },
+        kip: { type: 'num', dim: { L: 1, M: 1, T:-2 }, val: [ 1000n * BigInt(LBFSS10T), N10T * SEC**2 ], desc: "1000 lbf", smells: { uscu: true } },
 
         // Energy (L^2 M, T^-2)
         groupEnergy: { group: "Energy Units" },
@@ -1254,9 +1264,9 @@
         // BTU is highly problematic: https://en.wikipedia.org/wiki/British_thermal_unit#Definitions
         BTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
             desc: "ISO BTU", prefixSym: "Btu" },
-        MBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**6 * 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
+        MBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**6 * 105506 * KG * M**2, 100 * SEC**2 ],
             desc: "million BTU", alt: ["MMBTU"] },
-        therm: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**5 * 105506 * KG * M**2, 100 * SEC**2 ], alt: ["BTUs", "Btu", "Btus"],
+        therm: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 10**5 * 105506 * KG * M**2, 100 * SEC**2 ],
             desc: "100,000 ISO BTU, differs in US and UK", alt: ["therms"], prefixNames: ["therm", "therms"] },
         cdBTU: { type: 'num', dim: { L: 2, M: 1, T:-2 }, val: [ 1054615 * KG * M**2, 1000 * SEC**2 ],
             desc: "Canadian BTU, natural gas pricing" },
@@ -1313,8 +1323,8 @@
         T: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, SEC**2 * AMP ],
             desc: "magnetic flux density", alt: ["tesla", "teslas"],
             prefixSym: "T", prefixNames: "alts" },
-        Gs: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
-            desc: "magnetic flux density", alt: ["gauss"], prefixSym: "Gs", prefixNames: "alts",
+        gauss: { type: 'num', dim: { M: 1, T: -2, I: -1 }, val: [ KG, 10000 * SEC**2 * AMP ],
+            desc: "magnetic flux density", prefixNames: ["gauss"], // "Gs" conflicts wit gigasecond
             smells: { cgs: true } },
         H: { type: 'num', dim: { M: 1, L: 2, T: -2, I: -2 }, val: [ KG * M**2, SEC**2 * AMP**2 ],
             desc: "mutual inductance", alt: ["henry"], prefixSym: "H", prefixNames: "alts" },
@@ -1375,7 +1385,7 @@
             desc: "universal gravitational constant", smells: { mks: true } },
         c: { type: 'num', dim: { L: 1, T:-1 }, val: [ CMPS * M, SEC ], desc: "speed of light", smells: { mks: true } },
         ly: { type: 'num', dim: { L: 1 }, val: [ BigInt(CMPS) * BigInt(36525) * BigInt(DAY), 100 ],
-            desc: "distance light travels in a year", alt: ["lightyear", "lightyear"],
+            desc: "distance light travels in a year", alt: ["lightyear", "lightyears"],
             prefixSym: "ly", prefixNames: "alts" },
 
         // SI defining constants & related
@@ -1389,8 +1399,9 @@
             val: [ 1.25663706212e-6 * KG * M, SEC**2 * AMP**2 ], desc: "vacuum (magnetic) permeability" },
         h: { type: 'num', dim: { L: 2, M: 1, T:-1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC) ],
             display: PLANCKHSYM, desc: "Planck constant, defines the joule", alt: ["planck"], smells: { mks: true }, bonusHz: "Hz" },
-        // Representing hbar explicitly in angular units is a choice and I have made it. Provisionally.
-        hbar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC * CIRCLE) ],
+        // Representing h_bar explicitly in angular units is a choice and I have made it. Provisionally.
+        // Can't call it hbar because that conflicts with hectobar
+        h_bar: { type: 'num', dim: { L: 2, M: 1, T:-1, RAD: -1 }, val: [ 662607015 * M**2 * KG, 10n**42n * BigInt(SEC * CIRCLE) ],
             display: PLANCKHBARSYM, desc: "reduced Planck constant", alt: ["reducedplanck"], smells: { mks: true } },
         e: { type: 'num', dim: { T: 1, I: 1 }, smells: { mks: true }, BonusCoulomb: 'C',
             val: [ 1602176634 * SEC * AMP, 10n**28n ], desc: "elementary charge, defines the coulomb" },
@@ -1409,13 +1420,13 @@
         rod: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, 4 * N5K ], desc: "surveyor's rod", smells: { uscu: true }, alt: ["rods", "rd"] },
         chain: { type: 'num', dim: { L: 1 }, val: [ 66 * FT5K, N5K ], desc: "surveyor's chain", smells: { uscu: true }, alt: ["chains", "ch"] },
         furlong: { type: 'num', dim: { L: 1 }, val: [ 660 * FT5K, N5K ], smells: { uscu: true }, alt: ["furlongs"] },
-        point: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 360 * 1000 ], smells: { uscu: true }, alt: ["furlongs"] },
-        pica: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 30 * 1000 ], smells: { uscu: true }, alt: ["furlongs"] },
-        section: { type: 'num', dim: { L: 2 }, val: [ 640 * 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["section"],
+        point: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 360 * 1000 ], smells: { uscu: true }, alt: ["points"] },
+        pica: { type: 'num', dim: { L: 1 }, val: [ 127 * M, 30 * 1000 ], smells: { uscu: true }, alt: ["picas"] },
+        section: { type: 'num', dim: { L: 2 }, val: [ 640 * 66*FT5K * 660*FT5K, N5K**2 ], smells: { uscu: true }, alt: ["sections"],
             desc: "square mile" },
         township: { type: 'num', dim: { L: 2 }, val: [ BigInt(6 * MI5K)**2n, N5K**2 ], smells: { uscu: true }, alt: ["townships"] },
-        are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters" },
-        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], smells: { uscu: true } },
+        are: { type: 'num', dim: { L: 2 }, val: (10 * M)**2, desc: "10 meters \u00D7 10 meters", alt: ["ares"] },
+        grain: { type: 'num', dim: { M: 1 }, val: [ LBM100M, 7000 * N100M ], smells: { uscu: true }, alt: ["grains"] },
         stone: { type: 'num', dim: { M: 1 }, val: [ 14 * LBM100M, N100M ], smells: { uscu: true }, desc: "UK stone" }, // no alt "stones"
         cwt: { type: 'num', dim: { M: 1 }, val: [ 112 * LBM100M, N100M ], smells: { uscu: true }, alt: ["hundredweight"],
             desc: "UK hundredweight, about 51 kg" },  // in the US it's 100lb, but nobody uses it so...
@@ -1588,7 +1599,7 @@
         { name: "deci", symbol: "d", val: new Rational(1n, 10n) },
         { name: "centi", symbol: "c", val: new Rational(1n, 100n) },
         { name: "milli", symbol: "m", val: new Rational(1n, 1000n) },
-        { name: "micro", symbol: MICROSYM, val: new Rational(1n, 1000n**2n) },
+        { name: "micro", symbol: "u", val: new Rational(1n, 1000n**2n) },
         { name: "nano", symbol: "n", val: new Rational(1n, 1000n**3n) },
         { name: "pico", symbol: "p", val: new Rational(1n, 1000n**4n) },
         { name: "femto", symbol: "f", val: new Rational(1n, 1000n**5n) },
@@ -1642,8 +1653,10 @@
             sym.desc = altName;
           if (sym.display)
             alts.unshift(sym.display);
-          for (const alt of alts)
-            systemSymbols[alt] = { ...sym, sym: alt, altOf: name, alt: undefined, reserved: undefined };
+          for (const alt of alts) {
+            if (systemSymbols[alt]) throw new InternalError(`Symbol collision ${alt}`);
+            systemSymbols[alt] = { ...sym, sym: alt, altOf: name, alt: undefined, reserved: undefined, basedOn: sym };
+          }
           let helpDesc = sym.desc || name;
           if (helpDesc === alts[0]) {
             alts.shift();
@@ -1681,9 +1694,13 @@
                   display = `${pref.symbol}${sym.prefixSym}`;
                   desc = s;
                 }
-                if (!systemSymbols[s])
+                if (systemSymbols[s]) {
+                  if (!systemSymbols[s].basedOn === sym)
+                    throw new InternalError(`Symbol collision ${s}`);
+                } else {
                   systemSymbols[s] = { ...sym, sym: s, display, desc, alt: undefined, reserved: undefined,
-                      val: Rational.mul(sym.val, pref.val) };
+                      val: Rational.mul(sym.val, pref.val), basedOn: sym };
+                }
               }
             }
             if (sym.prefixSym) {
@@ -1701,15 +1718,20 @@
                 sep = ", ";
               }
               if (!(sym.noFractionalPrefix && pref.val.num < pref.val.denom)) {
-                let s = `${pref.symbol}${sym.prefixSym}`;
+                let s = `${pref.symbol}${sym.prefixSym}`, display = s;
+                if (pref.symbol === "u")
+                  display = `${MICROSYM}${sym.prefixSym}`
                 let desc;
                 if (sym.prefixNames)
                   desc = `${pref.name}${sym.prefixNames[0]}`;
-                if (!systemSymbols[s]) {
-                  systemSymbols[s] = { ...sym, sym: s, display: s, alt: undefined, reserved: undefined, desc,
+                if (systemSymbols[s]) {
+                  if (!systemSymbols[s].basedOn === sym)
+                    throw new InternalError(`Symbol collision ${s}`);
+                } else {
+                  systemSymbols[s] = { ...sym, sym: s, display, alt: undefined, reserved: undefined, desc,
                       val: Rational.mul(sym.val, pref.val) };
-                  if (pref.symbol === MICROSYM)
-                    systemSymbols[`u${sym.prefixSym}`] = systemSymbols[s];
+                  if (s !== display)
+                    systemSymbols[display] = systemSymbols[s];
                 }
               }
             }
