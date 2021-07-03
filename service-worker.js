@@ -12,7 +12,7 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = true;  // You can change this in the debugger XXX
+let logging = false;  // You can change this in the debugger
 let useNavigatorOnline = true;  // For testing; it should work either way
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
@@ -222,6 +222,6 @@ function deferFetchAndCache(...requests) {  // ... or requests
 // This is a fine place to schedule some prefetches
 // (which I don't actually need right now)
 deferFetchAndCache(
-  "foo.html", // XXX comment out
-  "bar.png",
+  // "foo.html",
+  // "bar.png",
 );
