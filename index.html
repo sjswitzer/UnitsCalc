@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.28">
+    <meta name="appVersion" content="1.6.29">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1849,17 +1849,19 @@
 
       let mixedRationStr = " : mixedratio", ratioString = " : ratio";
 
-      function stuffMixedRatio() {
+      function stuffMixedRatio(event) {
         let str = parseStr.trim() + mixedRationStr;
         stuffExpr(str);
+        event.preventDefault();
       }
 
-      function stuffRatio() {
+      function stuffRatio(event) {
         let str = parseStr.trim();
         if (str.endsWith(mixedRationStr))
           str = str.substr(0, str.length - mixedRationStr.length);
         str += ratioString;
         stuffExpr(str);
+        event.preventDefault();
       }
 
       const DIGITS_PRECISION = 10, EPSILON = Math.pow(10, -DIGITS_PRECISION);
@@ -2205,7 +2207,7 @@
               if (num !== 0n)
                 str += " ";
               if (opts.exactHint && opts.html)
-                ratioButton = ` <span class="button exact" onclick="stuffRatio()")>ratio?</span>`;
+                ratioButton = ` <span class="button exact" onclick="stuffRatio(event)")>ratio?</span>`;
             }
             if (num !== 0n)
               str += String(num) + "/" + String(denom);
@@ -2237,7 +2239,7 @@
             val2 = new Rational(val2.num/val2.denom, 1, true);
             ellipsis = '\u2026';
             if (opts.exactHint && opts.html)
-              exactButton = ` <span class="button exact" onclick="stuffMixedRatio()")>exact?</span>`;
+              exactButton = ` <span class="button exact" onclick="stuffMixedRatio(event)")>exact?</span>`;
           }
           let str = String(val2.num), trailingZeros = 0;
           exp += str.length-1;
