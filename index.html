@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.34">
+    <meta name="appVersion" content="1.6.35">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -722,8 +722,8 @@
             (<code>lux</code> and <code>lumen</code>) use the <code>steradian</code>.
             So, for practical reasons more than principled ones, this
             tool treats angles as if they were dimensional.
-            Splitting the differences among the different angular measurement systems, we use
-            the half-circle as the fundemental basis unit for angles.
+            Splitting the differences among the different angular units systems, I use
+            the <code>circle</code>, a full <code>revolution</code>, as the basis unit for angles.
         <p> This program is unapologetically biased toward US conventional units since
             it was originally conceived as a tool to deal with their difficulty; nobody else
             has problems with units calculations.
@@ -1101,7 +1101,7 @@
       const GAL5K3 = 231*IN5K**3;
       const AMP = 1, KELVIN = 1;
       const BIT = 1, BYTE = 8*BIT;
-      const HALF_CIRCLE = 1, CIRCLE = 2, PI = Math.PI, RADIAN = HALF_CIRCLE/PI;
+      const CIRCLE = 1, PI = Math.PI, RADIAN = CIRCLE/(2*PI);
       const CANDELA = 1;
       const PERSON = 1;
       const NONCE = 1;
@@ -1230,7 +1230,7 @@
         arcsec: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 360*60*60 ], alt: ["arcsecond", "arcseconds"], smells: { BonusAngle: "degree", ratio: 'rat' } },
         grad: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 400 ], alt: ["gradian", "gon"],
             command: () => { angleSmell = 'grad'; }, smells: { BonusAngle: "grad" } },
-        rev: { type: 'num', dim: { RAD: 1 }, reserved: true, val: CIRCLE, alt: ["revs", "revolution", "revolutions"],
+        rev: { type: 'num', dim: { RAD: 1 }, reserved: true, val: CIRCLE, alt: ["revs", "revolution", "revolutions", "circle", "circles"],
             desc: "revolutions" },
         rpm: { type: 'num', dim: { RAD: 1, T: -1 }, val: [ CIRCLE, MIN ], desc: "revolutions per minute" },
 
