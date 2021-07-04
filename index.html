@@ -235,7 +235,8 @@
       }
 
       span.button.exact {
-        font-size: 90%;
+        margin-left: .5em;
+        background-color: #888;
       }
 
       /* greasy way to make a text-delete button in the input box */
@@ -1905,12 +1906,12 @@
         'min', 'hr', // 'us', 'ms' -- don't include or you get um/us instead of m/s!
       ];
 
-      function val2str(val, opts) {
+      function val2str(val, opts = {}) {
         let descStr = "", origVal = val;
         let smells = val.smells ?? {}, valSmells = smells, displayUnits = val.displayUnits ?? [];
         for (const dispUnit of displayUnits)
           smells = { ...smells, ...dispUnit?.smells };
-        if (opts?.describe && val.desc && displayUnits.length === 0)
+        if (opts.describe && val.desc && displayUnits.length === 0)
           descStr = ` (${val.desc})`;
         let unitsStr = "", invUnitsStr = "";
         let dim = {};
@@ -1961,9 +1962,9 @@
         // UNLESS those units were in the original value
         if (valSmells.unscientific)
           excludeUnscientific = false;
-        function describeUnit(unit, opts) {
+        function describeUnit(unit, opts = {}) {
           try {
-            if (excludeUnscientific && unit.smells?.unscientific && !opts?.forceUnit)
+            if (excludeUnscientific && unit.smells?.unscientific && !opts.forceUnit)
               return null;
             let uscu = !!unit.smells?.uscu, timeOnly = undefined;
             for (let measure in unit.dim) {
@@ -1989,7 +1990,7 @@
             if (dotProduct < 0)
               exp = -exp;
             if (exp === 0 || !isFinite(smallest)) {
-              if (!opts?.forceUnit)
+              if (!opts.forceUnit)
                 return null;
               exp = 1;
             }
@@ -2006,7 +2007,7 @@
             dotProduct = dotProduct * exp;
             const reducedDim = Dim.add(dim, unit.dim, -exp);
             const reducedNormSquared = Dim.normSquared(reducedDim);
-            if (normSquared <= reducedNormSquared && !opts?.forceUnit)
+            if (normSquared <= reducedNormSquared && !opts.forceUnit)
               return null;
             let origin = unit.origin ?? Rational.ZERO;
             let newVal = Rational.div(Rational.sub(val, origin), Rational.pow(unit.val, exp));
@@ -2046,13 +2047,13 @@
               displayExp = -displayExp;
               str += "/"
             }
-            if (unit.display && !opts?.saveMode)
+            if (unit.display && !opts.saveMode)
               str += unit.display;
             else
               str += unit.sym;
             if (displayExp !== 1) {
               let expStr = String(displayExp);
-              if (opts?.html)
+              if (opts.html)
                 expStr = `<sup>${expStr}</sup>`;
               str += expStr;
             }
@@ -2157,7 +2158,7 @@
           minus = '-';
         }
 
-        if (opts?.saveMode) { // special path for saving; preserve rationality whenever possible
+        if (opts.saveMode) { // special path for saving; preserve rationality whenever possible
           let str;
           if (typeof val.num === 'number')
             str = val.num.toExponential();  // forces the JS parser for numbers on input
