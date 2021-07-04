@@ -235,7 +235,7 @@
       }
 
       span.button.exact {
-        font-size: 85%;
+        font-size: 90%;
       }
 
       /* greasy way to make a text-delete button in the input box */
@@ -2177,9 +2177,6 @@
         }
         if (displayRatio !== 'none' && typeof val.num === 'bigint') {
           let num = val.num, denom = val.denom, intpart = 0n;
-          let neg = num < 0n;
-          if (neg)
-            num = -num;
           let asFrac = true;
           if (displayRatio === 'mix' || displayRatio === 'mix?') {
             intpart = num/denom;
@@ -2201,17 +2198,17 @@
             }
           }
           if (asFrac) {
-            let str = "";
-            if (neg)
-              str += "-";
+            let str = "", ratioButton = "";
             if (intpart !== 0n || num === 0n) {
               str += String(intpart);
               if (num !== 0n)
                 str += " ";
+              if (opts.exactHint && opts.html)
+                ratioButton = ` <span class="button exact" onclick="stuffRatio()")>ratio?</span>`;
             }
             if (num !== 0n)
               str += String(num) + "/" + String(denom);
-            return minus + str + unitsStr + invUnitsStr + descStr;
+            return minus + str + unitsStr + invUnitsStr + descStr + ratioButton;
           }
         }
 
