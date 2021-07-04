@@ -1816,7 +1816,7 @@
         if (!val) {
           // special case to create pseudo-variables for exponentiated units.
           let pos = symName.length;
-          while (pos > 1 && DIGITS.includes(symName.charAt(pos-1)))
+          while (pos > 1 && DIGITS.includes(symName[pos-1]))
             pos -= 1;
           if (pos < symName.length) {
             const symPrefix = symName.substr(0, pos);
@@ -1866,20 +1866,25 @@
       }
 
       function stripSuffixes(str, ...suffixes) {
-        let stripped;
+        let oldLength;
         do {
-          stripped = false;
+          oldLength = str.length;
           for (let suffix of suffixes) {
-            if (str.endsWith(suffix)) {
-              str = str.substr(0, str.length-suffix.length);
-              stripped = true;
+            let pos = str.length-suffix.length;
+            if (ALPHA.includes(suffix[0])) {  // strip a word at a word boundary
+              if (str.endsWith(suffix) && !ALPHA.includes(str[pos-1]))  // strip a word
+                str = str.substr(0, pos); 
+            } else {   // strip any of these chars
+              pos = str.length - 1;
+              if (suffix.includes(str[pos])) 
+                str = str.substr(0, pos);
             }
           }
-        } while (stripped);
+        } while (str.length < oldLength);
         return str;
       }
 
-      let ratioSuffixes = [" ", ":", "|", ": ratio", ": mixedratio"]
+      let ratioSuffixes = [ " :|", "ratio", "rat", "mixedratio", "mix" ];
 
       function stuffMixedRatio(event) {
         let str = stripSuffixes(parseStr, ...ratioSuffixes) + " : mixedratio";
@@ -2273,12 +2278,12 @@
           }
           let str = String(val2.num), trailingZeros = 0;
           exp += str.length-1;
-          for (let n = str.length-1; n > 0 && str.charAt(n) === '0'; --n)
+          for (let n = str.length-1; n > 0 && str[n] === '0'; --n)
             ++trailingZeros;
           str = str.substr(0, str.length-trailingZeros);
           if (exp > 20 || exp < -6) {
             if (str.length > 1)
-              str = str.charAt(0) + '.' + str.substr(1);
+              str = str[0] + '.' + str.substr(1);
             str = str + ellipsis + (exp > 0 ? 'e+' : 'e') + String(exp);
             return minus + str + unitsStr + invUnitsStr + descStr + exactButton;
           }
@@ -2375,13 +2380,13 @@
 
       function peekc() {
         if (parsePos < parseStr.length)
-          return parseStr.charAt(parsePos);
+          return parseStr[parsePos];
         return null;
       }
 
       function getc() {
         if (parsePos < parseStr.length) {
-          let ch = parseStr.charAt(parsePos);
+          let ch = parseStr[parsePos];
           parsePos += 1;
           if (parsePos > parseFurthest && parseStr === initialParseStr)
             parseFurthest = parsePos;
@@ -2394,7 +2399,7 @@
         const backtrack = parsePos;
         if (!opts?.noSkip)
           skipSpaces();
-        if (parseStr.charAt(parsePos) === match) {
+        if (parseStr[parsePos] === match) {
           parsePos += 1;
           if (parsePos > parseFurthest && parseStr === initialParseStr)
             parseFurthest = parsePos;
@@ -2528,7 +2533,7 @@
       function getNonceUnit(name) {
         // It's preferable to write 'duck'2 to 'duck2' but we'll allow it anyway.
         let pos = name.length;
-        while (pos > 1 && DIGITS.includes(name.charAt(pos-1)))
+        while (pos > 1 && DIGITS.includes(name[pos-1]))
           pos -= 1;
         if (pos < name.length) {
           const symPrefix = name.substr(0, pos);
@@ -3176,12 +3181,13 @@
           } catch (e) {
             if (e instanceof ChattyError) {
               // Try to supply missing left parin.
-              // Note: This doesn't seem like a very general solution, but it works well enough.
+              // Note: This doesn't seem like a very general solution,
+              // and it's rather ugly but it works well enough.
               let fixPos = 0, trackingFix = true;
-              if (exprStr.charAt(exprStr.length-1) === ')') {
+              if (exprStr[exprStr.length-1] === ')') {
                 let fixPos = 0, trackingFix = true, nl = 0, nr = 0;
                 for (let pos = 0; pos < exprStr.length; pos++) {
-                  let c = exprStr.charAt(pos);
+                  let c = exprStr[pos];
                   if (c === ' ' || c === '\t') {
                     if (trackingFix)
                     fixPos = pos+1;
