@@ -173,7 +173,7 @@ const postBackgroundMessage = (() => {
             if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
             cache.put(request, fetchResponse.clone());
           } else {
-            opts = { ... opts };  // Just to be safe, copy opts; there might be aliasing)
+            opts = { ...opts };  // Just to be safe, copy opts; there might be aliasing)
             if (fetchResponse && (opts.retry === undefined || opts.retry > 0)) {
               let status = fetchResponse.status;
               if (status === 503 || status === 504 || status === 509) {
