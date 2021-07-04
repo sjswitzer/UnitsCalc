@@ -40,7 +40,7 @@ self.onfetch = event => {
     if (logging) console.info("cache response", cacheResponse);
 
     // If we're offline just return the cached value immediately.
-    // Due to "lie-fi" and related causes, "navigator.onLine" is unreliable,
+    // Due to "lie-fi" and related issues, "navigator.onLine" is unreliable,
     // but the way it's unreliable is that it can report online even if your network is
     // useless. If it returns false, you've (almost?) definitely got no network.
     // BUT, in that case the request is very likely to fail immediately and you have
