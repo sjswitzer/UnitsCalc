@@ -104,8 +104,18 @@ self.onfetch = event => {
 };
 
 //
-// Doodling some machinery here that I don't really need for this app...
-// It's all kindof a lark but why not?
+// Doodling some machinery here that I don't really need for this app.
+// It's kinda a lark but why not?
+//
+// ***************************************
+// ***  DANGER WILL ROBINSON, DANGER!  ***
+// ***************************************
+//
+// Everything above this comment is a good template for WHAT to do in a simple
+// self-updating service worker (save for the calls to deferFetchAndCache).
+//
+// Anything below this comment should be regarded as a sketch of HOW to do
+// things, but not necessarily WHAT you'd actually want to do yourself.
 //
 
 const postBackgroundMessage = (() => {
