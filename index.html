@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.32">
+    <meta name="appVersion" content="1.6.33">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -712,6 +712,18 @@
             <a href="https://www.google.com/search?&q=NIST+units+barrel+cranberry&btnI">unless it's cranberries</a>.
             Altogether, the situation is rather hopeless and by default I've chosen relatively
             uncontroverial wet US volume units and excluded dry units entirely.
+        <p> The SI system treats angles as dimensionless quantities, perhaps because they don't
+            actually <i>measure</i> anything. But treating them as if they were units allows
+            dealing with things like <code>revolutions / minute</code> ,
+            converting <code>degrees</code> to <code>radians</code>,
+            and, to be fair, makes some sense when thinking about things like the
+            reduced Planck constant (<code>&#x210F;</code>).
+            Even the SI is torn because units of luminosity
+            (<code>lux</code> and <code>lumen</code>) use the <code>steradian</code>.
+            So, for practical reasons more than principled ones, this
+            tool treats angles as if they were dimensional.
+            Splitting the differences among the different angular measurement systems, we use
+            the half-circle as the fundemental basis unit for angles.
         <p> This program is unapologetically biased toward US conventional units since
             it was originally conceived as a tool to deal with their difficulty; nobody else
             has problems with units calculations.
@@ -1069,7 +1081,7 @@
       // can be exact down to seconds because radians are never going to be exact anyway.
       // The unit for KELVIN could be a multiple of 9 so that fahrenheit can be represented exactly.
       //
-      // That's how it used to work, but the point is moot now that we use rational
+      // Well, that's how it used to work, but the point is moot now that we use rational
       // arithmetic whenever possible.
       // For instance, 1.001 is represented as the ratio 1001 / 1000. This allows
       // exact decimal representations whenever possible.
@@ -1089,7 +1101,7 @@
       const GAL5K3 = 231*IN5K**3;
       const AMP = 1, KELVIN = 1;
       const BIT = 1, BYTE = 8*BIT;
-      const DEGREE = 1, CIRCLE = 360 * DEGREE, PI = Math.PI, RADIAN = CIRCLE/2/PI;
+      const HALF_CIRCLE = 1, CIRCLE = 2, PI = Math.PI, RADIAN = HALF_CIRCLE/PI;
       const CANDELA = 1;
       const PERSON = 1;
       const NONCE = 1;
@@ -1212,12 +1224,15 @@
         radian: { type: 'num', dim: { RAD: 1 }, reserved: true, val: RADIAN, alt: ["radians"],
             command: () => { angleSmell = 'radian'; } },
         sr: { type: 'num', dim: { RAD: 2 }, val: RADIAN**2, alt: ["steradian", "steradians"], reserved: true, },
-        degree: { type: 'num', dim: { RAD: 1 }, val: DEGREE, desc: "degree", alt: ["degrees", "deg"],
+        degree: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 360 ], desc: "degree", alt: ["degrees", "deg"],
             command: () => { angleSmell = 'degree'; }, smells: { BonusAngle: "degree" } },
-        arcmin: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60 ], alt: ["arcminute", "arcminutes"], smells: { BonusAngle: "degree", ratio: 'rat' } },
-        arcsec: { type: 'num', dim: { RAD: 1 }, val: [ DEGREE, 60*60 ], alt: ["arcsecond", "arcseconds"], smells: { BonusAngle: "degree", ratio: 'rat' } },
-        grad: { type: 'num', dim: { RAD: 1 }, val: [ 90 * DEGREE, 100 ], alt: ["gradian", "gon"],
+        arcmin: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 360*60 ], alt: ["arcminute", "arcminutes"], smells: { BonusAngle: "degree", ratio: 'rat' } },
+        arcsec: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 360*60*60 ], alt: ["arcsecond", "arcseconds"], smells: { BonusAngle: "degree", ratio: 'rat' } },
+        grad: { type: 'num', dim: { RAD: 1 }, val: [ CIRCLE, 400 ], alt: ["gradian", "gon"],
             command: () => { angleSmell = 'grad'; }, smells: { BonusAngle: "grad" } },
+        rev: { type: 'num', dim: { RAD: 1 }, reserved: true, val: CIRCLE, alt: ["revs", "revolution", "revolutions"],
+            desc: "revolutions" },
+        rpm: { type: 'num', dim: { RAD: 1, T: -1 }, val: [ CIRCLE, MIN ], desc: "revolutions per minute" },
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
@@ -2218,10 +2233,11 @@
             let str = "", ratioButton = "";
             if (intpart !== 0n || num === 0n) {
               str += String(intpart);
-              if (num !== 0n)
+              if (num !== 0n) {
                 str += " ";
-              if (opts.exactHint && opts.html)
-                ratioButton = ` <span class="button exact" onclick="stuffRatio(event)")>ratio?</span>`;
+                if (opts.exactHint && opts.html)
+                  ratioButton = ` <span class="button exact" onclick="stuffRatio(event)")>ratio?</span>`;
+              }
             }
             if (num !== 0n)
               str += String(num) + "/" + String(denom);
