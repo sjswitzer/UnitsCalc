@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.33">
+    <meta name="appVersion" content="1.6.34">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -2375,7 +2375,8 @@
       //
 
       let parseStr = "", initialParseStr = "";
-      let parsePos = 0, parseFurthest = 0;
+      let parsePos = 0, parseFurthest = 0, exprStatementExprPos = -1;
+;
       const NOSKIP = { noSkip: true };
 
       function peekc() {
@@ -3065,10 +3066,13 @@
       //    expr ( ( ':' | '|' ) unitsstr ) )+
 
       function parseStatement(opts) {
+        exprStatementExprPos = -1;
         const backtrack = parsePos;
         let word = parseWord(opts);
         if (word !== null) {
           if (take('=')) {
+            skipSpaces();
+            exprStatementExprPos = parsePos;
             let val = parseExpr(opts);
             if (val) {
               return { ...val, sym: word, defined: true };
@@ -3099,6 +3103,7 @@
                 paramNames[p] = true;
               }
               skipSpaces();
+              exprStatementExprPos = parsePos;
               const exprStart = parsePos;
               let expr = parseExpr({ ...opts, parse: true });
               if (expr !== null)
@@ -3108,6 +3113,8 @@
           }
           parsePos = backtrack;
         }
+        skipSpaces();
+        exprStatementExprPos = parsePos;
         let val = parseExpr();
         let displayUnits;
         while (val && (take(':') || take('|'))) {  // I prefer '|' but ':' is easier on mobile
@@ -3181,46 +3188,24 @@
           } catch (e) {
             if (e instanceof ChattyError) {
               // Try to supply missing left parin.
-              // Note: This doesn't seem like a very general solution,
-              // and it's rather ugly but it works well enough.
-              let fixPos = 0, trackingFix = true;
-              if (exprStr[exprStr.length-1] === ')') {
-                let fixPos = 0, trackingFix = true, nl = 0, nr = 0;
-                for (let pos = 0; pos < exprStr.length; pos++) {
-                  let c = exprStr[pos];
-                  if (c === ' ' || c === '\t') {
-                    if (trackingFix)
-                    fixPos = pos+1;
-                  } else {
-                    trackingFix = false;
-                    if (c === ')') {
-                      nr++;
-                    } else if (c === '(' ) {
-                      nl++;
-                    } else if (c === '=') {
-                      trackingFix = true;
-                      fixPos = pos+1;
-                    }
+              if (exprStr[exprStr.length-1] === ')' && exprStatementExprPos >= 0) {
+                exprStr = exprStr.substring(0, exprStatementExprPos) + '(' + 
+                  exprStr.substring(exprStatementExprPos);
+                let saveParseStr = parseStr, saveParesPos = parsePos, saveParseFurthest = parseFurthest;
+                try {
+                  val = parseInputStatement(exprStr);
+                  if (val) {
+                    if (hasCaret)
+                      exprStr += CARETSYM;
+                    exprElement.value = exprStr;
+                    e = undefined;  // ignore the error
                   }
-                }
-                if (nl === nr-1) {
-                  exprStr = exprStr.substring(0, fixPos) + '(' + exprStr.substring(fixPos);
-                  let saveParseStr = parseStr, saveParesPos = parsePos, saveParseFurthest = parseFurthest;
-                  try {
-                    val = parseInputStatement(exprStr);
-                    if (val) {
-                      if (hasCaret)
-                        exprStr += CARETSYM;
-                      exprElement.value = exprStr;
-                      e = undefined;  // ignore the error
-                    }
-                  } catch(e2) {
-                      e = e2; // keep original error
-                  } finally {
-                    // If it succeeds, there will be no error message.
-                    // If it fails, we want original context.
-                    parseStr = saveParseStr, parsePos = saveParesPos, parseFurthest = saveParseFurthest;
-                  }
+                } catch(e2) {
+                    e = e2; // keep original error
+                } finally {
+                  // If it succeeds, there will be no error message.
+                  // If it fails, we want original context.
+                  parseStr = saveParseStr, parsePos = saveParesPos, parseFurthest = saveParseFurthest;
                 }
               }
             }
