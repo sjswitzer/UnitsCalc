@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.30">
+    <meta name="appVersion" content="1.6.31">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -617,10 +617,10 @@
             <th> Description
           <tr>
             <td> mean(x,y,&hellip;)
-            <td> The average of a set of numbers or lengths
+            <td> The average of a set of numbers or dimensional values
           <tr>
             <td> sum(x,y,&hellip;)
-            <td> The average of a set of numbers or lengths
+            <td> The average of a set of numbers or dimensional values
           <tr>
             <td> hyp(x,y,&hellip;)
             <td> The hypotenuse of a triangle or, more usefully, the diagonal of a rectangle
@@ -632,10 +632,10 @@
             <td> Cube root
           <tr>
             <td> sin(angle)
-            <td> Sine of an <i>angle</i> (must be units of radian or degree)
+            <td> Sine of an <i>angle</i> (must be units of radians or degrees or a plain number)
           <tr>
             <td> cos(angle)
-            <td> Cosine of an <i>angle</i> (must be units of radian or degree)
+            <td> Cosine of an <i>angle</i> (must be units of radians or degrees or a plain number)
           <tr>
             <td> atan2(y, x)
             <td> Returns the <i>angle</i> corresponding to the slope y/x, even when x is zero.
@@ -1766,6 +1766,8 @@
             let val = new Rational(Number((parts[0]??'0') + '.' + (parts[1]??'0')));
             systemSymbols.version = { sym: 'version', type: 'num', dim: {}, val,
                 desc: `version ${appVersion} ${location.href}` };
+            // Because I ALWAYS mistype this in my phone... :)
+            systemSymbols.bersion = systemSymbols.version;
           }
         }
       }
