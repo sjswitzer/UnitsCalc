@@ -1865,35 +1865,30 @@
         }
       }
 
-      function stripSuffixes(str, ...suffixes) {
+      function stripRatioSuffixes(str) {
         let oldLength;
         do {
           oldLength = str.length;
-          for (let suffix of suffixes) {
-            let pos = str.length-suffix.length;
-            if (ALPHA.includes(suffix[0])) {  // strip a word at a word boundary
-              if (str.endsWith(suffix) && !ALPHA.includes(str[pos-1]))  // strip a word
-                str = str.substr(0, pos); 
-            } else {   // strip any of these chars
-              pos = str.length - 1;
-              if (suffix.includes(str[pos])) 
-                str = str.substr(0, pos);
-            }
+          let pos = str.length - 1;
+          if (" \t:|".includes(str[pos]))
+            str = str.substr(0, pos);
+          for (let suffix of [ "ratio", "rat", "mixedratio", "mix" ]) {
+            pos = str.length-suffix.length;
+            if (str.endsWith(suffix) && !ALPHA.includes(str[pos-1]))  // needs word boundard
+              str = str.substr(0, pos); 
           }
         } while (str.length < oldLength);
         return str;
       }
 
-      let ratioSuffixes = [ " :|", "ratio", "rat", "mixedratio", "mix" ];
-
       function stuffMixedRatio(event) {
-        let str = stripSuffixes(parseStr, ...ratioSuffixes) + " : mixedratio";
+        let str = stripRatioSuffixes(parseStr) + " : mixedratio";
         stuffExpr(str);
         event.preventDefault();
       }
 
       function stuffRatio(event) {
-        let str = stripSuffixes(parseStr, ...ratioSuffixes) + " : ratio";
+        let str = stripRatioSuffixes(parseStr) + " : ratio";
         stuffExpr(str);
         event.preventDefault();
       }
