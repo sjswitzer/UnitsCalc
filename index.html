@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.29">
+    <meta name="appVersion" content="1.6.30">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1150,7 +1150,7 @@
         dram: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8) * BigInt(N5K)**3n ], smells: { uscu: true }, alt: ["drams"] },
         minim: { type: 'num', dim: { L: 3 }, val: [ GAL5K3, BigInt(128 * 8 * 60) * BigInt(N5K)**3n  ], smells: { uscu: true }, alt: ["minims"] },
         cord: { type: 'num', dim: { L: 3 }, val: [ 128 * FT5K**3, N5K**3 ], desc: "cord of wood", smells: { uscu: true }, alt: ["cords"] },
-        bdft: { type: 'num', dim: { L: 3 }, val: [ FT5K**2 * IN5K, N5K**3 ], desc: `1' \u00D7 1' \u00D7 1"`, smells: { uscu: true }, alt: ["boardfoot", "boardfeet"] },
+        bdft: { type: 'num', dim: { L: 3 }, val: [ FT5K**2 * IN5K, N5K**3 ], desc: `1' \u00D7 1' \u00D7 1"`, smells: { uscu: true, BonusFt: 'ft' }, alt: ["boardfoot", "boardfeet"] },
         hogshead: { type: 'num', dim: { L: 3 }, val: [ 63 * GAL5K3, N5K**3 ], smells: { uscu: true }, alt: ["hogsheads"] },
         barrel: { type: 'num', dim: { L: 3 }, val: [ 63 * GAL5K3, 2 * N5K**3 ], smells: { uscu: true }, alt: ["barrels", "bbl"],
             desc: "liquid barrel, not oil" },
@@ -1363,12 +1363,13 @@
         rad: { type: 'num', dim: { L: 2, T: -2 }, val: [ M**2, 100 * SEC**2 ], alt: ["rads"],
             prefixSym: "rad", prefixNames: ["rad", "rads"], smells: { cgs: true } },
         // (T^-1) -- Indistinguishable from Hz
-        Bq: { type: 'num', dim: { T: -1 }, val: [1, SEC ], alt: ["becquerel", "becquerels"],
+        Bq: { type: 'num', dim: { DECAY: 1, T: -1 }, val: [1, SEC ], alt: ["becquerel", "becquerels"],
             prefixSym: "Bq", prefixNames: "alts"  , smells: { mks: true } },
-        Ci: { type: 'num', dim: { T: -1 }, val: [37 * 10**9, SEC ], alt: ["curie", "curies"],
+        Ci: { type: 'num', dim: { DECAY: 1, T: -1 }, val: [37 * 10**9, SEC ], alt: ["curie", "curies"],
             prefixSym: "Ci", prefixNames: "alts" },
-        Rd: { type: 'num', dim: { T: -1 }, val: [10**6, SEC ], alt: ["rutherford", "rutherfords"],
+        Rd: { type: 'num', dim: { DECAY: 1, T: -1 }, val: [10**6, SEC ], alt: ["rutherford", "rutherfords"],
             prefixSym: "Rd", prefixNames: "alts" },
+        decay: { type: 'num', dim: { DECAY: 1 }, val: 1, desc: "radioactive decay event", alts: ["decays"] },
 
         // Interesting constants and units (various)
         groupVarious: { group: "Useful Constants and Units" },
@@ -1888,7 +1889,7 @@
         'bit', 'byte', 'kB',  'MB',  'GB',  'TB',
         // seconds come after electrical and information units so that a coulomb
         // is an "A s", not an "s A"
-        's', 'K', 'person', '$', 'symbol', 'mol',
+        's', 'K', 'person', '$', 'symbol', 'decay', 'mol',
         'sr', 'radian', 'cd', 'lx', 'lm',
       ];
       const mksUnits = [ ...universalUnits, 'm', 'kg', 'N', 'J', 'Pa', 'W', 'H' ];
