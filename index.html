@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.6.31">
+    <meta name="appVersion" content="1.6.32">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1850,19 +1850,30 @@
         }
       }
 
-      let mixedRationStr = " : mixedratio", ratioString = " : ratio";
+      function stripSuffixes(str, ...suffixes) {
+        let stripped;
+        do {
+          stripped = false;
+          for (let suffix of suffixes) {
+            if (str.endsWith(suffix)) {
+              str = str.substr(0, str.length-suffix.length);
+              stripped = true;
+            }
+          }
+        } while (stripped);
+        return str;
+      }
+
+      let ratioSuffixes = [" ", ":", "|", ": ratio", ": mixedratio"]
 
       function stuffMixedRatio(event) {
-        let str = parseStr.trim() + mixedRationStr;
+        let str = stripSuffixes(parseStr, ...ratioSuffixes) + " : mixedratio";
         stuffExpr(str);
         event.preventDefault();
       }
 
       function stuffRatio(event) {
-        let str = parseStr.trim();
-        if (str.endsWith(mixedRationStr))
-          str = str.substr(0, str.length - mixedRationStr.length);
-        str += ratioString;
+        let str = stripSuffixes(parseStr, ...ratioSuffixes) + " : ratio";
         stuffExpr(str);
         event.preventDefault();
       }
