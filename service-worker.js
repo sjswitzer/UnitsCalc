@@ -62,8 +62,8 @@ async function handleFetch(event) {
 //
 
 let prefetchURLs = [
-  "foo.html",
-  "bar.png",
+  // "foo.html",
+  // "bar.png",
 ];
 
 onactivate = event => handleActivate(event);
