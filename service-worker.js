@@ -66,7 +66,7 @@ let prefetchURLs = [
   "bar.png",
 ];
 
-onactivate = handleActivate(event);
+onactivate = event => handleActivate(event);
 
 async function handleActivate(event) {
   // The idea here is to issue prefetch requests one at a time at a leisurely pace
