@@ -176,26 +176,25 @@
         clear: right;
         margin-inline-end: 1ch;
       }
-      div.help td:last-child, div.help th:last-child {
+      div.help td:nth-child(2), div.help th:nth-child(2) {
         float: right;
         clear: unset;
         margin-inline-end: 0;
         width: 73%;
       }
-      table.example2 {
-        --description-indent: 11rem !important;
-      }
-      table.example2 td {
-        min-width: 7ch;
+      #help-builtin td:nth-child(2) {
+        width: 82%;
       }
       div.help td {
         margin-top: .05em;
         margin-bottom: .05em;
       }
-      div.help td.group {
+      div.help .group {
         padding: .5em 0em;
         font-style: italic;
         font-weight: normal !important;
+        display: block;
+        clear: both;
       }
       div.help th, div.help thead td {
         text-align: left;
@@ -207,10 +206,7 @@
       div.help ul > li {
         margin: .5em;
       }
-      div.help code,
-      div.help table.example td:first-child,
-      div.help table.example2 td:nth-child(1),
-      div.help table.example2 td:nth-child(2) {
+      div.help code, div.help table.example td:first-child {
         font-weight: bold;
         font-family: caption, sans-serif;
         color: #444;  /* subtle graying to offset the boldness */
@@ -436,7 +432,7 @@
             know why it's grayed out, you can hit &ldquo;enter&rdquo; to see an error message.
         <p> If you realize you should have begun a parenthesized expression and enter
             <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically
-            so that you don't have to go back and add it yourself (which is tedious on mobile devices).
+            so that you don't have to go back and add it yourself (which is annoying on mobile devices).
         <p> In these help boxes most sample expressions, like
             <code>11'4"/2</code>, can be clicked to evaluate the expression.
         </p>
@@ -510,7 +506,7 @@
             and <code>2 ft3</code> is two cubic feet. If a unit specifier is immediately
             preceded by a <code>/</code> (without spaces), it's an inverse unit.
             For instance, <code>60 /ft2</code> means 60 per square foot.
-            <code>144/ft2</code> means 144 per square foot or, equivalently, 1 per square inch
+            <code>144 /ft2</code> means 144 per square foot or, equivalently, 1 per square inch
             (which is how it will display). <i>What</i> per square foot? Anything.
             Think &ldquo;ducks&rdquo; or &ldquo;pebbles&rdquo; and you'll be on the right track.
         <p> In fact, you can type <code>640 'ducks' / mi2</code> or <code>144 'pebble'/ft2</code>.
@@ -763,11 +759,10 @@
         <h2> Built-In Constants and Units </h2>
         <p> Symbols that are reserved (that is, cannot be redefined) are noted.
         <p>
-        <table class="stuff example2">
+        <table class="stuff example">
           <thead>
             <tr>
               <td> Symbol
-              <td> Inverse
               <td> Description
             </tr>
           </thead>
@@ -1190,9 +1185,9 @@
         // and numbers come out all weird if you use tropical years. So "yr" is julian.
         // Per Unified Code for Units of Measure:
         yr: { type: 'num', dim: { T: 1 }, val: [ 36525 * DAY , 100 ], smells: { unscientific: true },
-            desc: "mean Julian year", alt: ["year", "years", "yrs", "aj"] },
+            desc: "mean Julian year", alt: ["year", "years", "yrs"] },
         yrt: { type: 'num', dim: { T: 1 }, val: [ 36524219 * DAY, 100000 ], smells: { unscientific: true },
-            desc: "mean tropical year", alt: ["at"] },
+            desc: "mean tropical year" },
         yrg: { type: 'num', dim: { T: 1 }, val: [ 3652425 * DAY, 10000 ], smells: { unscientific: true },
             desc: "mean Gregorian year", /* alt: ["ag"] -- nope, collides with attogram */ },
         mo: { type: 'num', dim: { T: 1 }, val: [  36525 * DAY, 1200 ], smells: { unscientific: true },
@@ -1634,7 +1629,7 @@
         let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
           if (sym.group) {
-            html += `<tr ${sym.id ? `id="${sym.id}"` : ''}><td colspan="3" class="group">${sym.group}`;
+            html += `<div class="group">${sym.group}</div>`;
             delete systemSymbols[name];
             continue;
           }
@@ -1758,11 +1753,10 @@
           }
           if (sep === ", ")
             helpDesc += ", etc.";
-          let row = `<tr><td><span class="stuff-text">${name}<span>
-                       <td><span class="stuff-text">/${name}</span><td>`;
+          let row = `<tr><td><span class="stuff-text">${name}<span><td>${helpDesc}</tr>`;
           backRefs[name] = { row, helpDesc };
           if (!sym.hidden)
-            html += row + helpDesc;
+            html += row;
         }
         builtinSymbolsElement.innerHTML = html;
 
@@ -3627,13 +3621,16 @@
 
       document.addEventListener('keydown', function(evt) {
         if (evt.key === 'Escape')
-          showHelp();
+          showHelp(); // which, since it has no param, means "dismiss help"
       });
 
       // onchange event isn't suitable because if the value doesn't change, nothing is reported
       exprElement.addEventListener('keydown', function(evt) {
         if (evt.key === 'Enter')
           updateParse({ doAssigns: true, userHitEnter: true });
+      });
+      exprElement.addEventListener('blur', function(evt) {
+        updateParse({ doAssigns: true, userHitEnter: true });
       });
 
       exprElement.addEventListener('input', function(evt) {
