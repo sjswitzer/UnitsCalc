@@ -43,6 +43,7 @@ async function handleFetch(event) {
       if (cacheResponse) return cacheResponse;
       return fetchResponse;
     } catch (failureReason) {
+      if (cacheResponse) return cacheResponse;
       return new Response(null, { status: 502, statusText: "Network Failed" });
     }
   }
