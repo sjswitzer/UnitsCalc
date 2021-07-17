@@ -17,19 +17,16 @@ let useNavigatorOnline = true;  // For testing; it should work either way
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
-// There SHOULD be a Promise.delay like this.
+// There should be a Promise.delay like this but it's easy to define
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
 self.onfetch = event => {
   let request = event.request;
   if (logging) console.info("onfetch", request.url, request);
 
-  // There SHOULD be async blocks like this:
-  //     async { ... }
-  // Instead, I'll use
-  //     (async () => { ... })()
-  // just like we once created scopes using (function() { ... })(), hmm...
-  event.respondWith((async () => {
+  event.respondWith(handleFetch());
+
+  async function handleFetch() {
     // Use only our specific cache. Most service worker examples match from the domain-wide
     // cache, "caches.match(...)", which seems like a bad idea to me.
     // Surely it's better to have each app manage its own cache in peace?
@@ -100,7 +97,7 @@ self.onfetch = event => {
     if (logging) console.info("resolved with", request.url, resp.status,
         resp === cacheResponse ? "cached" : "network", resp);
     return resp;
-  })());
+  }
 };
 
 //
