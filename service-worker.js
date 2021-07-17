@@ -12,223 +12,78 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let logging = false;  // You can change this in the debugger
-let useNavigatorOnline = true;  // For testing; it should work either way
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
 // There should be a Promise.delay like this but it's easy to define
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
-self.onfetch = event => {
+self.onfetch = event => event.respondWith(handleFetch(event));
+
+async function handleFetch(event) {
   let request = event.request;
-  if (logging) console.info("onfetch", request.url, request);
 
-  event.respondWith(handleFetch());
+  // Use only our specific cache. Most service worker examples match from the domain-wide
+  // cache, "caches.match(...)", which seems like a bad idea to me.
+  // Surely it's better to have each app manage its own cache in peace?
+  // This is particularly useful when you serve test and production versions of
+  // the app from the same origin.
+  let cache = await caches.open(cacheName);
+  let cacheResponse = await cache.match(request);
 
-  async function handleFetch() {
-    // Use only our specific cache. Most service worker examples match from the domain-wide
-    // cache, "caches.match(...)", which seems like a bad idea to me.
-    // Surely it's better to have each app manage its own cache in peace?
-    // This is particularly useful when you serve test and production versions of
-    // the app from the same origin.
-    let cache = await caches.open(cacheName);
-    let cacheResponse = await cache.match(request);
-    if (logging) console.info("cache response", cacheResponse);
-
-    // If we're offline just return the cached value immediately.
-    // Due to "lie-fi" and related issues, "navigator.onLine" is unreliable,
-    // but the way it's unreliable is that it can report online even if your network is
-    // useless. If it returns false, you've (almost?) definitely got no network.
-    // BUT, in that case the request is very likely to fail immediately and you have
-    // to handle that anyway. HOWEVER, testing "navigator.onLine" before calling fetch MIGHT
-    // prevent annoying browser popups asking to enable the network. So there's that.
-    if (useNavigatorOnline && navigator.onLine === false) {
-      if (cacheResponse) {
-        if (logging) console.log("offline cached response", request.url, cacheResponse.status, cacheResponse);
-        return cacheResponse;
-      }
-      if (logging) console.log("offline no-cache response", request.url);
-      // Add request to the deferred queue with a delay and fake a 502 Bad Gateway response
-      deferFetchAndCache({ request: request, delay: 5 * minutes });
-      return new Response(null, { status: 502, statusText: "Offline" });
-    }
-
-    // Issue a fetch request even if we have a cached response
-    let fetchResult = (async () => {
-      let fetchResponse, clonedRequest = request.clone();
-      try {
-        if (logging) console.info("request", request.url, request);
-        fetchResponse = await fetch(request, { cache: "no-cache" });
-        if (logging) console.info("response", request.url, fetchResponse.status, fetchResponse);
-      } catch (failureReason) {
-        if (logging) console.info("request failed", request.url, failureReason);
-        // Add request to the deferred queue with a delay and fake a 502 Bad Gateway response
-        deferFetchAndCache({ request: clonedRequest, delay: 5 * minutes });
-        fetchResponse = new Response(null, { status: 502, statusText: "Network Failed" });
-      }
-
+  // Issue a fetch request even if we have a cached response
+  let fetchResult = doFetch();
+  async function doFetch() {
+    try {
+      let fetchResponse = await fetch(request.clone(), { cache: "no-cache" });
       if (fetchResponse.ok) {
-        if (logging) console.info("response cached", request.url, fetchResponse.status, fetchResponse);
         cache.put(request, fetchResponse.clone());
         return fetchResponse;
-      }
-
-      // Requeue certain rejections after a delay
-      let status = fetchResponse.status;
-      if ((status === 503 || status === 504 || status === 509))
-        deferFetchAndCache({ request: clonedRequest, delay: 5 * seconds });
-
-      if (cacheResponse)
-        return cacheResponse;
+      }  
+      if (cacheResponse) return cacheResponse;
       return fetchResponse;
-    })();
-
-    if (!cacheResponse) {
-      if (logging) console.info("uncached response", request.url);
-      return fetchResult;
+    } catch (failureReason) {
+      return new Response(null, { status: 502, statusText: "Network Failed" });
     }
-
-    // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
-    // If navigator.onLine is false, we will have already returned the cached response, so this
-    // is not likely to happen often.
-    if (logging) console.info("awaiting response", request.url)
-    let resp = await Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
-    if (logging) console.info("resolved with", request.url, resp.status,
-        resp === cacheResponse ? "cached" : "network", resp);
-    return resp;
-  }
-};
-
-//
-// Doodling some machinery here that I don't really need for this app.
-// It's kinda a lark but why not?
-//
-// ***************************************
-// ***  DANGER WILL ROBINSON, DANGER!  ***
-// ***************************************
-//
-// Everything above this comment is a good template for WHAT to do in a simple
-// self-updating service worker (save for the calls to deferFetchAndCache).
-//
-// Anything below this comment should be regarded as a sketch of HOW to do
-// things, but not necessarily WHAT you'd actually want to do yourself.
-//
-
-const postBackgroundMessage = (() => {
-  // Encapsulate the background worker and its state
-  let _backgroundEvents = [], _backgroundMessageResolvers = [];
-
-  function nextBackgroundMessage() {
-    if (_backgroundEvents.length > 0)
-      return Promise.resolve(_backgroundEvents.shift());
-    return new Promise(resolve => _backgroundMessageResolvers.push(resolve));
   }
 
-  function postBackgroundMessage(event) {
-    if (_backgroundMessageResolvers.length > 0)
-      return void _backgroundMessageResolvers.shift()(event);
-    _backgroundEvents.push(event);
-  }
+  if (!cacheResponse) return fetchResult;
 
-  self.onactivate = event => {
-    (async () => {
-      // Delay a bit to stay out of the app's way while it's starting up.
-      await delay(5 * seconds);
-      if (logging) console.info("background work started", event)
-  
-      let cache = await caches.open(cacheName);
-      let deferredRequests = [];
-  
-      // The idea here is to issue deferred requests one at a time at a leisurely pace
-      // to keep from competing for network and other resources.
-      for (;;) {
-        while (deferredRequests.length > 0 && !(useNavigatorOnline && navigator.onLine === false)) {
-          // request is either Request or string or { request: request, ...opts }
-          let request = deferredRequests.shift(), opts = {};
-          if (typeof request === 'object' && !(request instanceof Request))
-            opts = request, request = opts.request;
-          if (typeof request === 'string')
-            request = new Request(request);
-          if (!(request instanceof Request)) {
-            if (logging) console.error("request options contains no request", request, opts);
-            continue;
-          }
-          if (opts.delay) {
-            delay(opts.delay).then(() => deferFetchAndCache({...opts, request, delay: 0 }));
-            continue;
-          }
-          let fetchResponse, clonedRequest = request.clone();
-          try {
-            if (logging) console.info("background request", request.url, request);
-            fetchResponse = await fetch(request, { cache: "no-cache" });
-            if (logging) console.info("background response", request.url, fetchResponse.status, fetchResponse);
-          } catch (error) {
-            if (logging) console.info("background request failed", request.url, error);
-          }
-          if (fetchResponse?.ok) {  // ?. because we might have come from the catch block
-            if (logging) console.info("background response cached", request.url, fetchResponse.status, fetchResponse);
-            cache.put(request, fetchResponse.clone());
-          } else {
-            opts = { ...opts };  // Just to be safe, copy opts; there might be aliasing)
-            if (fetchResponse && (opts.retry === undefined || opts.retry > 0)) {
-              let status = fetchResponse.status;
-              if (status === 503 || status === 504 || status === 509) {
-                opts.retry ??= 10;
-                opts.retryDelay ??= 5 * seconds;
-              }
-            }
-            if (opts.retry > 0) {
-              opts.request = clonedRequest;
-              opts.retryDelay ??= 1 * seconds;
-              opts.retryDelayFactor ??= 2;
-              opts.delay = opts.retryDelay;
-              opts.retryDelay = retryDelayFactor * opts.retryDelay;
-              opts.retry = opts.retry - 1;
-              if (logging) console.info("retry background request", request.url, opts);
-              deferredRequests.push(opts);
-            }
-          }
-          // Pause a bit between requests
-          await delay(2 * seconds);
-        }
-  
-        let message;
-        if (deferredRequests.length === 0) {
-         // If there's no work to do, just wait for a posted message
-          message = await nextBackgroundMessage();
-        } else {
-          // Otherwise, wait for a message or a timeout
-          message = await Promise.any([
-            nextBackgroundMessage(),
-            delay(5 * minutes).then(() => "timer"),
-          ]);
-        }
-  
-        if (logging) console.info("background message recieved", message);
-        if (message.deferredRequests)
-          deferredRequests.push(...message.deferredRequests);
-      }
-    })();
-  };
-
-  // MDN says workers have an "online" event:
-  //    https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/ononline
-  // But Chrome's ServiceWorkerGlobalScope does not have an "ononline" property
-  // and registering this event does nothing. On the other hand it does no harm. 
-  self.addEventListener('online', event => postBackgroundMessage(event));
-  self.addEventListener('offline', event => postBackgroundMessage(event));
-  
-  return postBackgroundMessage;
-})();
-
-function deferFetchAndCache(...requests) {  // ... or requests
-  postBackgroundMessage({ deferredRequests: requests });
+  // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
+  // If navigator.onLine is false, we will have already returned the cached response, so this
+  // is not likely to happen often.
+  return Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
 }
 
-// This is a fine place to schedule some prefetches
-// (which I don't actually need right now)
-deferFetchAndCache(
-  // "foo.html",
-  // "bar.png",
-);
+//
+// I don't have anything to prefetch since everything is referenced from index.html.
+// But if I did, it would go something like this.
+//
+
+let prefetchURLs = [
+  "foo.html",
+  "bar.png",
+];
+
+onactivate = handleActivate(event);
+
+async function handleActivate(event) {
+  // The idea here is to issue prefetch requests one at a time at a leisurely pace
+  // to keep from competing for network and other resources.
+  let cache = await caches.open(cacheName);
+
+  for (let url of prefetchURLs) {
+    // Delay a bit to stay out of the app's way while it's starting up.
+    // We're in no hurry here.
+    await delay(5 * seconds);
+
+    let request = new Request(url);
+    try {
+      let fetchResponse = await fetch(request, { cache: "no-cache" });
+      if (fetchResponse.ok)
+        cache.put(request, fetchResponse);
+    } catch (_) {
+      // If it fails, it fails. But we persevere.
+    }
+  }
+}
