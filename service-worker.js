@@ -15,7 +15,7 @@
 let cacheName = location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/, minutes = 60 * seconds;
 
-// There should be a Promise.delay like this but it's easy to define
+// There should be a Promise.delay like this but it's trivial to define.
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
 self.onfetch = event => event.respondWith(handleFetch(event));
@@ -23,15 +23,15 @@ self.onfetch = event => event.respondWith(handleFetch(event));
 async function handleFetch(event) {
   let request = event.request;
 
-  // Use only our specific cache. Most service worker examples match from the domain-wide
-  // cache, "caches.match(...)", which seems like a bad idea to me.
+  // Use only our specific cache. Most service worker examples match from the
+  // domain-wide cache, "caches.match(...)", which seems like a bad idea to me.
   // Surely it's better to have each app manage its own cache in peace?
   // This is particularly useful when you serve test and production versions of
   // the app from the same origin.
   let cache = await caches.open(cacheName);
   let cacheResponse = await cache.match(request);
 
-  // Issue a fetch request even if we have a cached response
+  // Issue a fetch request even if we have a cached response.
   let fetchResult = doFetch();
   async function doFetch() {
     try {
@@ -50,14 +50,15 @@ async function handleFetch(event) {
   if (!cacheResponse) return fetchResult;
 
   // Resolve with the fetch result or the cache response delayed for a moment, whichever is first.
-  // If navigator.onLine is false, we will have already returned the cached response, so this
-  // is not likely to happen often.
+  // If navigator.onLine is false, the request will have failed immediately and we will have
+  // already returned the cached response so this is not likely to happen often.
+  // There's no point even checking navigator.onLine.
   return Promise.any([fetchResult, delay(2 * seconds, cacheResponse)]);
 }
 
 //
 // I don't have anything to prefetch since everything is referenced from index.html.
-// But if I did, it would go something like this.
+// But if I did, it would go like this.
 //
 
 let prefetchURLs = [
@@ -69,14 +70,12 @@ onactivate = handleActivate(event);
 
 async function handleActivate(event) {
   // The idea here is to issue prefetch requests one at a time at a leisurely pace
-  // to keep from competing for network and other resources.
+  // to keep from competing for network and other resources. It makes no sense
+  // to compete with the app while it launches.
   let cache = await caches.open(cacheName);
 
   for (let url of prefetchURLs) {
-    // Delay a bit to stay out of the app's way while it's starting up.
-    // We're in no hurry here.
     await delay(5 * seconds);
-
     let request = new Request(url);
     try {
       let fetchResponse = await fetch(request, { cache: "no-cache" });
