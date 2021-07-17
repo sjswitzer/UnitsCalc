@@ -140,7 +140,7 @@
        * a <div> for help content which is made scrollable.
        */
       div.help {
-        padding: 0em .5em;
+        padding: 0em 1em;
         background-color: #e8e8e8;
         position: absolute;
         display: none;
@@ -150,6 +150,9 @@
         bottom: .5em;
         border: .15em solid black;
         border-radius: .4em;
+      }
+      body[data-device="mobile"] div.help {
+        padding: 0 .5em;  /* closer padding of help on mobile; every pixel counts */
       }
       div.help > close-button {
         color: #0005;  /* rather transparent black */
@@ -548,7 +551,7 @@
                 depends on usage and conditions. I'll pad it out to $65. -->
             <li> How much does it cost to run a typical refrigerator per month?
                 <code>ecost * 65W : month</code>
-            <li> How much does it cost to watch a large LED TV per hour?
+            <li> How much does it cost to watch a modern flat-screen TV per hour?
                   <code>ecost * 450 watt : hr</code>
             <li> How about a year on standby?
                   <code>ecost * .5 watt : yr</code>
@@ -2209,7 +2212,7 @@
             let l10 = Math.log10(Number(denom));
             if (l10 === Math.trunc(l10)) {
               asFrac = false;
-            } else if (num > 3n && (num > 12n || denom > 12n)) { // num and/or denom too big
+            } else if (num > 100n || denom > 100n) { // num and/or denom too big
               // unless we have a power of two in the denominator
               let lg2 = Math.log2(Number(denom));
               asFrac = (lg2 === Math.trunc(lg2) && lg2 <= 10);
