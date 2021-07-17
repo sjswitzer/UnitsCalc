@@ -28,7 +28,7 @@
     <base target="_blank"> <!-- all links open in a new tab/page -->
     <style type="text/css">
       html {
-        -webkit-text-size-adjust:none
+        -webkit-text-size-adjust: none
       }
 
       * { /* input elements lay out bizarrely without this since their borders aren't part of their size */
@@ -47,7 +47,7 @@
         left: 0;
         right: 0;
       }
-      body, table  {
+      html, table  {
         font: 110% caption, sans-serif;
       }
       @media all and (orientation:landscape) {
@@ -65,7 +65,7 @@
        * can change it later.
        */
       @media (hover: none) {
-        body { --device: mobile; }
+        body {--device: mobile;}
       }
       body[data-device="mobile"] div.input-area {
         font-size: 120%;
@@ -98,6 +98,10 @@
         border: .15em solid;
         border-radius: .3em;
         padding: .1em .4em;
+      }
+
+      .results {
+        font-size: 120%;
       }
 
       /*
@@ -141,8 +145,8 @@
         position: absolute;
         display: none;
         top: 10%;
-        left: 40%;
-        right: 1em;
+        left: 35%;
+        right: .5em;
         bottom: .5em;
         border: .15em solid black;
         border-radius: .4em;
@@ -164,18 +168,37 @@
         overflow-y: auto;
         height: 100%;
       }
-      /* styling for help content */
+      div.help table, div.help tr, div.help td, div.help th {
+        display: block;
+      }
       div.help td, div.help th {
-        padding: 0em .15em;
-        vertical-align: top;
-        text-align: left;
+        float: left;
+        clear: right;
+        margin-inline-end: 1ch;
+      }
+      div.help td:last-child, div.help th:last-child {
+        float: right;
+        clear: unset;
+        margin-inline-end: 0;
+        width: 73%;
+      }
+      table.example2 {
+        --description-indent: 11rem !important;
+      }
+      table.example2 td {
+        min-width: 7ch;
+      }
+      div.help td {
+        margin-top: .05em;
+        margin-bottom: .05em;
       }
       div.help td.group {
         padding: .5em 0em;
         font-style: italic;
         font-weight: normal !important;
       }
-      div.help th {
+      div.help th, div.help thead td {
+        text-align: left;
         font-weight: bold;
       }
       div.help ul {
@@ -194,16 +217,6 @@
       }
       div.help code.abstract {
         font-style: italic;
-      }
-      div.help table.example td:first-child {
-        width: 7em;
-     }
-      div.help table.example2 td:nth-child(1),
-      div.help table.example2 td:nth-child(2) {
-        width: 2.5em !important;
-      }
-      div.help table.example, div.help table.example2 {
-        margin-left: 1em;
       }
       /* Testing affordance; example text can be stuffed into the expr box */
       div.help code:hover, div.help .stuff-text:hover,
@@ -421,16 +434,18 @@
             The results box will be grayed out while that happens.
             It would be too noisy to alert each of these errors, but if you don't
             know why it's grayed out, you can hit &ldquo;enter&rdquo; to see an error message.
-        <p> If, however, you realize you should have begun a parenthesized expression and enter
+        <p> If you realize you should have begun a parenthesized expression and enter
             <code>10'4" + 4'2")</code>, the opening parenthesis will be provided automatically
             so that you don't have to go back and add it yourself (which is tedious on mobile devices).
         <p> In these help boxes most sample expressions, like
             <code>11'4"/2</code>, can be clicked to evaluate the expression.
         </p>
         <table class="stuff example">
-          <tr>
-            <th> Example
-            <th> Description
+          <thead>
+            <tr>
+              <td> Example
+              <td> Description
+            </thead>
           <tr>
             <td> 5' 6"
             <td> An ordinary distance
@@ -450,7 +465,7 @@
             <td> (5'6" + 7') / 2
             <td> The average of 5'6" and 7'
           <tr>
-            <td> 5'10 3/8" * 3/4
+            <td> 5' 10 3/8" * 3/4
             <td> 3/4 of 5' 10 3/8"
           <tr>
             <td> 12' / 6"
@@ -480,23 +495,12 @@
             <td> 1/4 mi2 / acres
             <td> The number of acres in a quarter of a square mile
         </table>
-        <p> Just for fun, try <code>furlongs/fortnight</code> or <code>gallons/cup</code>.
-        <h2> Terms </h2>
-        <p> Expressions are built up out of <i>terms</i> which are either
-          <ul>
-            <li> A plain number such as <code>12</code>, <code>7.</code>,
-                 <code>3.14</code>, <code>.15</code>, etc.
-            <li> A variable name, such as <code>pi</code>
-            <li> A <i>length</i> which can be a number, a fraction, or a number
-                 and a fraction followed by a <i>unit</i>
-            <li> Any sequence of the the previous length-unit combinations as long as
-                 the units are of descending size
-          </ul>
+        <p> Try <code>furlongs/fortnight</code> or <code>gallons/cup</code>.
         <h3> Units </h3>
         <p> Units are either the notations <code>'</code> and <code>"</code> for
             feet and inches or a named unit.
-            The  <span class="linklike" onclick="showHelp('help-builtin')">full list</span>
-            of predefined units and constants is too long to show here.
+            The  <span class="linklike" onclick="showHelp('help-builtin')">full list
+            of predefined units and constants</span> is too long to show here.
         <p> Any variable you define can be used as a unit itself.
             For example, if you enter <code>cubit = 1 1/2'</code>, you can then use
             expressions like <code>3 cubit 5 1/2"</code>.
@@ -514,13 +518,7 @@
             Try <code>2 'shoes'/person * 1000 people</code>.
             If there's some unit this tool didn't anticipate, you can define it yourself,
             <code>bogosity = 'bogosity'</code> and use it as an ordinary unit such as <code>20 bogosity</code>.
-        <p> Units must be specified in descending order.
-            You can use <code>12'3"</code> but you can't use <code>12"3'</code>.
-            This is to prevent accidentally typing <code>12'3'</code> when you really
-            meant <code>12'3"</code>.
-            You can type nonsense like <code>3 1/2m 3.5"</code> if you want, but you won't
-            do it by accident.
-        <p><i>Beware that spaces can occasionally make a big difference.</i>
+        <p> <i>Beware that spaces can occasionally make a big difference.</i>
             <code>1/2 in</code> or <code>1/2in</code> means half an inch,
             but <code>1 / 2 in</code> or even
             <code>1/ 2 in</code> means one over 2 inches. <i>Just avoid putting spaces around
@@ -643,7 +641,7 @@
         </table>
         <p> For the purposes of this tool, angles are neither degrees nor radians.
             They are <i>just angles</i> and can be
-            specified or displayed using either notation. If, however, a plain number is given, it will be
+            specified or displayed using either notation. If a plain number is given, it will be
             interpreted as radians. So <code>sin(45 degrees)</code>, <code>sin(pi/4radian)</code>
             and <code>sin(pi/4)</code> all mean the same thing.
         <h2> Metric Feet </h2>
@@ -664,7 +662,7 @@
         <p> This program started out as a quick and dirty tool to easily divide
             lengths given in feet and inches into equal parts, a common task
             in the construction industry and quite tedious to work out by hand.
-            If the file name or URL contains the string "inch" (regardless of case),
+            If the file name or URL contains the string "inch",
             you'll see the original user interface. If you're curious, you can
             <span class="linklike" onclick="toggleLegacyMode()">switch</code> the UI.
         <p> But I started to think of it as a <i>calculator</i> and wondered
@@ -768,9 +766,9 @@
         <table class="stuff example2">
           <thead>
             <tr>
-              <th> Symbol
-              <th> Inverse
-              <th> Description
+              <td> Symbol
+              <td> Inverse
+              <td> Description
             </tr>
           </thead>
           <tbody id="builtin-symbols">
@@ -831,7 +829,6 @@
       class MessageError extends Error {
         toString() { return this.message; }
       }
-      class OverflowError extends MessageError {};
       const InternalError = Error;
 
       // Errors that are too chatty to show while typing.
@@ -1112,7 +1109,6 @@
           PISYM = "\uD835\uDF0B", TAUSYM = '\uD835\uDF0F', NAUGHTSYM = "\u2080",
           PLANCKHSYM = "\u210E", PLANCKHBARSYM = "\u210F", EPSILONSYM = "\u03B5",
           MULSYM = "\u00D7", DIVSYM = "\u00F7";
-  ;
       const ALPHA =
         "abcdefghijklmnopqrstuvwxyz" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
@@ -1630,7 +1626,10 @@
       ];
 
       // Groom the system symbols and inject help text
+      groomSystemSymbols();
       function groomSystemSymbols() {
+        // This is pretty janky, but that's how one-off data conditioning code goes.
+        // It's only run at init time and never on user input.
         let html = "";
         let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
@@ -1654,7 +1653,7 @@
           if (typeof sym.val !== 'object') // array, really
             sym.val = [ sym.val, 1n ];
           if (sym.val) {
-            // Check for loss of precicion
+            // Check for loss of precision. Units should be entirely rational.
             if (typeof sym.val[0] === 'number' && sym.val[0] > 1e15)
               throw InternalError(`Numerator should be a BigInt ${sym.sym}`);
             if (typeof sym.val[1] === 'number' && sym.val[1] > 1e15)
@@ -1787,7 +1786,6 @@
         }
       }
 
-      groomSystemSymbols();
       let foot = getSymbol('ft'), inch = getSymbol('in');
 
       function reduceParamVals(name, accum, params, fn) {  // fn => (accum, val) => val
@@ -1994,75 +1992,69 @@
         if (valSmells.unscientific)
           excludeUnscientific = false;
         function describeUnit(unit, opts = {}) {
-          try {
-            if (excludeUnscientific && unit.smells?.unscientific && !opts.forceUnit)
-              return null;
-            let uscu = !!unit.smells?.uscu, timeOnly = undefined;
-            for (let measure in unit.dim) {
-              if (measure !== 'T')
-                timeOnly = false;
-              else if (timeOnly === undefined)
-                timeOnly = true;
-            }
-            if (timeOnly)  // a time dimension is in neither (or both) metric and uscu systems
-              uscu = null;
-            let normSquared = Dim.normSquared(dim);
-            let measures = {...dim, ...unit.dim }, smallest = Number.POSITIVE_INFINITY, dotProduct = 0;
-            for (const measure in measures) {
-              if (!dim[measure] || !unit.dim[measure])
-                continue;
-              dotProduct += (dim[measure] ?? 0) * unit.dim[measure];
-              let q = dim[measure]/unit.dim[measure];
-              q = Math.abs(Math.trunc(q));
-              if (q < smallest && q !== 0)
-                smallest = q;
-            }
-            let exp = smallest;
-            if (dotProduct < 0)
-              exp = -exp;
-            if (exp === 0 || !isFinite(smallest)) {
-              if (!opts.forceUnit)
-                return null;
-              exp = 1;
-            }
-            // Unit applied "exp" times; also ensures dotProduct is >= 0 unless forced.
-            // The dot product measures how similar the units vectors are; the projection
-            // each vector on the other. Orthagonal units have a product of zero; negative
-            // dot products mean anti-aligned, but we flipped the exponent's sign in that case.
-            // The dot product tells us which unit is most similar to the number and tells us
-            // the sign of the exponent, but it may not be the best unit to apply, for instance
-            // it may not divide the dimensions evenly and we can't have fractional dimensions.
-            // Also, other factors may figure in chosing the unit such as which one most reduces the
-            // total number of dimensions present. That's a bit heuristic and it's literally
-            // sorted out later based on the qualities summarized in the returned "description."
-            dotProduct = dotProduct * exp;
-            const reducedDim = Dim.add(dim, unit.dim, -exp);
-            const reducedNormSquared = Dim.normSquared(reducedDim);
-            if (normSquared <= reducedNormSquared && !opts.forceUnit)
-              return null;
-            let origin = unit.origin ?? Rational.ZERO;
-            let newVal = Rational.div(Rational.sub(val, origin), Rational.pow(unit.val, exp));
-            let expSum = 0, nDims = 0;
-            for (const measure in reducedDim) {
-              expSum += Math.abs(reducedDim[measure]);
-              if (reducedDim[measure])
-                nDims += 1;
-            }
-            let newNumAbs = Math.abs(Rational.toNumber(newVal));
-            // Basically the number of digits left of the decimal or zeros to the right
-            // It's a measure of "how far from one" the valus is.
-            let digits = Math.abs(Math.log10(newNumAbs));
-            let favored = unit.favored ?? 0;
-            let smells = unit.smells ?? {};
-            // A bunch of stuff that can be used in the sort function.
-            return { sym: unit.sym, uscu, favored, nDims, exp, expSum, digits, newNumAbs,
-                reducedDim, unit, newVal, reducedNormSquared, dotProduct, smells };
+          if (excludeUnscientific && unit.smells?.unscientific && !opts.forceUnit)
+            return null;
+          let uscu = !!unit.smells?.uscu, timeOnly = undefined;
+          for (let measure in unit.dim) {
+            if (measure !== 'T')
+              timeOnly = false;
+            else if (timeOnly === undefined)
+              timeOnly = true;
           }
-          catch (e) {
-            if (e instanceof OverflowError) // exponentiation failed somewhere along the line
-              return null;
-            throw e;  // rethrow
+          if (timeOnly)  // a time dimension is in neither (or both) metric and uscu systems
+            uscu = null;
+          let normSquared = Dim.normSquared(dim);
+          let measures = {...dim, ...unit.dim }, smallest = Number.POSITIVE_INFINITY, dotProduct = 0;
+          for (const measure in measures) {
+            if (!dim[measure] || !unit.dim[measure])
+              continue;
+            dotProduct += (dim[measure] ?? 0) * unit.dim[measure];
+            let q = dim[measure]/unit.dim[measure];
+            q = Math.abs(Math.trunc(q));
+            if (q < smallest && q !== 0)
+              smallest = q;
           }
+          let exp = smallest;
+          if (dotProduct < 0)
+            exp = -exp;
+          if (exp === 0 || !isFinite(smallest)) {
+            if (!opts.forceUnit)
+              return null;
+            exp = 1;
+          }
+          // Unit applied "exp" times; also ensures dotProduct is >= 0 unless forced.
+          // The dot product measures how similar the units vectors are; the projection
+          // each vector on the other. Orthagonal units have a product of zero; negative
+          // dot products mean anti-aligned, but we flipped the exponent's sign in that case.
+          // The dot product tells us which unit is most similar to the number and tells us
+          // the sign of the exponent, but it may not be the best unit to apply, for instance
+          // it may not divide the dimensions evenly and we can't have fractional dimensions.
+          // Also, other factors may figure in chosing the unit such as which one most reduces the
+          // total number of dimensions present. That's a bit heuristic and it's literally
+          // sorted out later based on the qualities summarized in the returned "description."
+          dotProduct = dotProduct * exp;
+          const reducedDim = Dim.add(dim, unit.dim, -exp);
+          const reducedNormSquared = Dim.normSquared(reducedDim);
+          if (normSquared <= reducedNormSquared && !opts.forceUnit)
+            return null;
+          let origin = unit.origin ?? Rational.ZERO;
+          let newVal = Rational.div(Rational.sub(val, origin), Rational.pow(unit.val, exp));
+          let expSum = 0, nDims = 0;
+          for (const measure in reducedDim) {
+            expSum += Math.abs(reducedDim[measure]);
+            if (reducedDim[measure])
+              nDims += 1;
+          }
+          let newNumAbs = Math.abs(Rational.toNumber(newVal));
+          // "digits" is basically the number of digits left of the decimal or zeros
+          // to the right. It's a measure of "how far from one" the value is in orders
+          // of magnitude.
+          let digits = Math.abs(Math.log10(newNumAbs));
+          let favored = unit.favored ?? 0;
+          let smells = unit.smells ?? {};
+          // A bunch of stuff that can be used in the sort function.
+          return { sym: unit.sym, uscu, favored, nDims, exp, expSum, digits, newNumAbs,
+              reducedDim, unit, newVal, reducedNormSquared, dotProduct, smells };
         }
         function applyDesc(unitDesc) {
           let unitList = unitDesc.unit.unitList ?? [ [ 1, unitDesc.unit ] ];
