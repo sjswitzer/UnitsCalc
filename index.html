@@ -242,6 +242,9 @@
         background: #0000cc;
         /* transform: scale(1.3); */
       }
+      span.padded-button {
+        padding: .2em 1.25ch;
+      }
 
       span.button.exact {
         margin-left: .5em;
@@ -372,10 +375,10 @@
             autocapitalize="none">
         </div>
         <div class="clear-text-button mobile-only" onclick="clearExpr(event)"><close-button></close-button></div>
-        <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
-          onclick="toggleNumpad(event)"> # </span>
-        <span class="button" style="margin-left: .25em; font-size: 1.125em"
-          onclick="showHelp('help-expr')"> ? </span>
+        <span class="button padded-button mobile-only" style="margin-left: .25em; font-size: 1.125em"
+          onclick="toggleNumpad(event)">#</span>
+        <span class="button padded-button" style="margin-left: .25em; font-size: 1.125em"
+          onclick="showHelp('help-expr')">?</span>
       </div>
       <div class="results">
         <p id="results">
