@@ -13,7 +13,7 @@
 //
 
 let cacheName = location.pathname;  // Segregate caching by worker location
-const seconds = 1000 /*ms*/, minutes = 60 * seconds;
+const seconds = 1000 /*ms*/;
 
 // There should be a Promise.delay like this but it's trivial to define.
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
