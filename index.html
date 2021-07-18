@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.7.2">
+    <meta name="appVersion" content="1.7.3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -566,6 +566,7 @@
             <li> What's a femtolightyear in yards? <code>femtolightyear : yards</code>
             <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
                  <code>5V / 2000 ohm</code>
+            <li> What's 33 1/3 RPM as degrees per second? <code>33 1/3 RPM : degrees/second</code>
             <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
                  and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
                  <code>220 ISK/liter : $/gallon</code>
@@ -1219,7 +1220,8 @@
             command: () => { angleSmell = 'grad'; }, smells: { BonusAngle: "grad" } },
         rev: { type: 'num', dim: { RAD: 1 }, reserved: true, val: CIRCLE, alt: ["revs", "revolution", "revolutions", "circle", "circles"],
             desc: "revolutions" },
-        rpm: { type: 'num', dim: { RAD: 1, T: -1 }, val: [ CIRCLE, MIN ], desc: "revolutions per minute" },
+        rpm: { type: 'num', dim: { RAD: 1, T: -1 }, val: [ CIRCLE, MIN ], alt: ["RPM"],
+            desc: "revolutions per minute" },
 
         // Data (BIT)
         groupInformation: { group: "Data Units" },
