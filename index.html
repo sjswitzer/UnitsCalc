@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.7.1">
+    <meta name="appVersion" content="1.7.2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -1630,7 +1630,7 @@
           }
           if (sym.repeat) {
             let backRef = backRefs[sym.repeat];
-            html += backRef.row + (sym.desc ?? backRef.helpDesc);
+            if (backRef) html += backRef;
             delete systemSymbols[name];
             continue;
           }
@@ -1749,7 +1749,7 @@
           if (sep === ", ")
             helpDesc += ", etc.";
           let row = `<tr><td><span class="stuff-text">${name}<span><td>${helpDesc}</tr>`;
-          backRefs[name] = { row, helpDesc };
+          backRefs[name] = row;
           if (!sym.hidden)
             html += row;
         }
