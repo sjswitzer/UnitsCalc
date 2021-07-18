@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.7.6">
+    <meta name="appVersion" content="1.7.7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -373,9 +373,9 @@
         </div>
         <div class="clear-text-button mobile-only" onclick="clearExpr(event)"><close-button></close-button></div>
         <span class="button mobile-only" style="margin-left: .25em; font-size: 1.125em"
-          onclick="toggleNumpad(event)">#</span>
+          onclick="toggleNumpad(event)"> # </span>
         <span class="button" style="margin-left: .25em; font-size: 1.125em"
-          onclick="showHelp('help-expr')">?</span>
+          onclick="showHelp('help-expr')"> ? </span>
       </div>
       <div class="results">
         <p id="results">
@@ -796,6 +796,10 @@
     </div>
     <script type="text/javascript">
       "use strict";
+
+      // TODO: Let a value be a list of incommensurate units.
+      // This way colors and complex numbers can be represented by making the color
+      // primaries and "i" be units.
 
       let appVersion = "0.0.0"; // updated later from meta tag
       const exprElement = document.getElementById('expr');
