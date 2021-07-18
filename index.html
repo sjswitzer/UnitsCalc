@@ -692,7 +692,7 @@
             <code>acres</code>, <code>chains</code>, <code>furlongs</code>, <code>townships</code>, etc.
             as if they were defined in terms of modern feet. But in fact
             they're defined in terms of the anachronistic
-            "<a href="https://en.wikipedia.org/wiki/Foot_(unit)#Survey_foot">survey foot</a>"
+            "<a href="https://en.wikipedia.org/wiki/Foot_(unit)#U.S._survey_foot">survey foot</a>"
             and there's a suite of
             <span class="linklike" onclick="showHelp('help-builtin#survey')">survey units</span>
             prefixed with "s" to refer to their, arguably proper, definitions:
@@ -1624,7 +1624,7 @@
         let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
           if (sym.group) {
-            html += `<div class="group">${sym.group}</div>`;
+            html += `<div class="group" ${sym.id ? `id="${sym.id}"` : ''}>${sym.group}</div>`;
             delete systemSymbols[name];
             continue;
           }
