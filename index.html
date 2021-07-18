@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.7.5">
+    <meta name="appVersion" content="1.7.6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -696,11 +696,12 @@
             "<a href="https://en.wikipedia.org/wiki/Foot_(unit)#U.S._survey_foot">survey foot</a>"
             and there's a suite of
             <span class="linklike" onclick="showHelp('help-builtin#survey')">survey units</span>
-            prefixed with "s" to refer to their, arguably proper, definitions:
-            <code>sacre</code>, <code>schain</code>, <code>srod</code>,
+            with their, arguably proper, definitions:
+            <code>surveyacre</code>, <code>surveychain</code>, <code>surveyrod</code>,
             <span class="linklike" onclick="showHelp('help-builtin#survey')">etc</span>.
-            In practice, usage varies by state and has recently undergone changes.
-            Call your congressmember or something. It's a mess.
+            In practice, usage varies by state and is
+            <a href="https://www.scientificamerican.com/article/multistate-disagreement-over-the-length-of-the-foot-to-end/">
+              currently undergoing  changes</a>. It's a mess.
         <p> Traditional volume units are problematic. There are differences between
             wet and dry gallons and futhermore differences between US and UK units.
             "Barrels" depend on what's in them. Fruits and vegetables are pretty simple,
@@ -1453,26 +1454,26 @@
         bakersdozen: { type: 'num', dim: {}, val: 13, hidden: true }, // :)
 
         // Survey or "statute" units, increasingly anachronistic
-        groupSurvey: { group: 'Survey or "statute" Units', id: "survey" },
-        sft: { type: 'num', dim: { L: 1 }, val: [ 1200 * M, 3937 ],smells: { uscu: true },
+        groupSurvey: { group: 'Survey or "Statute" Units', id: "survey" },
+        surveyfoot: { type: 'num', dim: { L: 1 }, val: [ 1200 * M, 3937 ], smells: { uscu: true },
             desc: "survey foot" },
-        slink: { type: 'num', dim: { L: 1 }, val: [ 792 * M, 3937 ], smells: { uscu: true },
+        surveylink: { type: 'num', dim: { L: 1 }, val: [ 792 * M, 3937 ], smells: { uscu: true },
             desc: "survey link" },
-        srod: { type: 'num', dim: { L: 1 }, val: [ 19800 * M, 3937 ], smells: { uscu: true },
+        surveyrod: { type: 'num', dim: { L: 1 }, val: [ 19800 * M, 3937 ], smells: { uscu: true },
             desc: "survey rod" },
-        schain: { type: 'num', dim: { L: 1 }, val: [ 79200 * M, 3937 ], smells: { uscu: true },
+        surveychain: { type: 'num', dim: { L: 1 }, val: [ 79200 * M, 3937 ], smells: { uscu: true },
             desc: "survey chain" },
-        sfurlong: { type: 'num', dim: { L: 1 }, val: [ 792 * 1000 * M, 3937 ], smells: { uscu: true },
+        surveyfurlong: { type: 'num', dim: { L: 1 }, val: [ 792 * 1000 * M, 3937 ], smells: { uscu: true },
             desc: "survey furlong" },
-        sleague: { type: 'num', dim: { L: 1 }, val: [ 19008 * 1000 * M, 3937 ], smells: { uscu: true },
+        surveyleague: { type: 'num', dim: { L: 1 }, val: [ 19008 * 1000 * M, 3937 ], smells: { uscu: true },
             desc: "survey league" },
-        smi: { type: 'num', dim: { L: 1 }, val: [ 6336 * 1000 * M, 3937 ], smells: { uscu: true },
+        surveymile: { type: 'num', dim: { L: 1 }, val: [ 6336 * 1000 * M, 3937 ], smells: { uscu: true },
             desc: "survey or statute mi" },
-        sacre: { type: 'num', dim: { L: 2 }, val: [ 43560 * 1200**2 * M**2, 3937**2 ],smells: { uscu: true },
+        surveyacre: { type: 'num', dim: { L: 2 }, val: [ 43560 * 1200**2 * M**2, 3937**2 ],smells: { uscu: true },
             desc: "survey acre" },
-        ssection: { type: 'num', dim: { L: 2 }, val: [ (6336 * 1000 * M)**2, 3937**2 ], smells: { uscu: true },
+        surveysection: { type: 'num', dim: { L: 2 }, val: [ (6336 * 1000 * M)**2, 3937**2 ], smells: { uscu: true },
             desc: "survey square mile" },
-        stownship: { type: 'num', dim: { L: 2 }, val: [ 36n * BigInt(6336 * 1000 * M)**2n, 3937**2 ], smells: { uscu: true },
+        surveytownship: { type: 'num', dim: { L: 2 }, val: [ 36n * BigInt(6336 * 1000 * M)**2n, 3937**2 ], smells: { uscu: true },
             desc: "survey township" },
 
         // Special units
