@@ -12,7 +12,7 @@
 //   4.0 International License. https://creativecommons.org/licenses/by-sa/4.0/
 //
 
-let cacheName = location.pathname;  // Segregate caching by worker location
+let cacheName = "cache-" + location.pathname;  // Segregate caching by worker location
 const seconds = 1000 /*ms*/;
 
 // There should be a Promise.delay like this but it's trivial to define.
