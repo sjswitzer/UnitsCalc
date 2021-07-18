@@ -737,19 +737,17 @@
             from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>.
         <p> The SI Units Logo, from the BIPM, is
             <a href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a>.
-        <div class="layout-row">
-          <div>
-            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
-              <img style="vertical-align: text-top;" alt="Creative Commons License" style="border-width:0"
-                src="by-sa-4-0-88x31.png"></a>
-          </div>
-          <div style="margin: 0 0 0 .5em">
-            This work is licensed under a
-            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
-              Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-            <br> Find source on
-            <a href="https://github.com/sjswitzer/UnitsCalc">GitHub</a>
-          </div>
+        <div style="float: left; margin-right: .5em">
+          <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+            <img style="vertical-align: text-top;" alt="Creative Commons License" style="border-width:0"
+              src="by-sa-4-0-88x31.png"></a>
+        </div>
+        <div style="width: 100%">
+          This work is licensed under a
+          <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+            Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          <br> Find source on
+          <a href="https://github.com/sjswitzer/UnitsCalc">GitHub</a>
         </div>
       </div>
     </div>
@@ -770,19 +768,17 @@
             <!-- table contents inserted here at onload event -->
           </tbody>
         </table>
-        <div class="layout-row">
-          <div>
-            <a href="https://www.bipm.org/en/measurement-units">
-              <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
-                  style="width: 10em">
-            </a>
-          </div>
-          <div style="margin: 0 0 0 .5em">
-            <p> References:
-              <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>;
-              <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a>;
-              <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
-          </div>
+        <div style="float: left; margin-right: .5em">
+          <a href="https://www.bipm.org/en/measurement-units">
+            <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
+                style="width: 10em">
+          </a>
+        </div>
+        <div style="width: 100%">
+          <p> References:
+            <br> <a href="https://www.bipm.org/en/measurement-units">Bureau international des poids et mesures (BIPM)</a>;
+            <br> <a href="https://www.nist.gov/pml/weights-and-measures/metric-si/si-units">National Institute of Standards and Technology (NIST)</a>;
+            <br> <a href="https://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia</a>
         </div>
       </div>
     </div>
@@ -1596,35 +1592,34 @@
             command: () =>  console.dir(systemSymbols) } },
       };
 
-      const metricPrefixes = [
-        { name: "", symbol: "", val: new Rational(1n, 1n) },
-        { name: "deca", symbol: "da", val: new Rational(10n, 1n) },
-        { name: "hecto", symbol: "h", val: new Rational(100n, 1n) },
-        { name: "kilo", symbol: "k", val: new Rational(1000n, 1n) },
-        { name: "mega", symbol: "M", val: new Rational(1000n**2n, 1n) },
-        { name: "giga", symbol: "G", val: new Rational(1000n**3n, 1n) },
-        { name: "tera", symbol: "T", val: new Rational(1000n**4n, 1n) },
-        { name: "peta", symbol: "P", val: new Rational(1000n**5n, 1n) },
-        { name: "exa", symbol: "E", val: new Rational(1000n**6n, 1n) },
-        { name: "zetta", symbol: "Z", val: new Rational(1000n**7n, 1n) },
-        { name: "yotta", symbol: "Y", val: new Rational(1000n**8n, 1n) },
-        { name: "deci", symbol: "d", val: new Rational(1n, 10n) },
-        { name: "centi", symbol: "c", val: new Rational(1n, 100n) },
-        { name: "milli", symbol: "m", val: new Rational(1n, 1000n) },
-        { name: "micro", symbol: "u", val: new Rational(1n, 1000n**2n) },
-        { name: "nano", symbol: "n", val: new Rational(1n, 1000n**3n) },
-        { name: "pico", symbol: "p", val: new Rational(1n, 1000n**4n) },
-        { name: "femto", symbol: "f", val: new Rational(1n, 1000n**5n) },
-        { name: "atto", symbol: "a", val: new Rational(1n, 1000n**6n) },
-        { name: "zepto", symbol: "z", val: new Rational(1n, 1000n**7n) },
-        { name: "yacto", symbol: "y", val: new Rational(1n, 1000n**8n) },
-      ];
-
-      // Groom the system symbols and inject help text
-      groomSystemSymbols();
-      function groomSystemSymbols() {
+      {
+        // Groom the system symbols and inject help text.
+        // Inject SI-prefix versions of symbols and ensure there's
+        // no loss of precision.
         // This is pretty janky, but that's how one-off data conditioning code goes.
-        // It's only run at init time and never on user input.
+        const metricPrefixes = [
+          { name: "", symbol: "", val: new Rational(1n, 1n) },
+          { name: "deca", symbol: "da", val: new Rational(10n, 1n) },
+          { name: "hecto", symbol: "h", val: new Rational(100n, 1n) },
+          { name: "kilo", symbol: "k", val: new Rational(1000n, 1n) },
+          { name: "mega", symbol: "M", val: new Rational(1000n**2n, 1n) },
+          { name: "giga", symbol: "G", val: new Rational(1000n**3n, 1n) },
+          { name: "tera", symbol: "T", val: new Rational(1000n**4n, 1n) },
+          { name: "peta", symbol: "P", val: new Rational(1000n**5n, 1n) },
+          { name: "exa", symbol: "E", val: new Rational(1000n**6n, 1n) },
+          { name: "zetta", symbol: "Z", val: new Rational(1000n**7n, 1n) },
+          { name: "yotta", symbol: "Y", val: new Rational(1000n**8n, 1n) },
+          { name: "deci", symbol: "d", val: new Rational(1n, 10n) },
+          { name: "centi", symbol: "c", val: new Rational(1n, 100n) },
+          { name: "milli", symbol: "m", val: new Rational(1n, 1000n) },
+          { name: "micro", symbol: "u", val: new Rational(1n, 1000n**2n) },
+          { name: "nano", symbol: "n", val: new Rational(1n, 1000n**3n) },
+          { name: "pico", symbol: "p", val: new Rational(1n, 1000n**4n) },
+          { name: "femto", symbol: "f", val: new Rational(1n, 1000n**5n) },
+          { name: "atto", symbol: "a", val: new Rational(1n, 1000n**6n) },
+          { name: "zepto", symbol: "z", val: new Rational(1n, 1000n**7n) },
+          { name: "yacto", symbol: "y", val: new Rational(1n, 1000n**8n) },
+        ];
         let html = "";
         let backRefs = {};
         for (const [name, sym] of Object.entries(systemSymbols)) {
