@@ -17,7 +17,7 @@
   <head>
     <title>Units Calculator</title>
     <meta charset="utf-8">
-    <meta name="appVersion" content="1.7.8">
+    <meta name="appVersion" content="1.7.9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="viewport" content="width=device-width">
@@ -417,7 +417,7 @@
       </div>
     </div>
     <div class="help" id="help-expr">
-      <close-button onclick="showHelp()"></close-button>
+      <close-button onclick="showHelp(null)"></close-button>
       <div>
         <h2> Expressions </h2>
         <p> Expressions can contain numbers, units and the operators
@@ -570,10 +570,9 @@
             <li> What's the current with <code>5V</code> across a <code>2000 ohm</code> resister?
                  <code>5V / 2000 ohm</code>
             <li> What's 33 1/3 RPM as degrees per second? <code>33 1/3 RPM : degrees/second</code>
-            <li> Suppose an Icelandic kr&oacute;na is about <code>ISK = .008$</code>
-                 and gas costs <code>220 ISK/liter</code>; what's that in dollars per gallon?
-                 <code>220 ISK/liter : $/gallon</code>
-            <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : ISK</code>
+            <li> Suppose gasoline costs <code>220 $ISK/liter</code> in Icelandic kr&oacute;na.
+                 What's that in dollars per gallon? <code>220 $ISK/liter : $/gallon</code>
+            <li> While we're at it, what's a dollar in kr&oacute;na? <code>$ : $ISK</code>
           </ul>
         <p> As an exercise, suppose an elephant weighs <code>elephantWeight = 8000lbf</code>
             (I've used <i>pounds of force</i>) and an elephant's foot is about
@@ -656,7 +655,7 @@
       </div>
     </div>
     <div class="help" id="help-boring">
-      <close-button onclick="showHelp()"></close-button>
+      <close-button onclick="showHelp(null)"></close-button>
       <div>
         <h2> Boring Details </h2>
         <p> This program started out as a quick and dirty tool to easily divide
@@ -761,7 +760,7 @@
       <div>
         <h2> Built-In Constants and Units </h2>
         <p> Symbols that are reserved (that is, cannot be redefined) are noted.
-        <p>
+        </p>
         <table class="stuff example">
           <thead>
             <tr>
@@ -773,6 +772,20 @@
             <!-- table contents inserted here at onload event -->
           </tbody>
         </table>
+        <h3> Currency values<span id="currency-date"></span></h3>
+        </p> 
+        <table class="stuff example">
+          <thead>
+            <tr>
+              <td> Symbol
+              <td> Currency
+            </tr>
+          </thead>
+          <tbody id="currency">
+            <!-- table contents inserted here at onload event -->
+          </tbody>
+        </table>
+        </p>
         <div style="float: left; margin-right: .5em">
           <a href="https://www.bipm.org/en/measurement-units">
             <img src="SI_Illustration_Base_Units_and_Constants_Colour_Full.svg" alt="SI Logo"
@@ -818,6 +831,8 @@
       const resultMetersElement = document.getElementById('resultMeters');
       const resultMetersMetricFeetElement = document.getElementById('resultMetersMetricFeet');
       const builtinSymbolsElement = document.getElementById('builtin-symbols');
+      const currencyElement = document.getElementById('currency');
+      const currencyDateElement = document.getElementById('currency-date');
       const ftElement = document.getElementById('ft');
       const inchElement = document.getElementById('inch');
       const numElement = document.getElementById('num');
@@ -1485,12 +1500,11 @@
 
         // Special units
         groupSpecial: { group: "Special Units" },
-        '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars"], reserved: true,
-            desc: 'a dollar, no particular kind'},
+        '$': { type: 'num', dim: { CURRENCY: 1 }, val: 1, alt: ["dollar", "dollars", "$USD"], reserved: true,
+            desc: 'a US dollar'},
         benjamin: { type: 'num', dim: { CURRENCY: 1 }, val: 100, alt: ["benjamins"], hidden: true,
             desc: "it's all about the benjamins" },
-        cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"],
-            desc: 'a cent, no particular kind' },
+        cent: { type: 'num', dim: { CURRENCY: 1 }, val: [ 1, 100 ], alt: ["cents"] },
         // These are mostly for my amusement, but also useful as debugging aids
         mks: { type: 'num', dim: {}, val: 1, desc: "display result in MKS system",
             smells: { requestSystem: "mks" } },
@@ -1593,7 +1607,7 @@
 
         // For debugging
         SAVE: function DebugSaveSyms() { return { type: 'num', dim: {}, val: Rational.ZERO,
-            command: () => saveUserSymbols() } },
+            command: () => saveState() } },
         DEVICE: function ToggleDeviceMode() { ; return { type: 'num', dim: {}, val: Rational.ZERO,
             command: () => toggleDeviceMode() } },
         UI: function ToggleLegacyMode() { ; return { type: 'num', dim: {}, val: Rational.ZERO,
@@ -1758,7 +1772,7 @@
           }
           if (sep === ", ")
             helpDesc += ", etc.";
-          let row = `<tr><td><span class="stuff-text">${name}<span><td>${helpDesc}</tr>`;
+          let row = `<tr><td><span class="stuff-text">${name}<span><td>${helpDesc}</tr>\n`;
           backRefs[name] = row;
           if (!sym.hidden)
             html += row;
@@ -1785,6 +1799,7 @@
         }
       }
 
+      let persistedState = {}, currencies = null;
       let foot = getSymbol('ft'), inch = getSymbol('in');
 
       function reduceParamVals(name, accum, params, fn) {  // fn => (accum, val) => val
@@ -3156,7 +3171,7 @@
       function deleteDef(symName) {
         delete userSymbols[symName];
         showUserSymbols()
-        saveUserSymbols();
+        saveState();
       }
 
       function updateParse(opts) {
@@ -3217,7 +3232,7 @@
               if (opts?.userHitEnter)
                 exprElement.value = "";
               // Save here because iOS doesn't reliably deliver any kind of event when the app closes.
-              saveUserSymbols();
+              saveState();
             } else if (val.type === 'num' && uscu && Dim.equal(val.dim, { L: 1 }) && !val.displayUnits) {
               showFeetInchesResult(numVal(val));
             } else if (val.type === 'num') {
@@ -3418,6 +3433,8 @@
         id = id.split("#");
         let frag = id[1];
         id = id[0];
+        if (id === 'help-builtin')
+          populateCurrencyHelp();
         let helpElement = document.getElementById(id);
         if (helpElement) {
           helpStack.push(helpElement);
@@ -3434,57 +3451,104 @@
         }
       }
 
+      function populateCurrencyHelp() {
+        if (!currencies) return;
+        let currencyList = [];
+        currencies.sort((a, b) => a.sym < b.sym ? -1 : b.sym < a.sym ? 1 : 0);
+        let html = "";
+        for (let currency of currencies)
+          html += `<tr><td><span class="stuff-text">${currency.sym}<span><td>${currency.name}</tr>\n`;
+        currencyElement.innerHTML = html;
+        if (persistedState?.rates?.time) {
+          let when = new Date(persistedState.rates.time);
+          currencyDateElement.textContent = " as of " + when.toLocaleDateString();
+        }
+        currencies = null;
+      }
+
       const LOCAL_STORAGE_KEY = `UnitsCalculator-${location.pathname}`;
 
-      function loadUserSymbols() {
+      function loadState() {
         const localStorage = window.localStorage;
         if (!localStorage)
-          return false;
+          return;
         let json = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!json)
-          return false;
-        let wad = JSON.parse(json);
-        let appVer = appVersion.split('.'), saveVer = wad.version.split('.');
-        if (!(Number(saveVer[0]) <= Number(appVer[0])))  // handles undefined implicitly
-          return false;
-        if (!wad.defs)
-          return false;
-        for (const def of wad.defs) {
-          try {
-            let val = parseInputStatement(def);
-            skipSpaces();
-            if (val !== null && peekc() === null) // nothing left over at the end
-              setUserSymbol(val);
-          }
-          catch (e) {
+        if (!json) return;
+        json = JSON.parse(json);
+        if (json)
+          persistedState = json;
+        let appVer = appVersion.split('.'), saveVer = persistedState.version.split('.');
+        if (persistedState.defs) {
+          for (const def of persistedState.defs) {
+            try {
+              let val = parseInputStatement(def);
+              skipSpaces();
+              if (val !== null && peekc() === null) // nothing left over at the end
+                setUserSymbol(val);
+            }
+            catch (e) {
+            }
           }
         }
         showUserSymbols();
-        return true;
+
+        let getRates = true;
+        if (persistedState.rates) {
+          let now = Date.now(), yesterday = now - 1000 * 60 * 60 * 24;
+          if (persistedState.rates.time && persistedState.rates.time > yesterday)
+            getRates = false;
+          if (persistedState.rates.floatrates)
+            addFloatRates(persistedState.rates.floatrates);
+        }
+        if (getRates) {
+          let xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              let floatrates = JSON.parse(xhr.responseText);
+              if (floatrates) {
+                Log(1, `Updating currencies`);
+                addFloatRates(floatrates);
+                let time = Date.now();
+                persistedState.rates = { time, floatrates };
+                saveState();
+              }
+            }
+          }
+          let async = true;
+          xhr.open("GET", "http://www.floatrates.com/daily/usd.json", async); 
+          xhr.send(null);
+        }
+        function addFloatRates(rates) {
+          currencies = [];
+          for (let rate of Object.values(rates)) {
+            let sym = `\$${rate.code}`;
+            let name = rate.name;
+            let value = rate.inverseRate;
+            let rationalizer = 10**15;
+            let val = new Rational(Math.trunc(value*rationalizer), rationalizer);
+            let currency = { sym, type: 'num', dim: { CURRENCY: 1 }, val };
+            systemSymbols[sym] = currency;
+            currencies.push({ sym, name, value });
+          }
+        }
       }
 
-      function saveUserSymbols() {
+      function saveState() {
         const localStorage = window.localStorage;
         if (!localStorage)
           return false;
-        const wad = { version: appVersion, defs: [] };
-        // We rely on the fact that objects are enumerated in the order
-        // items were added. Otherwise, function definitions might fail
-        // due to their variable references being unsatisfied.
+        persistedState.version = appVersion;
+        persistedState.defs = [];
         for (const sym in userSymbols) {
           if (userSymbols[sym].native || userSymbols[sym].origin)
             continue;  // can't save these types now
-          try { // Any save could theoretically fail for lack of basis units because of a user redefinition
-            let symStr = symString(userSymbols[sym], { saveMode: true });
-            if (symStr) {
-              wad.defs.push(symStr);
-              Log(1, `Saving: ${symStr}`);
-            }
-          } catch (e) {
-            console.error(e);
+          let symStr = symString(userSymbols[sym], { saveMode: true });
+          if (symStr) {
+            persistedState.defs.push(symStr);
+            Log(1, `Saving: ${symStr}`);
           }
         }
-        let json = JSON.stringify(wad);
+        let json = JSON.stringify(persistedState);
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, json);
           return true;
@@ -3626,7 +3690,7 @@
 
       document.addEventListener('keydown', function(evt) {
         if (evt.key === 'Escape')
-          showHelp(); // which, since it has no param, means "dismiss help"
+          showHelp(null);
       });
 
       // onchange event isn't suitable because if the value doesn't change, nothing is reported
@@ -3897,7 +3961,7 @@
       stylesheet.textContent = `close-button { cursor: pointer; }`;
       document.head.prepend(stylesheet);
 
-      try { loadUserSymbols(); } catch (e) {} // inconvenient to crash while loading
+      try { loadState(); } catch (e) {} // inconvenient to crash while loading
    </script>
   </body>
 </html>
