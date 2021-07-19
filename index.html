@@ -3470,27 +3470,28 @@
 
       function loadState() {
         const localStorage = window.localStorage;
-        if (!localStorage)
-          return;
-        let json = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!json) return;
-        json = JSON.parse(json);
-        if (json)
-          persistedState = json;
-        let appVer = appVersion.split('.'), saveVer = persistedState.version.split('.');
+        if (localStorage) {
+          let json = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (json) {
+            try {
+              json = JSON.parse(json);
+              persistedState = json;
+            } catch (_) {
+            }
+          }
+        }
         if (persistedState.defs) {
           for (const def of persistedState.defs) {
             try {
               let val = parseInputStatement(def);
-              skipSpaces();
-              if (val !== null && peekc() === null) // nothing left over at the end
+              if (val !== null)
                 setUserSymbol(val);
             }
             catch (e) {
             }
           }
+          showUserSymbols();
         }
-        showUserSymbols();
 
         let getRates = true;
         if (persistedState.rates) {
