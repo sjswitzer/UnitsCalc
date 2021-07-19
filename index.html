@@ -817,6 +817,8 @@
       // This way colors and complex numbers can be represented by making the color
       // primaries and "i" be units.
 
+      onload = _ => loadState();
+
       let appVersion = "0.0.0"; // updated later from meta tag
       const exprElement = document.getElementById('expr');
       const errorElement = document.getElementById('error');
@@ -3492,7 +3494,6 @@
           }
           showUserSymbols();
         }
-
         let getRates = true;
         if (persistedState.rates) {
           let now = Date.now(), yesterday = now - 1000 * 60 * 60 * 24;
@@ -3507,7 +3508,6 @@
             if (xhr.readyState == 4 && xhr.status == 200) {
               let floatrates = JSON.parse(xhr.responseText);
               if (floatrates) {
-                Log(1, `Updating currencies`);
                 addFloatRates(floatrates);
                 let time = Date.now();
                 persistedState.rates = { time, floatrates };
@@ -3961,8 +3961,6 @@
       let stylesheet = document.createElement("style");
       stylesheet.textContent = `close-button { cursor: pointer; }`;
       document.head.prepend(stylesheet);
-
-      try { loadState(); } catch (e) {} // inconvenient to crash while loading
    </script>
   </body>
 </html>
