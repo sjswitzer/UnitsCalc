@@ -18,7 +18,7 @@ const seconds = 1000 /*ms*/;
 // There should be a Promise.delay like this but it's trivial to define.
 const delay = (ms, val) => new Promise(resolve => setTimeout(() => resolve(val), ms));
 
-self.onfetch = event => event.respondWith(handleFetch(event));
+onfetch = event => event.respondWith(handleFetch(event));
 
 async function handleFetch(event) {
   let request = event.request;
